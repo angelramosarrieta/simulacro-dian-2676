@@ -1,0 +1,199 @@
+{
+ "_nota": "Avatar masculino (SadTalker sobre las fotos de referencia) con voz sintética es_MX-ald; tiempos según las pausas de cada frase.",
+ "dur": 24.95,
+ "voz": [
+  [
+   0.15,
+   "l1"
+  ],
+  [
+   5.4,
+   "l2"
+  ],
+  [
+   10.3,
+   "l3"
+  ],
+  [
+   16.6,
+   "l4"
+  ],
+  [
+   21.2,
+   "l5"
+  ]
+ ],
+ "persona": [
+  [
+   0.0,
+   5.3,
+   1
+  ],
+  [
+   16.45,
+   21.1,
+   4
+  ]
+ ],
+ "cierre": 23.6,
+ "gancho": [
+  0.0,
+  5.3
+ ],
+ "entradas": [
+  5.3,
+  21.1
+ ],
+ "zoom": [
+  [
+   5.3,
+   7.3,
+   1.0,
+   1.06,
+   760
+  ],
+  [
+   7.3,
+   9.3,
+   1.0,
+   1.0,
+   960
+  ],
+  [
+   9.3,
+   11.2,
+   1.0,
+   1.04,
+   900
+  ],
+  [
+   11.2,
+   12.4,
+   1.04,
+   1.0,
+   900
+  ],
+  [
+   12.4,
+   16.45,
+   1.0,
+   1.08,
+   880
+  ],
+  [
+   21.1,
+   23.6,
+   1.04,
+   1.0,
+   760
+  ]
+ ],
+ "cues": [
+  [
+   0.15,
+   1.6,
+   "Parce, si te estás preparando"
+  ],
+  [
+   1.6,
+   4.59,
+   "para el concurso [DIAN 2676],"
+  ],
+  [
+   4.62,
+   5.25,
+   "mira esto"
+  ],
+  [
+   5.4,
+   6.9,
+   "Encontré esta plataforma"
+  ],
+  [
+   6.9,
+   8.0,
+   "donde puedes practicar"
+  ],
+  [
+   8.0,
+   10.1,
+   "preguntas tipo [juicio situacional]"
+  ],
+  [
+   10.3,
+   11.06,
+   "Respondes,"
+  ],
+  [
+   11.06,
+   12.63,
+   "revisas la [explicación]"
+  ],
+  [
+   12.63,
+   14.13,
+   "y puedes entender mejor"
+  ],
+  [
+   14.13,
+   15.45,
+   "por qué una opción"
+  ],
+  [
+   15.45,
+   16.4,
+   "es más adecuada que otra"
+  ],
+  [
+   16.6,
+   17.9,
+   "La verdad, me parece"
+  ],
+  [
+   17.9,
+   19.53,
+   "una herramienta interesante"
+  ],
+  [
+   19.53,
+   21.0,
+   "para complementar el estudio"
+  ],
+  [
+   21.2,
+   22.3,
+   "Te dejo el enlace"
+  ],
+  [
+   22.3,
+   23.9,
+   "para que le eches un vistazo"
+  ]
+ ],
+ "app": {
+  "landing": [
+   5.3,
+   7.3
+  ],
+  "ejemplo": [
+   7.3,
+   7.75,
+   8.0,
+   8.8,
+   9.3
+  ],
+  "pregunta": [
+   9.3,
+   10.25,
+   10.85,
+   11.1,
+   11.5,
+   12.4,
+   16.45
+  ],
+  "landing2": [
+   21.1,
+   23.6
+  ]
+ }
+}

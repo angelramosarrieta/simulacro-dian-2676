@@ -1,0 +1,177 @@
+{
+ "_nota": "Clip de Gemini (mujer): tiempos ajustados a su voz tras quitar la frase repetida.",
+ "dur": 24.75,
+ "persona": [
+  [
+   0.0,
+   4.0,
+   1
+  ],
+  [
+   15.5,
+   19.85,
+   4
+  ]
+ ],
+ "cierre": 22.4,
+ "gancho": [
+  0.0,
+  4.0
+ ],
+ "entradas": [
+  4.0,
+  19.85
+ ],
+ "zoom": [
+  [
+   4.0,
+   6.3,
+   1.0,
+   1.06,
+   760
+  ],
+  [
+   6.3,
+   8.55,
+   1.0,
+   1.0,
+   960
+  ],
+  [
+   8.55,
+   10.5,
+   1.0,
+   1.04,
+   900
+  ],
+  [
+   10.5,
+   11.6,
+   1.04,
+   1.0,
+   900
+  ],
+  [
+   11.6,
+   15.5,
+   1.0,
+   1.08,
+   880
+  ],
+  [
+   19.85,
+   22.4,
+   1.04,
+   1.0,
+   760
+  ]
+ ],
+ "cues": [
+  [
+   0.17,
+   1.55,
+   "Parce, si te estás preparando"
+  ],
+  [
+   1.55,
+   4.0,
+   "para el concurso [DIAN 2676],"
+  ],
+  [
+   4.12,
+   4.85,
+   "mira esto"
+  ],
+  [
+   4.9,
+   6.25,
+   "Encontré esta plataforma"
+  ],
+  [
+   6.3,
+   7.0,
+   "donde puedes practicar"
+  ],
+  [
+   7.05,
+   9.5,
+   "preguntas tipo [juicio situacional]"
+  ],
+  [
+   10.0,
+   10.62,
+   "Respondes,"
+  ],
+  [
+   10.66,
+   11.9,
+   "revisas la [explicación]"
+  ],
+  [
+   12.15,
+   13.35,
+   "y puedes entender mejor"
+  ],
+  [
+   13.55,
+   14.4,
+   "por qué una opción"
+  ],
+  [
+   14.4,
+   15.5,
+   "es más adecuada que otra"
+  ],
+  [
+   15.74,
+   16.8,
+   "La verdad, me parece"
+  ],
+  [
+   16.8,
+   17.95,
+   "una herramienta interesante"
+  ],
+  [
+   17.98,
+   19.65,
+   "para complementar el estudio"
+  ],
+  [
+   20.11,
+   20.95,
+   "Te dejo el enlace"
+  ],
+  [
+   20.95,
+   22.3,
+   "para que le eches un vistazo"
+  ]
+ ],
+ "app": {
+  "landing": [
+   4.0,
+   6.3
+  ],
+  "ejemplo": [
+   6.3,
+   6.85,
+   7.15,
+   8.0,
+   8.55
+  ],
+  "pregunta": [
+   8.55,
+   9.45,
+   10.05,
+   10.3,
+   10.75,
+   11.6,
+   15.5
+  ],
+  "landing2": [
+   19.85,
+   22.4
+  ]
+ }
+}

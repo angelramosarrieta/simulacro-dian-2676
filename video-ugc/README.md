@@ -1,17 +1,27 @@
 # Video UGC · DIAN 2676 (centrahoy.online)
 
-Video vertical 1080 × 1920, 30 fps, **24,75 s**. **Video final: `entregables/dian2676_ugc_final_1080x1920.mp4`** (avatar generado con Gemini + app real). Alterna un avatar de IA fotorrealista que habla a cámara con la **interfaz real** de la app mostrada dentro de un celular: la landing de centrahoy.online y el simulador de ejemplo (`/ejemplo`), en *Practicar → Práctica rápida*.
+Video vertical 1080 × 1920, 30 fps. Alterna un avatar de IA que habla a cámara con la **interfaz real** de la app, mostrada dentro de un celular: la landing de centrahoy.online y el simulador de ejemplo (`/ejemplo`), en *Practicar → Práctica rápida*. Hay dos versiones con el mismo guion:
+
+| Versión | Archivo | Avatar y voz | Duración |
+|---|---|---|---|
+| **Hombre** | `entregables/dian2676_ugc_hombre_1080x1920.mp4` | Fotos de referencia (`referencias/`) animadas con SadTalker + GFPGAN; voz sintética masculina en español latino (Piper es_MX-ald) | 24,95 s |
+| Gemini | `entregables/dian2676_ugc_final_1080x1920.mp4` | Clip de Gemini (mujer), con su propia voz | 24,75 s |
+
+Los tiempos de cada versión (escenas, subtítulos, zoom y capturas) están en `tiempos/hombre.json` y `tiempos/gemini.json`; todos los scripts los leen según `TIEMPOS=hombre|gemini` (por defecto `hombre`).
 
 | Archivo | Qué es |
 |---|---|
-| `entregables/dian2676_ugc_final_1080x1920.mp4` | Video final con voz (-14 LUFS), listo para TikTok, Reels y Facebook. |
+| `voz_hombre.py`, `voz/*.flac` | Voz masculina: síntesis de las 5 frases y armado de la pista según `tiempos/hombre.json`. Las frases exactas del video final están en `voz/`. |
+| `preparar_avatar_hombre.sh` | Ubica los clips animados de las escenas 1 y 4 donde empieza su frase y arma `build/avatar.mp4`. |
 | `preparar_avatar.sh` | Adapta el clip de Gemini: recorte 9:16, quita la frase repetida (19,85–25,0 s del original) y difumina sus subtítulos quemados. |
 | `capturar.mjs` | Graba la app real cuadro por cuadro (Playwright, 360 × 640 @3x). |
 | `componer.py` | Mockup del celular, zoom, toques, subtítulos, texto gancho y cierre. `previa` → MP4 · `capa` → ProRes 4444 con alfa. |
 | `montar.sh` | Pone la capa sobre el clip del avatar y mezcla la voz con la música. |
-| `subtitulos.srt` | Subtítulos para cargar como captions en TikTok, Reels o CapCut. |
+| `subtitulos.srt`, `subtitulos_gemini.srt` | Subtítulos de cada versión para cargarlos como captions en TikTok, Reels o CapCut. |
 
 ## Guion y tiempos
+
+Tiempos de la versión Gemini; los de la versión hombre están en `tiempos/hombre.json` (escena 1: 0–5,3 s · app: 5,3–16,45 s · escena 4: 16,45–21,1 s · app: 21,1–23,6 s · cierre: 23,6–24,95 s).
 
 | Tiempo | Imagen | Diálogo (exacto) | Texto en pantalla |
 |---|---|---|---|
@@ -48,6 +58,15 @@ Pronunciación: escribe “DIAN dos mil seiscientos setenta y seis” en el camp
 
 **Música.** Usa una pista lo‑fi o acústica suave de la biblioteca libre de derechos de TikTok o CapCut. `montar.sh` la deja a ≈ ‑24 dB y la baja aún más cuando hay voz.
 
+## Versión hombre: cómo se generó el avatar
+
+1. **Voz:** `python3 video-ugc/voz_hombre.py --usar-guardadas build/voz` arma la pista con las frases de `voz/` (o las sintetiza de nuevo; ver el docstring).
+2. **Animación con sincronía de labios** ([SadTalker](https://github.com/OpenTalker/SadTalker), checkpoints de sus releases en GitHub, CPU):
+   `python inference.py --driven_audio voz/l1.wav --source_image referencias/avatar_escena1.png --still --preprocess full --size 256 --cpu`
+   (y lo mismo con `l4` y `avatar_escena4.png`). Con Python 3.13 y numpy 2 hacen falta parches menores: alias `np.float`/`np.int`, `float()` sobre arrays de un elemento en `src/face3d/util/preprocess.py` y `src/utils/preprocess.py`, `audioop-lts` para pydub, `basicsr` 1.4.2 compilado a mano. Además, en `src/utils/paste_pic.py` se cambió `seamlessClone` por un pegado con borde difuminado, porque el recorte de la cara se sale del cuadro.
+3. **Nitidez de la cara:** GFPGAN v1.4 (peso 0,5) sobre cada cuadro.
+4. `video-ugc/preparar_avatar_hombre.sh esc1.mp4 esc4.mp4 build/voz/voz_hombre.wav`, y luego el montaje de abajo con `TIEMPOS=hombre`.
+
 ## Montaje
 
 ```bash
@@ -55,13 +74,15 @@ Pronunciación: escribe “DIAN dos mil seiscientos setenta y seis” en el camp
 cd web && npm ci
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:9 NEXT_PUBLIC_SUPABASE_ANON_KEY=x npx next dev -p 3100 &
 
-# 2. Grabar la app real y componer
+# 2. Grabar la app real y componer (TIEMPOS=hombre o gemini)
+export TIEMPOS=hombre
 node video-ugc/capturar.mjs
 python3 video-ugc/componer.py previa   # previsualización
 python3 video-ugc/componer.py capa     # capa con alfa para el montaje
 
-# 3. Preparar el clip de Gemini y montar
-video-ugc/preparar_avatar.sh gemini_generated_video.mp4
+# 3. Pista del avatar y montaje
+video-ugc/preparar_avatar_hombre.sh esc1.mp4 esc4.mp4 build/voz/voz_hombre.wav   # versión hombre
+# TIEMPOS=gemini video-ugc/preparar_avatar.sh gemini_generated_video.mp4         # versión Gemini
 video-ugc/montar.sh build/avatar.mp4
 # → video-ugc/build/dian2676_ugc_1080x1920.mp4
 ```
@@ -70,7 +91,7 @@ Si prefieres CapCut: importa `build/capa.mov` (ProRes con alfa) en una pista por
 
 ## Verificación antes de publicar
 
-- [ ] La duración es de 24,75 s, en 1080 × 1920.
+- [ ] La duración no pasa de 25 s (24,95 s la versión hombre, 24,75 s la de Gemini), en 1080 × 1920.
 - [ ] Todo lo que se ve de la app es una captura real de la landing y de `/ejemplo`.
 - [ ] Los subtítulos coinciden palabra por palabra con el guion; los resaltados son DIAN 2676, juicio situacional y explicación.
 - [ ] El dominio final es exactamente **centrahoy.online**.

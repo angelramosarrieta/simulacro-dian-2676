@@ -17,7 +17,7 @@ cd "$(dirname "$0")"
 TOMA=${1:?Uso: montar.sh TOMA.mp4 [MUSICA.mp3] [INICIO_SEG]}
 MUSICA=${2:-}
 INICIO=${3:-0}
-DUR=24.75
+DUR=$(python3 -c "import json,os;print(json.load(open(\"tiempos/\"+os.environ.get(\"TIEMPOS\",\"hombre\")+\".json\"))[\"dur\"])")
 CAPA=build/capa.mov
 OUT=build/dian2676_ugc_1080x1920.mp4
 [ -f "$CAPA" ] || { echo "Falta $CAPA: corre python3 video-ugc/componer.py capa" >&2; exit 1; }

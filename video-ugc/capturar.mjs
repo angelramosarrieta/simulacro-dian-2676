@@ -4,7 +4,7 @@
 // Uso:    node video-ugc/capturar.mjs [salida]   (por defecto video-ugc/build/frames)
 // Genera un PNG por cuadro (1080x1920, 30 fps) y manifest.json con los toques.
 import { createRequire } from "node:module";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,6 +15,8 @@ const { chromium } = require("@playwright/test");
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3100";
 const OUT = resolve(process.argv[2] || join(here, "build/frames"));
 const FPS = 30;
+// Tiempos compartidos con componer.py (TIEMPOS=gemini|hombre).
+const T = JSON.parse(readFileSync(join(here, "tiempos", `${process.env.TIEMPOS || "hombre"}.json`), "utf8")).app;
 mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
@@ -70,43 +72,47 @@ async function open(path) {
   await page.addStyleTag({ content: CLEAN });
 }
 
-// ---- Escena 2a (4.0–6.3 s): landing de centrahoy.online, arriba del todo.
+// ---- Escena 2a: landing de centrahoy.online, arriba del todo.
+const [l0, l1] = T.landing;
 await open("/");
-await hold(4.0, 6.3, "landing");
+await hold(l0, l1, "landing");
 
-// ---- Escena 2b (6.3–8.55 s): simulador de ejemplo → Practicar → Práctica rápida.
+// ---- Escena 2b: simulador de ejemplo → Practicar → Práctica rápida.
+const [e0, e1, e2, e3, e4] = T.ejemplo;
 await open("/ejemplo");
 const tabs = page.getByRole("tab", { name: /Practicar/ });
 const s0 = (await docTop(tabs)) - 240;
 await scrollTo(s0);
-await hold(6.3, 6.85, "ejemplo");
-await tap(tabs, 6.85);
-await hold(6.85, 7.15, "ejemplo");
+await hold(e0, e1, "ejemplo");
+await tap(tabs, e1);
+await hold(e1, e2, "ejemplo");
 const rapida = page.getByRole("button", { name: /Práctica rápida/ });
 const s1 = (await docTop(rapida)) - 300;
-await scroll(s0, s1, 7.15, 8.0, "ejemplo");
-await hold(8.0, 8.55, "ejemplo");
-await tap(rapida, 8.55);
+await scroll(s0, s1, e2, e3, "ejemplo");
+await hold(e3, e4, "ejemplo");
+await tap(rapida, e4);
 
-// ---- Escena 3 (8.55–15.5 s): caso, opciones, respuesta y explicación.
+// ---- Escena 3: caso, opciones, respuesta y explicación.
+const [p0, p1, p2, p3, p4, p5, p6] = T.pregunta;
 const caso = page.getByText("Caso", { exact: true });
 const s2 = (await docTop(caso)) - 150;
 await scrollTo(s2);
-await hold(8.55, 9.45, "pregunta");
+await hold(p0, p1, "pregunta");
 const opts = page.locator("[role=radio]");
 const s3 = (await docTop(opts.nth(0))) - 170;
-await scroll(s2, s3, 9.45, 10.05, "pregunta");
-await hold(10.05, 10.3, "pregunta");
-await tap(opts.nth(1), 10.3);
-await hold(10.3, 10.75, "pregunta");
+await scroll(s2, s3, p1, p2, "pregunta");
+await hold(p2, p3, "pregunta");
+await tap(opts.nth(1), p3);
+await hold(p3, p4, "pregunta");
 const fb = page.getByText("Incorrecto", { exact: true });
 const s4 = (await docTop(fb)) - 110;
-await scroll(s3, s4, 10.75, 11.6, "explicacion");
-await hold(11.6, 15.5, "explicacion");
+await scroll(s3, s4, p4, p5, "explicacion");
+await hold(p5, p6, "explicacion");
 
-// ---- Escena 5 (19.85–22.4 s): de vuelta a la landing.
+// ---- Escena 5: de vuelta a la landing.
+const [f0, f1] = T.landing2;
 await open("/");
-await hold(19.85, 22.4, "landing");
+await hold(f0, f1, "landing");
 
 writeFileSync(join(OUT, "manifest.json"), JSON.stringify(manifest, null, 1));
 await browser.close();
