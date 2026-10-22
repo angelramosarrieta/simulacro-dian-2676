@@ -29,6 +29,7 @@ export const CONFIG_FIELDS: ConfigField[] = [
   { key: "WOMPI_PRIVATE_KEY", label: "Llave privada", group: "wompi", secret: true, pattern: /^prv_(test|prod)_[A-Za-z0-9]{8,}$/, placeholder: "prv_test_…" },
   { key: "WOMPI_INTEGRITY_SECRET", label: "Secreto de integridad", group: "wompi", secret: true, pattern: /^[A-Za-z0-9_\-]{8,}$/, placeholder: "test_integrity_…" },
   { key: "WOMPI_EVENTS_SECRET", label: "Secreto de eventos", group: "wompi", secret: true, pattern: /^[A-Za-z0-9_\-]{8,}$/, placeholder: "test_events_…" },
+  { key: "WOMPI_FORWARD_URL", label: "Reenviar eventos de otras apps (CENTRA)", group: "wompi", secret: false, pattern: /^https:\/\/[^\s"'<>]+$/, placeholder: "https://app.centrahoy.online/api/webhooks/wompi", hint: "La cuenta de Wompi es compartida: los eventos de pagos que no son del simulador se reenvían intactos a esta URL." },
   { key: "RESEND_API_KEY", label: "API key de Resend", group: "correo", secret: true, pattern: /^re_[A-Za-z0-9_]{10,}$/, placeholder: "re_…", hint: "resend.com → API Keys (la de CENTRA sirve)." },
   { key: "EMAIL_FROM", label: "Remitente", group: "correo", secret: false, pattern: /^[^<>]{0,60}<?[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+>?$/, placeholder: "Simulacro 2676 <no-reply@centrahoy.online>" },
   { key: "ADMIN_ALERT_EMAIL", label: "Correo para alertas y resumen diario", group: "correo", secret: false, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },

@@ -60,7 +60,8 @@ test("registro con verificación de correo y perfil inicial", async ({ page }) =
   await page.getByLabel("Nivel").selectOption("Profesional");
   await page.getByLabel("Modalidad").selectOption("Ingreso");
   await page.getByRole("button", { name: "Guardar y continuar" }).click();
-  await expect(page).toHaveURL(/\/panel\/nueva/);
+  // La primera vez el servidor de desarrollo compila /api/profile (puede tardar más de 5 s).
+  await expect(page).toHaveURL(/\/panel\/nueva/, { timeout: 20_000 });
 });
 
 test("asistente: datos, subida de documentos y pago (sin pasarela configurada)", async ({ page }) => {

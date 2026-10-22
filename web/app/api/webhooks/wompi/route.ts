@@ -4,6 +4,7 @@ import { applyTransaction } from "@/lib/payments/apply";
 import { fetchTransaction, wompiEventsSecret } from "@/lib/payments/wompi";
 import { verifyWebhookSignature, type WompiWebhookPayload } from "@/lib/payments/wompi-core";
 import { alertAdmin } from "@/lib/email/send";
+import { OWN_REFERENCE, forwardEvent, forwardTarget } from "@/lib/payments/forward";
 
 /**
  * Webhook de eventos de Wompi (URL a configurar en el panel de Wompi:
@@ -27,6 +28,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true, ignored: true });
   }
   if (!verifyWebhookSignature(payload, secret)) return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
+
+  // Eventos de otras aplicaciones de la misma cuenta de Wompi (CENTRA): se reenvían intactos.
+  if (!OWN_REFERENCE.test(payload.data.transaction.reference ?? "")) {
+    const target = forwardTarget(request.url);
+    if (target) {
+      try {
+        return await forwardEvent(target, raw, request.headers);
+      } catch (e) {
+        console.error("No se pudo reenviar el evento de Wompi:", e instanceof Error ? e.message : e);
+        return NextResponse.json({ error: "No se pudo reenviar" }, { status: 502 });
+      }
+    }
+  }
 
   const admin = createAdminClient();
   const tx = payload.data.transaction;

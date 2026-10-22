@@ -88,3 +88,49 @@ describe("URL alternativa del webhook", () => {
     expect(alias.POST).toBe(main.POST);
   });
 });
+
+describe("cuenta de Wompi compartida con CENTRA", () => {
+  it("reenvía intacto el evento de una transacción de CENTRA y devuelve el estado del destino", async () => {
+    process.env.WOMPI_EVENTS_SECRET = SECRET;
+    process.env.WOMPI_FORWARD_URL = "https://app.centrahoy.online/api/webhooks/wompi";
+    const calls: { url: string; body: string }[] = [];
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: string, init: RequestInit) => {
+      calls.push({ url: String(url), body: String(init.body) });
+      return new Response(JSON.stringify({ recibido: true }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }) as typeof fetch;
+    try {
+      const body = event({ id: "tx-centra-1", status: "APPROVED", reference: "centra-wompi-123e4567-e89b-12d3-a456-426614174000-2026-11-01", amount_in_cents: 990000 });
+      const res = await post(body);
+      expect(res.status).toBe(200);
+      expect(calls).toHaveLength(1);
+      expect(calls[0].url).toBe("https://app.centrahoy.online/api/webhooks/wompi");
+      expect(calls[0].body).toBe(JSON.stringify(body));
+    } finally {
+      globalThis.fetch = realFetch;
+      delete process.env.WOMPI_FORWARD_URL;
+    }
+  });
+
+  it("no reenvía eventos con firma inválida ni a su propio dominio", async () => {
+    process.env.WOMPI_EVENTS_SECRET = SECRET;
+    process.env.WOMPI_FORWARD_URL = "https://localhost/api/webhooks/wompi";
+    const realFetch = globalThis.fetch;
+    let called = 0;
+    globalThis.fetch = (async () => {
+      called++;
+      return new Response("{}");
+    }) as typeof fetch;
+    try {
+      const bad = event({ id: "tx-x", status: "APPROVED", reference: "centra-wompi-x", amount_in_cents: 100 });
+      bad.signature.checksum = "0".repeat(64);
+      expect((await post(bad)).status).toBe(401);
+      const { forwardTarget } = await import("@/lib/payments/forward");
+      expect(forwardTarget("https://localhost/api/webhooks/wompi")).toBeNull();
+      expect(called).toBe(0);
+    } finally {
+      globalThis.fetch = realFetch;
+      delete process.env.WOMPI_FORWARD_URL;
+    }
+  });
+});
