@@ -4,6 +4,7 @@ import { jsonError, readJson, requireUser } from "@/lib/api";
 import { getAdmin } from "@/lib/admin/auth";
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
+const httpsUrl = z.string().trim().max(300).refine((v) => v === "" || /^https:\/\/[^\s"'<>]+$/.test(v), "Debe ser un enlace https:// (o quedar vacío).");
 
 const schema = z.object({
   price_first_cop: int(1000, 1_000_000),
@@ -11,6 +12,12 @@ const schema = z.object({
   questions_per_generation: int(20, 200),
   order_pending_ttl_minutes: int(10, 1440),
   admin_emails: z.array(z.string().trim().toLowerCase().email()).min(1).max(10),
+  help_links: z.object({
+    simo: httpsUrl,
+    guia: httpsUrl,
+    dian: httpsUrl,
+    indicadores: httpsUrl,
+  }),
   generation_limits: z.object({
     max_input_tokens: int(20_000, 2_000_000),
     max_output_tokens: int(10_000, 1_000_000),

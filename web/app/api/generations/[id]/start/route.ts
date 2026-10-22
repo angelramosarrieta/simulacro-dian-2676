@@ -8,6 +8,8 @@ import { sniffMime } from "@/lib/generation/files";
 import { loadLimits } from "@/lib/generation/limits";
 import { driveGeneration } from "@/lib/generation/worker";
 import { UUID_RE } from "@/lib/security";
+import { readJson } from "@/lib/api";
+import { findBank } from "@/lib/generation/bank";
 
 export const maxDuration = 300;
 
@@ -17,6 +19,7 @@ const ERRORS: Record<string, [number, string]> = {
   limite_diario: [429, "Alcanzaste el límite diario de generaciones. Intenta mañana."],
   generacion_ya_iniciada: [409, "Esta generación ya fue iniciada."],
   faltan_documentos: [422, "Sube el manual de funciones y tus indicadores."],
+  sin_biblioteca: [409, "Este empleo ya no está en la biblioteca. Sube tus documentos para generarlo."],
   generacion_no_encontrada: [404, "Generación no encontrada."],
 };
 
@@ -27,26 +30,36 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   if (!UUID_RE.test(id)) return jsonError(404, "no_encontrada", "Generación no encontrada.");
 
-  // Sin IA configurada no se consume ningún crédito.
-  if (!(await integrationStatus()).ai) {
+  let fromBank = false;
+  try {
+    const body = (await readJson(request)) as { mode?: string };
+    fromBank = body?.mode === "biblioteca";
+  } catch {
+    return jsonError(400, "json_invalido", "Solicitud inválida.");
+  }
+
+  // Sin IA configurada no se consume ningún crédito (la biblioteca no necesita IA).
+  if (!fromBank && !(await integrationStatus()).ai) {
     return jsonError(503, "ia_no_configurada", "El generador se está configurando. Tu crédito queda guardado; intenta más tarde.");
   }
 
   const admin = createAdminClient();
   const { data: gen } = await admin
     .from("generations")
-    .select("id, status, manual_path, manual_mime, indicadores_path, indicadores_mime")
+    .select("id, status, opec, manual_path, manual_mime, indicadores_path, indicadores_mime")
     .eq("id", id)
     .eq("user_id", auth.user.id)
     .maybeSingle();
   if (!gen) return jsonError(404, "no_encontrada", "Generación no encontrada.");
   if (gen.status !== "draft") return jsonError(409, "ya_iniciada", "Esta generación ya fue iniciada.");
 
+  if (fromBank && !(await findBank(admin, gen.opec))) return jsonError(409, "sin_biblioteca", ERRORS.sin_biblioteca[1]);
+
   const limits = await loadLimits(admin);
-  for (const [label, p, mime] of [
+  for (const [label, p, mime] of fromBank ? [] : ([
     ["El manual de funciones", gen.manual_path, gen.manual_mime],
     ["El archivo de indicadores", gen.indicadores_path, gen.indicadores_mime],
-  ] as const) {
+  ] as const)) {
     if (!p) return jsonError(422, "faltan_documentos", `${label} no se ha subido.`);
     const { data: file, error } = await admin.storage.from("documents").download(p);
     if (error || !file) return jsonError(422, "faltan_documentos", `${label} no se ha subido completo. Vuelve a cargarlo.`);
@@ -56,7 +69,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (sniffMime(head) !== mime) return jsonError(422, "archivo_invalido", `${label} no es un PDF o imagen válido.`);
   }
 
-  const { error } = await admin.rpc("start_generation", { p_user_id: auth.user.id, p_generation_id: id });
+  const { error } = await admin.rpc("start_generation", { p_user_id: auth.user.id, p_generation_id: id, p_from_bank: fromBank });
   if (error) {
     const key = Object.keys(ERRORS).find((k) => error.message.includes(k));
     const [status, message] = key ? ERRORS[key] : [500, "No pudimos iniciar la generación."];

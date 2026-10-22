@@ -19,6 +19,10 @@ export default async function Page() {
     order_pending_ttl_minutes: Number(map.get("order_pending_ttl_minutes") ?? 60),
     admin_emails: Array.isArray(map.get("admin_emails")) ? (map.get("admin_emails") as string[]) : [],
     generation_limits: mergeLimits(map.get("generation_limits") ?? DEFAULT_LIMITS),
+    help_links: (() => {
+      const v = (map.get("help_links") ?? {}) as Record<string, string>;
+      return { simo: v.simo ?? "", guia: v.guia ?? "", dian: v.dian ?? "", indicadores: v.indicadores ?? "" };
+    })(),
   };
   await loadRuntimeConfig(true);
   const s = await integrationStatus();

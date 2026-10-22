@@ -6,6 +6,9 @@ import { Alert } from "@/components/ui/Alert";
 import { ACTIVE_STATUSES } from "@/components/ui/StatusBadge";
 import { getBalance, getProfile, getQuote, requireSession } from "@/lib/data/account";
 import { integrationStatus } from "@/lib/env";
+import { getHelpLinks } from "@/lib/pricing";
+import { findBank } from "@/lib/generation/bank";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = { title: "Nuevo simulador" };
 
@@ -21,6 +24,7 @@ export default async function Page() {
   const active = rows?.find((r) => ACTIVE_STATUSES.includes(r.status));
   const draft = rows?.find((r) => r.status === "draft");
   const status = await integrationStatus();
+  const [helpLinks, bank] = await Promise.all([getHelpLinks(), draft && status.supabase ? findBank(createAdminClient(), draft.opec) : Promise.resolve(null)]);
 
   return (
     <>
@@ -50,6 +54,8 @@ export default async function Page() {
           hasPaid={quote.hasPaid}
           aiReady={status.ai}
           paymentsReady={status.wompi}
+          bank={bank}
+          helpLinks={helpLinks}
         />
       )}
     </>

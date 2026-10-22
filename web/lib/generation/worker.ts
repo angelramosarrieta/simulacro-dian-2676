@@ -49,6 +49,7 @@ type GenerationRow = {
   cost_usd: number;
   steps_run: number;
   step_attempts: number;
+  source: "ia" | "biblioteca";
 };
 
 export type StepResult = { state: "advanced" | "completed" | "failed" | "busy" | "idle"; detail?: string };
@@ -71,6 +72,9 @@ export async function runStep(admin: SupabaseClient, generationId: string, getPr
     const { data: gen, error } = await admin.from("generations").select("*").eq("id", generationId).single<GenerationRow>();
     if (error || !gen) throw new Error(error?.message ?? "generacion_no_encontrada");
     if (!ACTIVE.has(gen.status)) return { state: "idle" };
+
+    // Empleo que ya está en la biblioteca: se arma sin llamar a la IA.
+    if (gen.source === "biblioteca") return await fromBank(admin, gen);
 
     const limits = await loadLimits(admin);
     const exceeded = budgetExceeded(gen, limits);
@@ -197,6 +201,28 @@ async function generateBatch(admin: SupabaseClient, gen: GenerationRow, provider
   return { state: "advanced", detail: `batch:${fresh.length}` };
 }
 
+async function fromBank(admin: SupabaseClient, gen: GenerationRow): Promise<StepResult> {
+  const { data: bank } = await admin.from("job_banks").select("questions, plan, analysis, uses").eq("opec", gen.opec).eq("enabled", true).maybeSingle();
+  if (!bank || !Array.isArray(bank.questions) || !bank.questions.length) {
+    return fail(admin, gen, "biblioteca_no_disponible", "El banco de este empleo ya no está disponible. Intenta de nuevo subiendo tus documentos.");
+  }
+  gen.questions = bank.questions as TemplateQuestion[];
+  gen.plan = bank.plan as PlanItem[];
+  gen.analysis = bank.analysis as Analysis | null;
+  gen.target_questions = gen.questions.length;
+  await patch(admin, gen.id, {
+    status: "assembling",
+    questions: gen.questions,
+    plan: gen.plan,
+    analysis: gen.analysis,
+    target_questions: gen.target_questions,
+    progress: 90,
+    current_step: "Armando tu simulador desde la biblioteca",
+  });
+  await admin.from("job_banks").update({ uses: Number(bank.uses) + 1 }).eq("opec", gen.opec);
+  return assemble(admin, gen);
+}
+
 async function assemble(admin: SupabaseClient, gen: GenerationRow): Promise<StepResult> {
   const minimum = Math.ceil(gen.target_questions * 0.6);
   if (gen.questions.length < minimum) {
@@ -220,6 +246,8 @@ async function assemble(admin: SupabaseClient, gen: GenerationRow): Promise<Step
     error_message: null,
   });
   await deleteDocuments(admin, gen);
+  // Lo generado con IA alimenta la biblioteca para los siguientes aspirantes de la misma OPEC.
+  if (gen.source !== "biblioteca") await admin.rpc("save_job_bank", { p_generation_id: gen.id });
   await notifyGenerationFinished(admin, gen.id);
   return { state: "completed" };
 }

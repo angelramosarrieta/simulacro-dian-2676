@@ -67,8 +67,8 @@ test("asistente: datos, subida de documentos y pago (sin pasarela configurada)",
   await login(page);
   await page.goto("/panel/nueva");
   await expect(page.getByLabel("Denominación, código y grado")).toHaveValue("Gestor I 301-01");
-  await page.getByLabel("OPEC o número de empleo").fill("23a6762");
-  await expect(page.getByLabel("OPEC o número de empleo")).toHaveValue("236762");
+  await page.getByLabel("OPEC o número de empleo").fill("98a7651");
+  await expect(page.getByLabel("OPEC o número de empleo")).toHaveValue("987651");
   await page.getByRole("button", { name: "Continuar" }).click();
 
   await expect(page.getByRole("heading", { name: "Sube tus 2 documentos" })).toBeVisible();
@@ -98,7 +98,7 @@ test("asistente: datos, subida de documentos y pago (sin pasarela configurada)",
   const db = adminDb();
   const { data: user } = await db.from("profiles").select("id").eq("email", email).single();
   const { data: gen } = await db.from("generations").select("status, opec, manual_path, indicadores_path").eq("user_id", user!.id).eq("status", "draft").single();
-  expect(gen).toMatchObject({ status: "draft", opec: "236762" });
+  expect(gen).toMatchObject({ status: "draft", opec: "987651" });
   expect((await db.storage.from("documents").download(gen!.manual_path!)).error).toBeNull();
   expect((await db.storage.from("documents").download(gen!.indicadores_path!)).error).toBeNull();
 });

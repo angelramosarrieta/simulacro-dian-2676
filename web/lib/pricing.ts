@@ -22,3 +22,21 @@ export async function getPublicPricing(): Promise<Pricing> {
     return DEFAULT_PRICING;
   }
 }
+
+export type HelpLinks = { simo?: string; guia?: string; dian?: string; indicadores?: string };
+
+/** Enlaces para conseguir los documentos (app_settings.help_links, editables desde el admin). */
+export async function getHelpLinks(): Promise<HelpLinks> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) return {};
+  try {
+    const sb = createClient(url, anon, { auth: { persistSession: false } });
+    const { data } = await sb.from("app_settings").select("value").eq("key", "help_links").maybeSingle();
+    const v = (data?.value ?? {}) as Record<string, unknown>;
+    const clean = (x: unknown) => (typeof x === "string" && /^https:\/\/[^\s"'<>]+$/.test(x) ? x : undefined);
+    return { simo: clean(v.simo), guia: clean(v.guia), dian: clean(v.dian), indicadores: clean(v.indicadores) };
+  } catch {
+    return {};
+  }
+}

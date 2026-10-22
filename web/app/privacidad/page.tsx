@@ -30,6 +30,7 @@ export default function Page() {
       <h2>4. Documentos y proveedores</h2>
       <ul>
         <li>Tus documentos se procesan con un proveedor de inteligencia artificial para generar las preguntas y se eliminan automáticamente al terminar la generación.</li>
+        <li>Las preguntas generadas para un empleo (OPEC) pueden reutilizarse para otros aspirantes del mismo empleo. No contienen tus datos personales y tus documentos no se comparten ni se conservan.</li>
         <li>Usamos proveedores de infraestructura (alojamiento, base de datos y correo) y Wompi para pagos, que pueden tratar datos fuera de Colombia con garantías adecuadas.</li>
       </ul>
       <h2>5. Tus derechos</h2>

@@ -77,9 +77,9 @@ d("BD: aislamiento por usuario (RLS) y permisos", () => {
     expect(other.data ?? []).toHaveLength(0);
   });
 
-  it("solo los precios son públicos en la configuración", async () => {
+  it("solo los precios y los enlaces de ayuda son públicos en la configuración", async () => {
     const { data } = await A.client.from("app_settings").select("key");
-    expect((data ?? []).map((r) => r.key).sort()).toEqual(["price_first_cop", "price_next_cop", "questions_per_generation"]);
+    expect((data ?? []).map((r) => r.key).sort()).toEqual(["help_links", "price_first_cop", "price_next_cop", "questions_per_generation"]);
     const w = await A.client.from("app_settings").update({ value: 1 }).eq("key", "price_first_cop").select();
     expect(w.data ?? []).toHaveLength(0);
   });

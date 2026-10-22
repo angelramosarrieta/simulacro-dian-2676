@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { Check, CreditCard, FileText, ImageIcon, Lock, Sparkles, UploadCloud, X } from "lucide-react";
+import { BookCheck, Check, CreditCard, ExternalLink, FileText, HelpCircle, ImageIcon, Lock, Sparkles, UploadCloud, X } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
 import { Spinner } from "@/components/ui/Spinner";
 import { track } from "@vercel/analytics";
@@ -10,6 +10,10 @@ import { cop } from "@/lib/format";
 
 type DocKind = "manual" | "indicadores";
 type DocState = { status: "empty" | "uploading" | "done" | "error"; name?: string; size?: number; mime?: string | null; error?: string; progress?: number };
+
+export type BankInfo = { cargo: string; nivel: string; modalidad: string; questions: number; ejes: string[] };
+export type HelpLinks = { simo?: string; guia?: string; dian?: string; indicadores?: string };
+type Mode = "biblioteca" | "documentos";
 
 type Draft = {
   id: string;
@@ -43,6 +47,8 @@ export function Wizard(props: {
   hasPaid: boolean;
   aiReady: boolean;
   paymentsReady: boolean;
+  bank: BankInfo | null;
+  helpLinks: HelpLinks;
 }) {
   const router = useRouter();
   const d = props.draft;
@@ -60,11 +66,17 @@ export function Wizard(props: {
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Biblioteca: si la OPEC ya tiene un banco, se puede usar sin subir documentos.
+  const [bank, setBank] = useState<BankInfo | null>(props.bank);
+  const [mode, setMode] = useState<Mode>(props.bank && !(d?.manual && d?.indicadores) ? "biblioteca" : "documentos");
   // Datos con los que se creó el borrador actual (para no crear otro si no cambian).
   const [saved, setSaved] = useState(d ? { cargo: d.cargo, nivel: d.nivel, opec: d.opec, modalidad: d.modalidad } : null);
 
   const formValid = form.cargo.trim().length >= 2 && form.nivel && /^[0-9]{3,10}$/.test(form.opec.trim()) && form.modalidad;
   const docsReady = docs.manual.status === "done" && docs.indicadores.status === "done";
+  const fromBank = mode === "biblioteca" && Boolean(bank);
+  // Desde la biblioteca no se necesita la IA: el banco ya existe.
+  const canGenerate = fromBank || props.aiReady;
 
   async function saveData(e: React.FormEvent) {
     e.preventDefault();
@@ -76,8 +88,10 @@ export function Wizard(props: {
       const next = { ...form, cargo: form.cargo.trim(), opec: form.opec.trim() };
       const changed = !saved || saved.cargo !== next.cargo || saved.nivel !== next.nivel || saved.opec !== next.opec || saved.modalidad !== next.modalidad;
       if (!genId || changed) {
-        const { id } = await api<{ id: string }>("/api/generations", next);
+        const { id, bank: found } = await api<{ id: string; bank: BankInfo | null }>("/api/generations", next);
         setGenId(id);
+        setBank(found);
+        setMode(found ? "biblioteca" : "documentos");
         setSaved(next);
         setDocs({ manual: { status: "empty" }, indicadores: { status: "empty" } });
         track("borrador_creado");
@@ -117,8 +131,8 @@ export function Wizard(props: {
     setError(null);
     setBusy(true);
     try {
-      await api(`/api/generations/${genId}/start`);
-      track("generacion_iniciada");
+      await api(`/api/generations/${genId}/start`, { mode });
+      track("generacion_iniciada", { modo: mode });
       router.push(`/panel/simuladores/${genId}?nuevo=1`);
       router.refresh();
     } catch (err) {
@@ -220,6 +234,41 @@ export function Wizard(props: {
 
         {step === 2 && (
           <div className="space-y-5">
+            {bank && (
+              <div className="rounded-xl border border-brand/30 bg-brandSoft/50 p-4">
+                <p className="flex items-center gap-2 font-medium">
+                  <BookCheck className="h-5 w-5 text-brandInk" aria-hidden /> Tu empleo ya está en nuestra biblioteca
+                </p>
+                <p className="mt-1 text-[14px] text-muted">
+                  Ya generamos el banco de la OPEC <b className="font-mono text-ink">{form.opec}</b>: <b className="text-ink">{bank.cargo}</b> · {bank.nivel}, con{" "}
+                  <b className="text-ink">{bank.questions} preguntas</b> en {bank.ejes.length} ejes. No necesitas subir documentos y tu simulador queda listo al instante.
+                </p>
+                {bank.cargo.toLowerCase() !== form.cargo.trim().toLowerCase() && (
+                  <p className="mt-2 text-[13px] text-warn">Verifica que sea tu empleo: escribiste “{form.cargo}”.</p>
+                )}
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {([
+                    ["biblioteca", "Usar la biblioteca", "Recomendado · listo al instante"],
+                    ["documentos", "Subir mis documentos", "Generamos uno nuevo con tu manual e indicadores"],
+                  ] as const).map(([m, t, sub]) => (
+                    <label key={m} className={`flex cursor-pointer items-start gap-2.5 rounded-xl border bg-surface px-4 py-3 text-[14px] ${mode === m ? "border-brand ring-1 ring-brand/30" : "border-line"}`}>
+                      <input type="radio" name="modo" className="mt-1 accent-[rgb(var(--brand))]" checked={mode === m} onChange={() => setMode(m)} />
+                      <span>
+                        <span className="font-medium">{t}</span>
+                        <span className="block text-[12.5px] text-muted">{sub}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            {fromBank ? (
+              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-between">
+                <button type="button" className="btn-ghost" onClick={() => setStep(1)}>Atrás</button>
+                <button type="button" className="btn-primary" onClick={() => setStep(3)}>Continuar</button>
+              </div>
+            ) : (
+            <>
             <div>
               <h2 className="text-[18px] font-semibold">Sube tus 2 documentos</h2>
               <p className="mt-1 text-[14px] text-muted">PDF (máx. {MAX_MB} MB) o imagen PNG, JPG o WEBP (máx. {MAX_IMAGE_MB} MB). Se eliminan al terminar la generación.</p>
@@ -228,6 +277,7 @@ export function Wizard(props: {
               kind="manual"
               title="Manual de funciones"
               hint="La ficha del MERF de tu empleo (Resolución DIAN 067 de 2024)."
+              help={<ManualHelp links={props.helpLinks} />}
               state={docs.manual}
               onFile={(f) => upload("manual", f)}
               onClear={() => setDocs((s) => ({ ...s, manual: { status: "empty" } }))}
@@ -236,6 +286,7 @@ export function Wizard(props: {
               kind="indicadores"
               title="Tus indicadores"
               hint="Pantallazo de la lista completa en la consulta del operador (sección 4.3 de la Guía)."
+              help={<IndicadoresHelp links={props.helpLinks} />}
               state={docs.indicadores}
               onFile={(f) => upload("indicadores", f)}
               onClear={() => setDocs((s) => ({ ...s, indicadores: { status: "empty" } }))}
@@ -244,6 +295,8 @@ export function Wizard(props: {
               <button type="button" className="btn-ghost" onClick={() => setStep(1)}>Atrás</button>
               <button type="button" className="btn-primary" disabled={!docsReady} onClick={() => setStep(3)}>Continuar</button>
             </div>
+            </>
+            )}
           </div>
         )}
 
@@ -257,10 +310,10 @@ export function Wizard(props: {
               <div><dt className="text-muted">Empleo</dt><dd className="font-medium">{form.cargo}</dd></div>
               <div><dt className="text-muted">OPEC</dt><dd className="font-mono font-medium">{form.opec}</dd></div>
               <div><dt className="text-muted">Nivel y modalidad</dt><dd className="font-medium">{form.nivel} · {form.modalidad}</dd></div>
-              <div><dt className="text-muted">Documentos</dt><dd className="font-medium">Manual e indicadores cargados</dd></div>
+              <div><dt className="text-muted">{fromBank ? "Origen" : "Documentos"}</dt><dd className="font-medium">{fromBank ? `Biblioteca · ${bank?.questions} preguntas, listo al instante` : "Manual e indicadores cargados"}</dd></div>
             </dl>
 
-            {!props.aiReady && (
+            {!canGenerate && (
               <Alert tone="warning" title="El generador se está configurando">
                 Tus datos y documentos quedan guardados. Cuando el servicio esté activo podrás generar desde aquí.
                 {props.balance > 0 ? " Tu crédito no se consume hasta entonces." : ""}
@@ -273,8 +326,8 @@ export function Wizard(props: {
                   <Sparkles className="h-4 w-4 text-brandInk" aria-hidden />
                   Usarás 1 de tus {props.balance} {props.balance === 1 ? "generación disponible" : "generaciones disponibles"}.
                 </p>
-                <button type="button" className="btn-primary" onClick={start} disabled={busy || !props.aiReady}>
-                  {busy && <Spinner />} {busy ? "Iniciando…" : "Generar mi simulador"}
+                <button type="button" className="btn-primary" onClick={start} disabled={busy || !canGenerate}>
+                  {busy && <Spinner />} {busy ? "Iniciando…" : fromBank ? "Obtener mi simulador" : "Generar mi simulador"}
                 </button>
               </div>
             ) : (
@@ -302,7 +355,44 @@ export function Wizard(props: {
   );
 }
 
-function DocUpload({ kind, title, hint, state, onFile, onClear }: { kind: DocKind; title: string; hint: string; state: DocState; onFile: (f: File) => void; onClear: () => void }) {
+function HelpLink({ href, children }: { href?: string; children: React.ReactNode }) {
+  if (!href) return <>{children}</>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="link inline-flex items-center gap-1">
+      {children} <ExternalLink className="h-3 w-3" aria-hidden />
+    </a>
+  );
+}
+
+function ManualHelp({ links }: { links: HelpLinks }) {
+  return (
+    <ol className="list-decimal space-y-1.5 pl-5">
+      <li>Entra a <HelpLink href={links.simo}>SIMO</HelpLink> con tu usuario.</li>
+      <li>Abre la OPEC del Proceso DIAN 2676 y busca tu número de empleo.</li>
+      <li>En la parte inferior aparece la <b>ficha del empleo</b> con el propósito y las funciones esenciales. Descárgala en PDF o toma pantallazos que se lean completos.</li>
+      {links.dian && <li>También puedes ver el proceso en la <HelpLink href={links.dian}>página del concurso en la DIAN</HelpLink>.</li>}
+    </ol>
+  );
+}
+
+function IndicadoresHelp({ links }: { links: HelpLinks }) {
+  return (
+    <div className="space-y-2">
+      <p>Los <b>indicadores</b> (ejes temáticos) son los temas que te van a evaluar en la prueba escrita. Cada empleo tiene los suyos y los publica el operador del concurso.</p>
+      <ol className="list-decimal space-y-1.5 pl-5">
+        {links.indicadores ? (
+          <li>Abre la <HelpLink href={links.indicadores}>consulta de indicadores del operador</HelpLink>.</li>
+        ) : (
+          <li>Abre la <HelpLink href={links.guia}>Guía de Orientación al Aspirante</HelpLink> y busca el enlace de la sección 4.3 (consulta de indicadores).</li>
+        )}
+        <li>Ingresa tus datos de inscripción (número de inscripción o documento, según pida la consulta).</li>
+        <li>Toma un <b>pantallazo de la lista completa</b> de indicadores. Si no cabe en una sola imagen, guarda la página como PDF.</li>
+      </ol>
+    </div>
+  );
+}
+
+function DocUpload({ kind, title, hint, help, state, onFile, onClear }: { kind: DocKind; title: string; hint: string; help?: React.ReactNode; state: DocState; onFile: (f: File) => void; onClear: () => void }) {
   const input = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   const Icon = state.mime?.startsWith("image/") ? ImageIcon : FileText;
@@ -362,6 +452,14 @@ function DocUpload({ kind, title, hint, state, onFile, onClear }: { kind: DocKin
         }}
       />
       {state.status === "error" && <p className="mt-2 text-[13px] text-bad">{state.error}</p>}
+      {help && (
+        <details className="group mt-2 rounded-xl bg-soft/60 px-4 py-2.5 text-[13.5px] text-muted [&_summary::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 font-medium text-brandInk">
+            <HelpCircle className="h-4 w-4" aria-hidden /> ¿Dónde consigo {kind === "manual" ? "mi manual de funciones" : "mis indicadores"}?
+          </summary>
+          <div className="mt-2 pb-1">{help}</div>
+        </details>
+      )}
     </div>
   );
 }

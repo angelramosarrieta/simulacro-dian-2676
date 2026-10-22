@@ -22,7 +22,15 @@ export type Settings = {
   order_pending_ttl_minutes: number;
   admin_emails: string[];
   generation_limits: Limits;
+  help_links: { simo: string; guia: string; dian: string; indicadores: string };
 };
+
+const LINKS: [keyof Settings["help_links"], string, string][] = [
+  ["indicadores", "Consulta de indicadores del operador", "El enlace de la sección 4.3 de la Guía. Si lo dejas vacío, al aspirante se le indica buscarlo en la Guía."],
+  ["guia", "Guía de Orientación al Aspirante", "Página o PDF de la CNSC."],
+  ["simo", "SIMO", "Donde está la ficha del empleo (manual de funciones)."],
+  ["dian", "Página del concurso en la DIAN", "Opcional."],
+];
 
 const LIMIT_FIELDS: [keyof Limits, string, string, number?][] = [
   ["max_cost_usd", "Costo máximo por generación (USD)", "Si se alcanza, se entrega lo generado (si hay al menos el 60 %) o se reembolsa.", 0.1],
@@ -96,6 +104,20 @@ export function SettingsForm({ initial }: { initial: Settings }) {
               <label htmlFor={k} className="label">{label}</label>
               <input id={k} type="number" step={step ?? 1} className="input font-mono" value={s.generation_limits[k]} onChange={(e) => setS({ ...s, generation_limits: { ...s.generation_limits, [k]: num(e.target.value) } })} />
               {hint && <p className="hint">{hint}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card p-5 sm:p-6">
+        <h2 className="font-medium">Enlaces de ayuda para los documentos</h2>
+        <p className="mt-1 text-[13px] text-muted">Aparecen en el paso de subir documentos, en “¿Dónde consigo…?”.</p>
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          {LINKS.map(([k, label, hint]) => (
+            <div key={k}>
+              <label htmlFor={`link-${k}`} className="label">{label}</label>
+              <input id={`link-${k}`} type="url" className="input text-[14px]" placeholder="https://…" value={s.help_links[k]} onChange={(e) => setS({ ...s, help_links: { ...s.help_links, [k]: e.target.value } })} />
+              <p className="hint">{hint}</p>
             </div>
           ))}
         </div>

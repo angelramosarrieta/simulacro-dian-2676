@@ -7,7 +7,8 @@
 3. **API key de IA** con saldo.
 4. **Llaves de Wompi** y la URL de eventos.
 5. **Primera generación real** para validar la calidad y el costo. El flujo está probado con una IA simulada, no contra la API real.
-6. **Revisión legal** de `/terminos` y `/privacidad`.
+6. **Revisión legal** de `/terminos` y `/privacidad`. Conviene decir allí que las preguntas generadas para una OPEC se reutilizan para otros aspirantes del mismo empleo (no se guardan los documentos, solo las preguntas).
+7. **Enlace de consulta de indicadores**: pega en `/admin/configuracion → Enlaces de ayuda` la URL exacta que publica el operador (sección 4.3 de la Guía de Orientación). Mientras esté vacío, la ayuda remite a la Guía.
 
 ## Hecho en esta segunda tanda
 
@@ -17,6 +18,11 @@
 - Captcha de Cloudflare Turnstile en registro, ingreso, recuperación y reenvío de correo (vía Supabase Auth).
 - Vercel Analytics con eventos de conversión (registro, borrador, checkout y generación).
 - Progreso del simulador sincronizado con la cuenta para estudiar en varios dispositivos.
+
+## Hecho en la tercera tanda
+
+- Biblioteca de empleos por OPEC (`/admin/biblioteca` para revisar, ver usos y retirar bancos).
+- Ayuda “¿Dónde consigo…?” en cada documento con enlaces a SIMO, la Guía de la CNSC y la página del concurso; los enlaces se editan desde `/admin/configuracion`.
 
 ## Ideas para después
 

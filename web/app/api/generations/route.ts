@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { jsonError, readJson, requireUser } from "@/lib/api";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generationInputSchema } from "@/lib/generation/schemas";
+import { findBank } from "@/lib/generation/bank";
 
 /** Crea un borrador de generación (todavía no consume créditos). */
 export async function POST(request: Request) {
@@ -46,5 +47,6 @@ export async function POST(request: Request) {
     .update({ default_cargo: parsed.data.cargo, default_nivel: parsed.data.nivel, default_modalidad: parsed.data.modalidad, updated_at: new Date().toISOString() })
     .eq("id", auth.user.id);
 
-  return NextResponse.json({ id: data.id });
+  // Si la OPEC ya está en la biblioteca, el asistente ofrece usarla sin subir documentos.
+  return NextResponse.json({ id: data.id, bank: await findBank(admin, parsed.data.opec) });
 }

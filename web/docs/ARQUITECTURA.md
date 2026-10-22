@@ -4,9 +4,11 @@
 
 ```
 Landing (/) → /registro → correo de confirmación → /panel/bienvenida (perfil)
-  → /panel/nueva: 1) datos del empleo  2) manual + indicadores  3) pagar (Wompi) o generar con un crédito
+  → /panel/nueva: 1) datos del empleo  2) manual + indicadores (o la biblioteca, si su OPEC ya existe)  3) pagar (Wompi) o generar con un crédito
   → /panel/simuladores/:id (progreso en vivo) → /s/:id (simulador, solo el dueño)
 ```
+
+**Biblioteca de empleos.** Cada generación con IA que termina bien queda guardada en `job_banks` con su OPEC (`save_job_bank`). Cuando otro aspirante escribe la misma OPEC, el paso 2 le ofrece el simulador de la biblioteca: no sube documentos, no se llama a la IA (`source = 'biblioteca'`, `steps_run = 0`) y lo recibe al instante. Se cobra igual. La llave es la OPEC y no cargo + nivel, porque una misma denominación puede tener ejes distintos según la dependencia. Un banco solo se reemplaza por otro con más preguntas, y el administrador puede retirarlo en `/admin/biblioteca`.
 
 Registrarse no cobra nada. La compra se hace cuando el usuario ya subió sus documentos, en el paso 3; al volver de Wompi continúa donde quedó.
 
@@ -40,6 +42,7 @@ Registrarse no cobra nada. La compra se hace cuando el usuario ya subió sus doc
 - `payment_events`: eventos de webhook (idempotencia y auditoría). Sin acceso para usuarios.
 - `app_settings`: precios (públicos) y límites (privados).
 - `admins` y `admin_audit_log`: quién administra y qué hizo (solo servidor).
+- `job_banks`: banco de preguntas reutilizable por OPEC (solo servidor). `generations.source` dice si salió de la IA o de la biblioteca.
 - `simulator_progress`: aciertos e historial del simulador por generación.
 
 ## Seguridad (resumen de la revisión)

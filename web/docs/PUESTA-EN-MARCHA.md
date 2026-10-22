@@ -74,7 +74,7 @@ Desde **/admin/configuracion → Llaves de integración** puedes guardar las lla
 
 ## 5. Primera generación real (20 min)
 
-Genera con tu manual y tus indicadores. Debe llegarte el correo "Tu simulador está listo". Revisa la calidad de las preguntas y el costo en `/admin/generaciones`.
+Genera con tu manual y tus indicadores. Debe llegarte el correo "Tu simulador está listo". Revisa la calidad de las preguntas y el costo en `/admin/generaciones`. Ese simulador queda en `/admin/biblioteca`: los siguientes aspirantes de esa OPEC lo recibirán sin costo de IA. Si la calidad no te convence, retíralo allí.
 
 ## 6. Producción
 
