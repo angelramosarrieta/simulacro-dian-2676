@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, FlaskConical, KeyRound, XCircle } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -11,6 +11,7 @@ export type SecretRow = {
   secret: boolean;
   hint?: string;
   options?: string[];
+  dynamicOptions?: "openai";
   placeholder?: string;
   source: "panel" | "vercel" | null;
   display: string | null; // últimos 4 caracteres o valor (si no es secreto)
@@ -75,7 +76,21 @@ function Group({ title, text, group, rows, disabled }: { title: string; text: st
 
 function SecretField({ row, disabled }: { row: SecretRow; disabled: boolean }) {
   const router = useRouter();
-  const [value, setValue] = useState(row.options ? row.display ?? "" : "");
+  const [value, setValue] = useState(row.options || row.dynamicOptions ? row.display ?? "" : "");
+  const [models, setModels] = useState<{ list: string[]; note?: string } | null>(null);
+  const [custom, setCustom] = useState(false);
+  useEffect(() => {
+    if (!row.dynamicOptions) return;
+    let alive = true;
+    fetch("/api/admin/models")
+      .then((r) => r.json())
+      .then((d) => alive && setModels({ list: Array.isArray(d.models) ? d.models : [], note: d.message }))
+      .catch(() => alive && setModels({ list: [], note: "No se pudo cargar la lista de modelos." }));
+    return () => {
+      alive = false;
+    };
+  }, [row.dynamicOptions]);
+  const modelOptions = models ? [...models.list, ...(value && !models.list.includes(value) ? [value] : [])] : [];
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const id = `cfg-${row.key}`;
@@ -104,7 +119,24 @@ function SecretField({ row, disabled }: { row: SecretRow; disabled: boolean }) {
         </span>
       </div>
       <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-        {row.options ? (
+        {row.dynamicOptions && !custom ? (
+          <select
+            id={id}
+            className="input"
+            value={value}
+            onChange={(e) => {
+              if (e.target.value === "__otro") {
+                setCustom(true);
+                setValue("");
+              } else setValue(e.target.value);
+            }}
+            disabled={disabled || !models}
+          >
+            <option value="">{models ? "Selecciona un modelo…" : "Cargando modelos…"}</option>
+            {modelOptions.map((o) => <option key={o} value={o}>{o}</option>)}
+            <option value="__otro">Otro (escribirlo)…</option>
+          </select>
+        ) : row.options ? (
           <select id={id} className="input" value={value} onChange={(e) => setValue(e.target.value)} disabled={disabled}>
             <option value="">Selecciona…</option>
             {row.options.map((o) => <option key={o}>{o}</option>)}
@@ -134,6 +166,12 @@ function SecretField({ row, disabled }: { row: SecretRow; disabled: boolean }) {
         </div>
       </div>
       {row.hint && <p className="hint">{row.hint}</p>}
+      {row.dynamicOptions && models?.note && <p className="hint text-warn">{models.note}</p>}
+      {row.dynamicOptions && custom && (
+        <button type="button" className="mt-1 text-[13px] text-brandInk underline-offset-4 hover:underline" onClick={() => setCustom(false)}>
+          Volver a la lista
+        </button>
+      )}
       {msg && <p className={`mt-1.5 text-[13px] ${msg.ok ? "text-ok" : "text-bad"}`}>{msg.text}</p>}
     </li>
   );

@@ -38,6 +38,7 @@ export default async function Page() {
       secret: f.secret,
       hint: f.hint,
       options: f.options,
+      dynamicOptions: f.dynamicOptions,
       placeholder: f.placeholder,
       source,
       display: source === "panel" ? hints.get(f.key) ?? null : !f.secret && envValue ? envValue : null,

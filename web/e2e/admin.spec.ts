@@ -61,7 +61,7 @@ test("un correo de la lista de administradores obtiene acceso y edita la configu
   const db = adminDb();
   const u = await makeUser("duena");
   const { data: cur } = await db.from("app_settings").select("value").eq("key", "admin_emails").single();
-  await db.from("app_settings").update({ value: [...(cur!.value as string[]), u.email] }).eq("key", "admin_emails");
+  await db.from("app_settings").update({ value: [...(cur!.value as string[]).slice(0, 1), u.email] }).eq("key", "admin_emails");
   const { data: price } = await db.from("app_settings").select("value").eq("key", "price_next_cop").single();
 
   await login(page, u.email);
@@ -78,6 +78,7 @@ test("un correo de la lista de administradores obtiene acceso y edita la configu
   await page.goto("/");
   await expect(page.locator("#precios")).toContainText("$ 22.000");
   await db.from("app_settings").update({ value: price!.value }).eq("key", "price_next_cop");
+  await db.from("app_settings").update({ value: cur!.value }).eq("key", "admin_emails");
 });
 
 test("el simulador de ejemplo sigue disponible en /ejemplo", async ({ page }) => {
@@ -139,4 +140,29 @@ test("/ejemplo es una demo sin PIN y separada; /mi-simulador conserva el simulad
   await expect(page.getByRole("tab", { name: "Inicio" })).toBeVisible();
   await page.getByRole("main").getByRole("link", { name: "Crear el mío" }).click();
   await expect(page).toHaveURL(/\/registro$/);
+});
+
+test("el modelo de OpenAI se elige de una lista desplegable (o se escribe con Otro)", async ({ page }) => {
+  const db = adminDb();
+  const a = await makeUser("modelos", true);
+  await login(page, a.email);
+  await page.goto("/admin/configuracion");
+  const select = page.getByLabel("Modelo de OpenAI");
+  await expect(select).toBeEnabled();
+  // Sin API key de OpenAI se muestra la lista base y el aviso.
+  await expect(page.getByText("Guarda la API key de OpenAI para ver los modelos de tu cuenta.")).toBeVisible();
+  await expect(select.locator("option", { hasText: "gpt-4.1-mini" })).toHaveCount(1);
+  await select.selectOption("gpt-4.1-mini");
+  const row = page.locator("li").filter({ has: select });
+  await row.getByRole("button", { name: "Guardar" }).click();
+  await expect(row.getByText("Guardado y cifrado.")).toBeVisible();
+  const { data } = await db.from("app_secrets").select("hint").eq("key", "OPENAI_MODEL").single();
+  expect(data!.hint).toBe("gpt-4.1-mini");
+
+  // "Otro" permite escribir un modelo que no está en la lista.
+  await page.reload();
+  await page.getByLabel("Modelo de OpenAI").selectOption("__otro");
+  await page.getByLabel("Modelo de OpenAI").fill("gpt-personalizado-1");
+  await expect(page.getByRole("button", { name: "Volver a la lista" })).toBeVisible();
+  await db.from("app_secrets").delete().eq("key", "OPENAI_MODEL");
 });
