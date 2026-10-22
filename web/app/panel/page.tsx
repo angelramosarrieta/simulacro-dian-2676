@@ -13,7 +13,7 @@ export default async function Resumen() {
   const active = generations.find((g) => ACTIVE_STATUSES.includes(g.status));
   const completed = generations.filter((g) => g.status === "completed");
   const days = daysUntil(BRAND.examDate);
-  const status = integrationStatus();
+  const status = await integrationStatus();
 
   const steps = [
     { done: true, label: "Crear tu cuenta" },

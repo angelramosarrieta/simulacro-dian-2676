@@ -51,6 +51,12 @@ Falta configurar en el panel de Supabase de **centra-log**:
 
 ✅ Verificación: en `/admin`, todos los indicadores de integración salen en verde salvo IA y Wompi, que se configuran en los pasos siguientes.
 
+## Llaves desde el panel (recomendado)
+
+Desde **/admin/configuracion → Llaves de integración** puedes guardar las llaves de la IA, Wompi y Resend sin entrar a Vercel. Se guardan **cifradas** (AES-256-GCM con `SECRETS_ENCRYPTION_KEY`, que solo existe en Vercel), solo los administradores pueden cambiarlas, nunca se vuelven a mostrar completas y cada cambio queda en la auditoría. Cada grupo tiene **Probar conexión**: verifica la llave de IA, consulta tu comercio en Wompi o te envía un correo de prueba. Lo guardado en el panel tiene prioridad sobre las variables de Vercel y se aplica en máximo 1 minuto, sin redeploy.
+
+> No cambies `SECRETS_ENCRYPTION_KEY` en Vercel: las llaves guardadas dejarían de poder descifrarse y habría que volver a ingresarlas.
+
 ## 3. IA (10 min)
 
 `ANTHROPIC_API_KEY` en Vercel. Opcional: `AI_MODEL=claude-sonnet-5-5`, que cuesta la mitad. Para OpenAI: `AI_PROVIDER=openai`, `OPENAI_API_KEY` y `OPENAI_MODEL`. Redeploy.

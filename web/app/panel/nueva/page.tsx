@@ -20,7 +20,7 @@ export default async function Page() {
     .limit(5);
   const active = rows?.find((r) => ACTIVE_STATUSES.includes(r.status));
   const draft = rows?.find((r) => r.status === "draft");
-  const status = integrationStatus();
+  const status = await integrationStatus();
 
   return (
     <>

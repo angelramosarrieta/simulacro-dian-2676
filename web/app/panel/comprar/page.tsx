@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Comprar generación" };
 
 export default async function Page() {
   const [quote, balance] = await Promise.all([getQuote(), getBalance()]);
-  const status = integrationStatus();
+  const status = await integrationStatus();
   return (
     <>
       <PageHeader eyebrow="Comprar" title={quote.hasPaid ? "Compra otra generación" : "Activa tu primer simulador"} description="Pago único. Cada compra suma una generación a tu cuenta." />

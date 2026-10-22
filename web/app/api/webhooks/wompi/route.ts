@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { applyTransaction } from "@/lib/payments/apply";
-import { fetchTransaction } from "@/lib/payments/wompi";
+import { fetchTransaction, wompiEventsSecret } from "@/lib/payments/wompi";
 import { verifyWebhookSignature, type WompiWebhookPayload } from "@/lib/payments/wompi-core";
 import { alertAdmin } from "@/lib/email/send";
 
@@ -12,7 +12,7 @@ import { alertAdmin } from "@/lib/email/send";
  * vuelve a consultar la transacción en la API de Wompi.
  */
 export async function POST(request: Request) {
-  const secret = process.env.WOMPI_EVENTS_SECRET;
+  const secret = await wompiEventsSecret();
   if (!secret) return NextResponse.json({ error: "Webhook no configurado" }, { status: 503 });
 
   const raw = await request.text();

@@ -6,6 +6,7 @@ import { admin, dbAvailable, newUser } from "./helpers";
 // webhook verifica firma, re-consulta la transacción y acredita una sola vez.
 const transactions = new Map<string, { id: string; status: string; reference: string; amount_in_cents: number; currency: string; payment_method_type: string }>();
 vi.mock("@/lib/payments/wompi", () => ({
+  wompiEventsSecret: async () => process.env.WOMPI_EVENTS_SECRET,
   fetchTransaction: async (id: string) => {
     const tx = transactions.get(id);
     if (!tx) throw new Error("wompi_http_404");

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAiProvider } from "@/lib/ai";
+import { aiProviderFactory } from "@/lib/ai";
 import { dispatchContinuation } from "@/lib/generation/dispatch";
 import { driveGeneration } from "@/lib/generation/worker";
 import { safeEqual, UUID_RE } from "@/lib/security";
@@ -17,7 +17,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!UUID_RE.test(id)) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
 
   const admin = createAdminClient();
-  const last = await driveGeneration(admin, id, getAiProvider, 280_000);
+  const last = await driveGeneration(admin, id, await aiProviderFactory(), 280_000);
   if (last.state === "advanced") await dispatchContinuation(id);
   return NextResponse.json({ state: last.state });
 }

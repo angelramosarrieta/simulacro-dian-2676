@@ -2,7 +2,7 @@ import { NextResponse, after } from "next/server";
 import { jsonError, requireUser } from "@/lib/api";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { integrationStatus } from "@/lib/env";
-import { getAiProvider } from "@/lib/ai";
+import { aiProviderFactory } from "@/lib/ai";
 import { dispatchContinuation } from "@/lib/generation/dispatch";
 import { sniffMime } from "@/lib/generation/files";
 import { loadLimits } from "@/lib/generation/limits";
@@ -28,7 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!UUID_RE.test(id)) return jsonError(404, "no_encontrada", "Generación no encontrada.");
 
   // Sin IA configurada no se consume ningún crédito.
-  if (!integrationStatus().ai) {
+  if (!(await integrationStatus()).ai) {
     return jsonError(503, "ia_no_configurada", "El generador se está configurando. Tu crédito queda guardado; intenta más tarde.");
   }
 
@@ -64,7 +64,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   after(async () => {
-    const last = await driveGeneration(admin, id, getAiProvider, 280_000);
+    const last = await driveGeneration(admin, id, await aiProviderFactory(), 280_000);
     if (last.state === "advanced" || last.state === "busy") await dispatchContinuation(id);
   });
   return NextResponse.json({ ok: true });

@@ -4,13 +4,12 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { requireAdminPage } from "@/lib/admin/auth";
 import { loadMetrics } from "@/lib/admin/metrics";
 import { integrationStatus } from "@/lib/env";
-import { emailConfigured } from "@/lib/email/send";
 import { cop } from "@/lib/format";
 
 export default async function Page() {
   const { admin } = await requireAdminPage();
   const m = await loadMetrics(admin);
-  const s = integrationStatus();
+  const s = await integrationStatus();
   const alerts = [
     m.alerts.failed24h && { text: `${m.alerts.failed24h} generaciones fallidas en las últimas 24 h`, href: "/admin/generaciones?estado=failed" },
     m.alerts.pendingOld && { text: `${m.alerts.pendingOld} órdenes pendientes hace más de 1 hora`, href: "/admin/ordenes?estado=pending" },
@@ -26,7 +25,7 @@ export default async function Page() {
           ["Supabase", s.supabase],
           [`IA (${s.aiProvider})`, s.ai],
           [`Wompi (${s.wompiEnv})`, s.wompi],
-          ["Correos (Resend)", emailConfigured()],
+          ["Correos (Resend)", s.email],
           ["Jobs internos", s.internalSecret],
           ["Cron diario", Boolean(process.env.CRON_SECRET)],
         ].map(([label, ok]) => (

@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { applyTransaction } from "@/lib/payments/apply";
 import { findTransactionsByReference } from "@/lib/payments/wompi";
+import { getCfg } from "@/lib/config/runtime";
 
 /**
  * Concilia órdenes pendientes consultando a Wompi por referencia (respaldo si
@@ -9,8 +10,8 @@ import { findTransactionsByReference } from "@/lib/payments/wompi";
  * (cron diario). Requiere WOMPI_PRIVATE_KEY; sin ella no hace nada. Nunca lanza.
  */
 export async function reconcilePendingOrders(userId?: string, limit = 5) {
-  if (!process.env.WOMPI_PRIVATE_KEY) return 0;
   try {
+    if (!(await getCfg("WOMPI_PRIVATE_KEY"))) return 0;
     const admin = createAdminClient();
     const since = new Date(Date.now() - 3 * 86_400_000).toISOString();
     let q = admin.from("orders").select("reference").in("status", ["pending", "expired"]).is("paid_at", null).gte("created_at", since).order("created_at", { ascending: false }).limit(limit);

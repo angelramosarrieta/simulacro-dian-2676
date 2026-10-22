@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { costUsd } from "@/lib/ai/pricing";
+import { cfg } from "@/lib/config/runtime";
 import { AiError, type AiJsonRequest, type AiJsonResult, type AiProvider } from "@/lib/ai/types";
 
 // Modelo por defecto: Claude Opus 5.5. Para bajar costos se puede usar
@@ -8,12 +9,12 @@ import { AiError, type AiJsonRequest, type AiJsonResult, type AiProvider } from 
 const DEFAULT_MODEL = "claude-opus-5-5";
 
 export function createAnthropicProvider(): AiProvider {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = cfg("ANTHROPIC_API_KEY");
   if (!apiKey) throw new AiError("not_configured", "Falta ANTHROPIC_API_KEY", false);
-  const model = process.env.AI_MODEL || DEFAULT_MODEL;
+  const model = cfg("AI_MODEL") || DEFAULT_MODEL;
   // Reintentos propios del SDK para 429/5xx/errores de red; el worker reintenta además por etapa.
   const client = new Anthropic({ apiKey, maxRetries: 2, timeout: 280_000 });
-  const effort = (process.env.AI_EFFORT as "low" | "medium" | "high" | undefined) || "medium";
+  const effort = (cfg("AI_EFFORT") as "low" | "medium" | "high" | undefined) || "medium";
 
   return {
     name: "anthropic",

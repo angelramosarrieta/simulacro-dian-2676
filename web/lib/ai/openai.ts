@@ -1,11 +1,12 @@
 import "server-only";
 import OpenAI from "openai";
 import { costUsd } from "@/lib/ai/pricing";
+import { cfg } from "@/lib/config/runtime";
 import { AiError, type AiJsonRequest, type AiJsonResult, type AiProvider } from "@/lib/ai/types";
 
 export function createOpenAiProvider(): AiProvider {
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL;
+  const apiKey = cfg("OPENAI_API_KEY");
+  const model = cfg("OPENAI_MODEL");
   if (!apiKey) throw new AiError("not_configured", "Falta OPENAI_API_KEY", false);
   if (!model) throw new AiError("not_configured", "Falta OPENAI_MODEL", false);
   const client = new OpenAI({ apiKey, maxRetries: 2, timeout: 280_000 });

@@ -13,7 +13,7 @@ import { newReference } from "@/lib/payments/wompi-core";
 export async function POST(request: Request) {
   const auth = await requireUser(request);
   if ("error" in auth) return auth.error;
-  const status = integrationStatus();
+  const status = await integrationStatus();
   if (!status.wompi) return jsonError(503, "pagos_no_configurados", "Los pagos se están configurando. Intenta de nuevo en unas horas.");
   if (status.wompiEnv === "production" && !status.ai) {
     return jsonError(503, "ia_no_configurada", "Estamos terminando de configurar el generador. Aún no se reciben pagos.");
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const { data: order, error } = await admin.rpc("create_or_reuse_order", { p_user_id: auth.user.id, p_reference: newReference() });
   if (error || !order) return jsonError(500, "orden_no_creada", "No pudimos crear tu orden. Intenta de nuevo.");
 
-  const url = checkoutUrlFor({
+  const url = await checkoutUrlFor({
     reference: order.reference,
     amountInCents: Number(order.amount_in_cents),
     redirectUrl: `${siteUrl()}/panel/pagos/resultado`,

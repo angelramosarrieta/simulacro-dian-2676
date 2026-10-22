@@ -1,7 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { jsonError, requireUser } from "@/lib/api";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAiProvider } from "@/lib/ai";
+import { aiProviderFactory } from "@/lib/ai";
 import { dispatchContinuation } from "@/lib/generation/dispatch";
 import { driveGeneration } from "@/lib/generation/worker";
 import { UUID_RE } from "@/lib/security";
@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   if (stalled) {
     after(async () => {
       const admin = createAdminClient();
-      const last = await driveGeneration(admin, id, getAiProvider, 280_000);
+      const last = await driveGeneration(admin, id, await aiProviderFactory(), 280_000);
       if (last.state === "advanced") await dispatchContinuation(id);
     });
   }

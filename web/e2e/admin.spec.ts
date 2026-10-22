@@ -113,3 +113,43 @@ test("el simulador de ejemplo sigue disponible en /ejemplo", async ({ page }) =>
   expect(res?.status()).toBe(200);
   await expect(page).toHaveTitle(/Simulacro/);
 });
+
+test("el administrador guarda llaves cifradas desde configuración; nadie más puede", async ({ page, browser }) => {
+  const db = adminDb();
+  const a = await makeUser("llaves", true);
+  await login(page, a.email);
+  await page.goto("/admin/configuracion");
+  await expect(page.getByRole("heading", { name: "Llaves de integración" })).toBeVisible();
+
+  const secret = `re_prueba${Date.now()}XYZW`;
+  const input = page.getByLabel("API key de Resend");
+  await input.fill(secret);
+  await input.locator("xpath=ancestor::li").getByRole("button", { name: "Guardar" }).click();
+  await expect(page.getByText("Guardado y cifrado.")).toBeVisible();
+  await expect(page.getByText("Guardada aquí …XYZW")).toBeVisible();
+  // El valor completo nunca vuelve al navegador.
+  expect(await page.content()).not.toContain(secret);
+  const { data: row } = await db.from("app_secrets").select("ciphertext, hint").eq("key", "RESEND_API_KEY").single();
+  expect(row!.ciphertext).not.toContain(secret);
+  expect(row!.hint).toBe("…XYZW");
+
+  // Formato inválido se rechaza.
+  await page.getByLabel("API key de Anthropic (Claude)").fill("no-es-una-llave");
+  await page.getByLabel("API key de Anthropic (Claude)").locator("xpath=ancestor::li").getByRole("button", { name: "Guardar" }).click();
+  await expect(page.getByText(/El formato no parece válido/)).toBeVisible();
+
+  // Otro usuario no puede leer ni escribir llaves.
+  const other = await makeUser("intruso");
+  const ctx = await browser.newContext();
+  const p2 = await ctx.newPage();
+  await login(p2, other.email);
+  const res = await p2.request.post("/api/admin/secrets", { data: { key: "RESEND_API_KEY", value: "re_hackeo1234567" }, headers: { origin: "http://localhost:3000" } });
+  expect(res.status()).toBe(404);
+  await ctx.close();
+
+  // Quitar la llave vuelve a "Sin configurar".
+  page.once("dialog", (d) => d.accept());
+  await page.getByLabel("API key de Resend").locator("xpath=ancestor::li").getByRole("button", { name: "Quitar" }).click();
+  await expect(page.getByText("Quitado.")).toBeVisible();
+  expect((await db.from("app_secrets").select("key").eq("key", "RESEND_API_KEY")).data).toHaveLength(0);
+});

@@ -1,4 +1,5 @@
 import "server-only";
+import { cfg, loadRuntimeConfig } from "@/lib/config/runtime";
 
 /**
  * Envío de correos transaccionales con Resend (el mismo proveedor y dominio
@@ -7,19 +8,21 @@ import "server-only";
  */
 export type Email = { to: string; subject: string; html: string; text: string };
 
-export function emailConfigured() {
-  return Boolean(process.env.RESEND_API_KEY);
+export async function emailConfigured() {
+  await loadRuntimeConfig();
+  return Boolean(cfg("RESEND_API_KEY"));
 }
 
 export async function sendEmail(mail: Email): Promise<boolean> {
-  const key = process.env.RESEND_API_KEY;
+  await loadRuntimeConfig();
+  const key = cfg("RESEND_API_KEY");
   if (!key || !mail.to) return false;
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM || "Simulacro 2676 <no-reply@centrahoy.online>",
+        from: cfg("EMAIL_FROM") || "Simulacro 2676 <no-reply@centrahoy.online>",
         to: [mail.to],
         reply_to: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || undefined,
         subject: mail.subject,
@@ -38,7 +41,8 @@ export async function sendEmail(mail: Email): Promise<boolean> {
 
 /** Alerta para el administrador (ADMIN_ALERT_EMAIL). */
 export async function alertAdmin(subject: string, lines: string[]) {
-  const to = process.env.ADMIN_ALERT_EMAIL;
+  await loadRuntimeConfig();
+  const to = cfg("ADMIN_ALERT_EMAIL");
   if (!to) return false;
   const text = lines.join("\n");
   return sendEmail({ to, subject: `[Simulacro 2676] ${subject}`, text, html: `<pre style="font:13px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap">${escapeHtml(text)}</pre>` });
