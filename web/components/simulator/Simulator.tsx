@@ -33,7 +33,13 @@ import { ExamView, Meter, ResultView, grade, newSession, type Result, type Sessi
  * así se recupera lo que el aspirante estudió en la versión anterior.
  */
 export type Persistence =
-  | { kind: "account"; generationId: string; initial: { stats: unknown; history: unknown; updatedAt: string | null } }
+  | {
+      kind: "account";
+      generationId: string;
+      initial: { stats: unknown; history: unknown; updatedAt: string | null };
+      /** Espacio del navegador de un simulador anterior (importado) del que se recupera el progreso una vez. */
+      legacyNamespace?: string;
+    }
   | { kind: "local"; namespace: string };
 
 type Tab = "inicio" | "practicar" | "progreso" | "guia";
@@ -104,7 +110,12 @@ export function Simulator({ data, persistence }: { data: SimData; persistence: P
   // Al montar: fecha local (evita diferencias servidor/cliente) y progreso del navegador si es más reciente.
   useEffect(() => {
     setNow(new Date());
-    const local = readLocal(ns);
+    let local = readLocal(ns);
+    // Simulador importado: si en este navegador hay progreso del original y la cuenta aún no tiene nada, se trae.
+    if (!local.stats && persistence.kind === "account" && persistence.legacyNamespace && !persistence.initial.stats) {
+      const old = readLocal(persistence.legacyNamespace);
+      if (old.stats) local = { ...old, at: Date.now() };
+    }
     const serverAt = persistence.kind === "account" && persistence.initial.updatedAt ? Date.parse(persistence.initial.updatedAt) : 0;
     if (local.stats && (persistence.kind === "local" || local.at > serverAt)) {
       const p = sanitizeProgress(local.stats, local.hist);

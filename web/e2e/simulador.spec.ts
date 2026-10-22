@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+import path from "path";
 import { expect, test } from "@playwright/test";
 import { adminDb, uniqueEmail } from "./utils";
 
@@ -96,4 +98,28 @@ test("simulacro cronometrado: califica y guarda el historial", async ({ page }) 
   await page.reload();
   await page.getByRole("tab", { name: "Progreso" }).click();
   await expect(page.getByText(/\/15 correctas/)).toBeVisible();
+});
+
+test("simulador importado: conserva su banco completo y trae el progreso del original", async ({ page }) => {
+  const db = adminDb();
+  const demo = JSON.parse(readFileSync(path.join(__dirname, "../lib/simulator/data/demo.json"), "utf8"));
+  const email = uniqueEmail("imp");
+  const { data: u } = await db.auth.admin.createUser({ email, password: PASSWORD, email_confirm: true, user_metadata: { full_name: "Dueño Original" } });
+  const counts = demo.ejes.map((e: string) => ({ eje: e, cantidad: 0, generadas: demo.questions.filter((x: { t: string }) => x.t === e).length }));
+  const { data: gen } = await db
+    .from("generations")
+    .insert({ user_id: u.user!.id, cargo: demo.cargo, nivel: "Profesional", opec: demo.opec, modalidad: "Ingreso", status: "completed", progress: 100, source: "importado", analysis: { clave: "2676", banco: "original" }, target_questions: demo.questions.length, questions: [], plan: counts, finished_at: new Date().toISOString() })
+    .select("id")
+    .single();
+
+  // Progreso que tenía en el simulador original (mismo dominio): pregunta 0 fallada.
+  await page.goto("/mi-simulador");
+  await page.evaluate(() => localStorage.setItem("simulacro2676:v1", JSON.stringify({ "0": { n: 1, ok: 0, last: false } })));
+  await login(page, email);
+  await page.goto(`/panel/simuladores/${gen!.id}`);
+  await expect(page.getByText(`${demo.questions.length} preguntas`).first()).toBeVisible();
+  await expect(page.getByText("1 preguntas pendientes").first()).toBeVisible();
+  await expect.poll(async () => (await db.from("simulator_progress").select("stats").eq("generation_id", gen!.id).maybeSingle()).data?.stats, { timeout: 15_000 }).toEqual({ "0": { n: 1, ok: 0, last: false } });
+  await page.getByText("Detalles de tu simulador").click();
+  await expect(page.getByRole("link", { name: "Abrir versión original" })).toHaveAttribute("href", "/mi-simulador");
 });

@@ -10,6 +10,7 @@ import { compactNumber, dateTime } from "@/lib/format";
 import { UUID_RE } from "@/lib/security";
 import { Simulator } from "@/components/simulator/Simulator";
 import { buildSimData, type RawQuestion } from "@/lib/simulator/engine";
+import demo from "@/lib/simulator/data/demo.json";
 
 export const metadata: Metadata = { title: "Mi simulador" };
 
@@ -22,18 +23,24 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const { supabase } = await requireSession();
   const { data: g } = await supabase
     .from("generations")
-    .select("id, status, cargo, nivel, opec, modalidad, progress, current_step, error_message, target_questions, questions, plan, created_at, started_at, finished_at, credit_refunded, input_tokens, output_tokens")
+    .select("id, status, source, analysis, simulator_html_path, cargo, nivel, opec, modalidad, progress, current_step, error_message, target_questions, questions, plan, created_at, started_at, finished_at, credit_refunded, input_tokens, output_tokens")
     .eq("id", id)
     .maybeSingle();
   if (!g || g.status === "cancelled") notFound();
   const plan = (g.plan ?? []) as Plan;
   const total = Array.isArray(g.questions) ? g.questions.length : 0;
-  const casos = Array.isArray(g.questions) ? g.questions.filter((q: { p?: number }) => q.p === 1).length : 0;
 
   if (g.status === "completed") {
-    const jobQuestions = (Array.isArray(g.questions) ? g.questions : []) as RawQuestion[];
+    // Importado desde el simulador personal original: su banco es el de index.html (lib/simulator/data/demo.json).
+    const fromOriginal = g.source === "importado" && g.analysis?.banco === "original";
+    const jobQuestions = (fromOriginal ? demo.questions : Array.isArray(g.questions) ? g.questions : []) as RawQuestion[];
     const ejes = plan.map((p) => p.eje).filter((e) => jobQuestions.some((q) => q.t === e));
-    const data = buildSimData({ cargo: g.cargo, opec: g.opec, ejes, jobQuestions });
+    // Un simulador importado ya trae su banco completo (ids iguales a los del original).
+    const imported = g.source === "importado";
+    const data = buildSimData({ cargo: g.cargo, opec: g.opec, ejes, jobQuestions, includeCommon: !imported });
+    const jobTotal = jobQuestions.length;
+    const jobCasos = jobQuestions.filter((q) => "p" in q && q.p === 1).length;
+    const legacy = imported && typeof g.analysis?.clave === "string" ? `simulacro${g.analysis.clave}` : undefined;
     const { data: progress } = await supabase.from("simulator_progress").select("stats, history, updated_at").eq("generation_id", g.id).maybeSingle();
     return (
       <div className="space-y-6">
@@ -45,15 +52,15 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           <h1 className="text-[26px] font-semibold leading-tight tracking-tight sm:text-[28px]">{g.cargo}</h1>
           <p className="mt-1 text-[14px] text-muted">{g.nivel} · {g.modalidad} · {data.questions.length} preguntas</p>
         </div>
-        <Simulator data={data} persistence={{ kind: "account", generationId: g.id, initial: { stats: progress?.stats ?? null, history: progress?.history ?? null, updatedAt: progress?.updated_at ?? null } }} />
+        <Simulator data={data} persistence={{ kind: "account", generationId: g.id, legacyNamespace: legacy, initial: { stats: progress?.stats ?? null, history: progress?.history ?? null, updatedAt: progress?.updated_at ?? null } }} />
         <details className="card group p-5 sm:p-6">
           <summary className="cursor-pointer list-none font-medium [&::-webkit-details-marker]:hidden">
             Detalles de tu simulador <span className="text-muted group-open:hidden">· ver</span>
           </summary>
           <div className="mt-5 space-y-5">
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-xl bg-soft/70 p-4"><p className="text-[13px] text-muted">Preguntas de tu empleo</p><p className="mt-1 text-[22px] font-semibold">{total}</p></div>
-              <div className="rounded-xl bg-soft/70 p-4"><p className="text-[13px] text-muted">Casos de juicio situacional</p><p className="mt-1 text-[22px] font-semibold">{casos}</p></div>
+              <div className="rounded-xl bg-soft/70 p-4"><p className="text-[13px] text-muted">{fromOriginal ? "Preguntas" : "Preguntas de tu empleo"}</p><p className="mt-1 text-[22px] font-semibold">{jobTotal}</p></div>
+              <div className="rounded-xl bg-soft/70 p-4"><p className="text-[13px] text-muted">Casos de juicio situacional</p><p className="mt-1 text-[22px] font-semibold">{jobCasos}</p></div>
               <div className="rounded-xl bg-soft/70 p-4"><p className="text-[13px] text-muted">Ejes cubiertos</p><p className="mt-1 text-[22px] font-semibold">{ejes.length}</p></div>
             </div>
             <ul className="divide-y divide-line text-[14px]">
@@ -69,7 +76,11 @@ export default async function Page({ params, searchParams }: { params: Promise<{
                 <Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-brandInk" aria-hidden />
                 <span><b className="text-ink">¿Sin internet el día del examen?</b> Descarga el archivo y ábrelo en tu navegador; ese archivo guarda el progreso solo en ese dispositivo.</span>
               </p>
-              <a href={`/s/${g.id}?descargar=1`} className="btn-secondary btn-sm shrink-0"><Download className="h-4 w-4" aria-hidden /> Descargar</a>
+              {g.simulator_html_path ? (
+                <a href={`/s/${g.id}?descargar=1`} className="btn-secondary btn-sm shrink-0"><Download className="h-4 w-4" aria-hidden /> Descargar</a>
+              ) : (
+                <Link href="/mi-simulador" className="btn-secondary btn-sm shrink-0">Abrir versión original</Link>
+              )}
             </div>
             <p className="text-[12.5px] text-muted">
               Las preguntas las redacta una IA a partir de normas públicas y pueden tener errores, sobre todo en plazos y cifras. Compáralas siempre con la norma citada.
