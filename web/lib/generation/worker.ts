@@ -277,7 +277,7 @@ async function callAi(
       maxOutputTokens,
     });
     await recordUsage(admin, gen, step, res.usage, true);
-    return { kind: "ok", data: res.data };
+    return { kind: "ok", data: cleanAiData(res.data) };
   } catch (e) {
     const err = e instanceof AiError ? e : new AiError("provider_error", e instanceof Error ? e.message : "Error desconocido", true);
     await recordUsage(admin, gen, step, err.usage, false, `${err.code}: ${err.message}`);
@@ -285,6 +285,24 @@ async function callAi(
     if (!err.retryable) return { kind: "stop", step: await fail(admin, gen, `ia_${err.code}`, err.message) };
     return { kind: "stop", step: await retryOrFail(admin, gen, limits, `ia_${err.code}`, err.message) };
   }
+}
+
+/**
+ * Postgres (jsonb/text) rechaza el carácter nulo \u0000 y los sustitutos UTF-16
+ * sueltos; a veces los modelos los incluyen. Se eliminan de toda la respuesta
+ * (y los caracteres de control invisibles) antes de guardarla.
+ */
+export function cleanAiData<T>(value: T): T {
+  if (typeof value === "string") {
+    return value
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+      .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "") as T;
+  }
+  if (Array.isArray(value)) return value.map(cleanAiData) as T;
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([k, v]) => [cleanAiData(k), cleanAiData(v)])) as T;
+  }
+  return value;
 }
 
 async function retryOrFail(admin: SupabaseClient, gen: GenerationRow, limits: GenerationLimits, code: string, message: string): Promise<StepResult> {

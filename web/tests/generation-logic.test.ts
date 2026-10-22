@@ -129,3 +129,13 @@ describe("seguridad de utilidades", () => {
     expect(sniffMime(new TextEncoder().encode("<html>"))).toBeNull();
   });
 });
+
+import { cleanAiData } from "@/lib/generation/worker";
+
+describe("limpieza de la respuesta de la IA", () => {
+  it("quita el carácter nulo, controles invisibles y sustitutos sueltos que Postgres rechaza", () => {
+    const dirty = { preguntas: [{ enunciado: "Hola\u0000 mundo\u0007", opciones: ["a\uD800b", "ok 😀", "línea\nnueva\tcon tab"] }], "cla\u0000ve": 1 };
+    expect(cleanAiData(dirty)).toEqual({ preguntas: [{ enunciado: "Hola mundo", opciones: ["ab", "ok 😀", "línea\nnueva\tcon tab"] }], clave: 1 });
+    expect(JSON.stringify(cleanAiData(dirty))).not.toMatch(/\\u0000/);
+  });
+});

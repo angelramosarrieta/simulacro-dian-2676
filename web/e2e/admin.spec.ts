@@ -64,6 +64,12 @@ test("un correo de la lista de administradores obtiene acceso y edita la configu
   await db.from("app_settings").update({ value: [...(cur!.value as string[]).slice(0, 1), u.email] }).eq("key", "admin_emails");
   const { data: price } = await db.from("app_settings").select("value").eq("key", "price_next_cop").single();
 
+  // Restaura precio y lista de administradores aunque la prueba falle.
+  const restore = async () => {
+    await db.from("app_settings").update({ value: price!.value }).eq("key", "price_next_cop");
+    await db.from("app_settings").update({ value: cur!.value }).eq("key", "admin_emails");
+  };
+  try {
   await login(page, u.email);
   await page.goto("/admin/configuracion");
   await expect(page.getByRole("heading", { name: "Configuración" })).toBeVisible();
@@ -77,8 +83,9 @@ test("un correo de la lista de administradores obtiene acceso y edita la configu
 
   await page.goto("/");
   await expect(page.locator("#precios")).toContainText("$ 22.000");
-  await db.from("app_settings").update({ value: price!.value }).eq("key", "price_next_cop");
-  await db.from("app_settings").update({ value: cur!.value }).eq("key", "admin_emails");
+  } finally {
+    await restore();
+  }
 });
 
 test("el simulador de ejemplo sigue disponible en /ejemplo", async ({ page }) => {
