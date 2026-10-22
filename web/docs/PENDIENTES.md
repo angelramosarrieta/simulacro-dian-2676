@@ -7,7 +7,7 @@
 3. **API key de IA** con saldo.
 4. **Llaves de Wompi** y la URL de eventos.
 5. **Primera generación real** para validar la calidad y el costo. El flujo está probado con una IA simulada, no contra la API real.
-6. **Revisión legal** de `/terminos` y `/privacidad`. Conviene decir allí que las preguntas generadas para una OPEC se reutilizan para otros aspirantes del mismo empleo (no se guardan los documentos, solo las preguntas).
+6. **Términos y política de datos** publicados en `/terminos` y `/privacidad` (Ley 1480 de 2011, Ley 1581 de 2012). Para identificar al responsable sin escribirlo en el código, define en Vercel `NEXT_PUBLIC_LEGAL_NAME`, `NEXT_PUBLIC_LEGAL_ID` (NIT o cédula) y `NEXT_PUBLIC_LEGAL_ADDRESS`. Conviene una revisión de un abogado antes de operar a escala.
 7. **Enlace de consulta de indicadores**: pega en `/admin/configuracion → Enlaces de ayuda` la URL exacta que publica el operador (sección 4.3 de la Guía de Orientación). Mientras esté vacío, la ayuda remite a la Guía.
 
 ## Hecho en esta segunda tanda

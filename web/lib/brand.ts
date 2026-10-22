@@ -7,6 +7,9 @@ export const BRAND = {
   supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "soporte@centrahoy.online",
   whatsapp: process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "",
   legalName: process.env.NEXT_PUBLIC_LEGAL_NAME || "Simulacro 2676",
+  // Identificación y domicilio del responsable (opcionales): se muestran en las políticas solo si se configuran.
+  legalId: process.env.NEXT_PUBLIC_LEGAL_ID || "",
+  legalAddress: process.env.NEXT_PUBLIC_LEGAL_ADDRESS || "",
   examDate: "2026-11-08",
   examDateText: "domingo 8 de noviembre de 2026",
   exampleUrl: "/ejemplo",

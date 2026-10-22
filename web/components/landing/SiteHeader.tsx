@@ -17,7 +17,7 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
             <Link href="/panel" className="btn-primary btn-sm">Ir a mi panel</Link>
           ) : (
             <>
-              <Link href="/ingresar" className="btn-ghost btn-sm hidden sm:inline-flex">Ingresar</Link>
+              <Link href="/ingresar" className="btn-ghost btn-sm px-2.5 sm:px-3">Ingresar</Link>
               <Link href="/registro" className="btn-primary btn-sm">Crear cuenta</Link>
             </>
           )}
