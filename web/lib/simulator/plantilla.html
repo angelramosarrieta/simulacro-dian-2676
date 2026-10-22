@@ -1,0 +1,621 @@
+<title>Simulacro DIAN 2676</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: app de una columna (máx. 680px) con barra superior, contenido y barra de pestañas inferior fija; las vistas de examen ocupan la pantalla sin pestañas */
+:root{
+  --bg:#F6F6F4; --surface:#FFFFFF; --soft:#EFEFEB; --ink:#15171B; --muted:#6A6F77; --line:#E3E3DE;
+  --accent:#0E6B58; --on-accent:#FFFFFF; --accent-soft:#E2EFEA;
+  --ok:#157A43; --ok-soft:#E5F3EA; --bad:#B42318; --bad-soft:#FBEAE8;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D0F12; --surface:#15181C; --soft:#1B1F24; --ink:#ECEDEF; --muted:#8E949C; --line:#252A30;
+  --accent:#4FC2A4; --on-accent:#06231C; --accent-soft:#11302A;
+  --ok:#4ADE80; --ok-soft:#0F2A1B; --bad:#F68B80; --bad-soft:#331715; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D0F12; --surface:#15181C; --soft:#1B1F24; --ink:#ECEDEF; --muted:#8E949C; --line:#252A30;
+  --accent:#4FC2A4; --on-accent:#06231C; --accent-soft:#11302A;
+  --ok:#4ADE80; --ok-soft:#0F2A1B; --bad:#F68B80; --bad-soft:#331715; color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+h1,h2,p{margin:0}
+h1{font-size:1.75rem;font-weight:600;letter-spacing:-.025em;line-height:1.15;text-wrap:balance}
+h2{font-size:.78rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:680px;margin:0 auto}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+
+/* barra superior */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)}
+.top .inner{display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:var(--mono);font-size:.72rem;font-weight:500}
+.top-r{display:flex;align-items:center;gap:6px}
+.chip{font-family:var(--mono);font-size:.75rem;padding:4px 10px;border-radius:999px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;color:var(--muted)}
+.icon-btn:hover{background:var(--soft);color:var(--ink)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* contenido */
+.view{padding-block:24px calc(96px + env(safe-area-inset-bottom,0px))}
+.view .inner{display:flex;flex-direction:column;gap:28px}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+/* pestañas inferiores */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs .inner{display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 8px;font-size:.7rem;font-weight:500;color:var(--muted)}
+.tab[aria-current="page"]{color:var(--ink)}
+.tab[aria-current="page"] svg.i{stroke-width:2.1}
+
+/* inicio */
+.hero{display:flex;flex-direction:column;gap:6px}
+.big{font-size:3.6rem;font-weight:600;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:1.1rem;font-weight:500;letter-spacing:-.01em;color:var(--muted);margin-left:6px}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;text-align:left;padding:18px 20px;border-radius:var(--r);background:var(--ink);color:var(--bg)}
+.cta b{display:block;font-weight:600;font-size:1.02rem}
+.cta span.s{display:block;font-size:.84rem;opacity:.7}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.kpi{padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi+.kpi{border-left:1px solid var(--line)}
+.kpi b{font-size:1.35rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.75rem;color:var(--muted)}
+
+/* listas */
+.list{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 14px;width:100%;text-align:left;padding:14px 16px;min-height:56px}
+.row+.row{border-top:1px solid var(--line)}
+button.row:hover{background:var(--soft)}
+.row .t{font-weight:500;min-width:0}
+.row .d{font-size:.8rem;color:var(--muted);grid-column:1}
+.row .r{grid-row:1/span 2;grid-column:2;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.8rem}
+.row .meter{grid-column:1/-1;height:3px;border-radius:3px;background:var(--soft);overflow:hidden;margin-top:6px}
+.row .meter i{display:block;height:100%;background:var(--accent)}
+.row .meter i.low{background:var(--bad)}
+.badge{font-size:.68rem;font-weight:600;letter-spacing:.03em;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:12px;background:var(--soft)}
+.seg button{padding:8px;border-radius:9px;font-size:.85rem;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.label{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.empty{padding:16px;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted);font-size:.9rem}
+.note{font-size:.82rem;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:12px;font-weight:500;border:1px solid var(--line);background:var(--surface);min-height:46px}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.link{color:var(--muted);font-size:.85rem;text-decoration:underline;text-underline-offset:3px;padding:8px 0}
+.confirm{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:var(--r);background:var(--bad-soft)}
+.confirm .acts{display:flex;gap:8px}
+
+/* guía */
+.guide details{border-top:1px solid var(--line)}
+.guide details:last-child{border-bottom:1px solid var(--line)}
+.guide summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:16px 0;font-weight:500;cursor:pointer}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary::after{content:"+";font-family:var(--mono);color:var(--muted);font-size:1.1rem}
+.guide details[open] summary::after{content:"−"}
+.guide ul{margin:0 0 16px;padding-left:18px;display:flex;flex-direction:column;gap:8px;color:var(--ink);font-size:.92rem}
+.guide li::marker{color:var(--muted)}
+
+/* bloqueo */
+.lock{min-height:100%;display:flex;align-items:center;justify-content:center;padding-block:40px}
+.lockbox{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center}
+.lockbox .mark{width:48px;height:48px;border-radius:14px;font-size:1rem}
+.lockbox h1{font-size:1.5rem}
+.dots{display:flex;gap:14px;height:14px}
+.dots i{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--muted)}
+.dots i.on{background:var(--ink);border-color:var(--ink)}
+.dots.err{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.err-msg{color:var(--bad);font-size:.85rem;min-height:1.3em}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:14px 22px}
+.pad button{width:72px;height:72px;border-radius:50%;background:var(--surface);border:1px solid var(--line);font-size:1.5rem;font-weight:400;font-variant-numeric:tabular-nums}
+.pad button:active{background:var(--soft)}
+.pad button.ghost{background:none;border-color:transparent;color:var(--muted)}
+
+/* examen */
+.qbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg)}
+.qbar .inner{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:8px;height:56px}
+.qmeta{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.qmeta b{font-weight:500;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qmeta span{font-size:.75rem;color:var(--muted)}
+.timer{font-family:var(--mono);font-size:.85rem;padding:4px 10px;border-radius:999px;background:var(--soft);font-variant-numeric:tabular-nums}
+.timer.low{background:var(--bad-soft);color:var(--bad)}
+.prog{height:2px;background:var(--line)}
+.prog i{display:block;height:100%;background:var(--ink);transition:width .25s ease}
+.quiz{padding-block:20px calc(110px + env(safe-area-inset-bottom,0px))}
+.quiz .inner{display:flex;flex-direction:column;gap:18px}
+.kicker{font-size:.72rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.caso{padding:14px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.qtext{font-size:1.15rem;font-weight:500;letter-spacing:-.01em;line-height:1.45}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;text-align:left;width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);transition:border-color .15s,background .15s}
+.opt .l{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-size:.8rem;background:var(--soft);color:var(--muted)}
+.opt:hover:not([disabled]){border-color:var(--muted)}
+.opt.sel{border-color:var(--ink)} .opt.sel .l{background:var(--ink);color:var(--bg)}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)} .opt.ok .l{background:var(--ok);color:var(--surface)}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft)} .opt.bad .l{background:var(--bad);color:var(--surface)}
+.opt[disabled]{cursor:default}
+.fb{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:12px;font-size:.92rem;border-left:3px solid var(--muted);background:var(--surface)}
+.fb.ok{border-left-color:var(--ok)} .fb.bad{border-left-color:var(--bad)} .fb.info{border-left-color:var(--accent)}
+.fb strong{font-weight:600}
+.ref{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.qnav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px))}
+.qnav .inner{display:flex;gap:10px}
+.qnav .btn{flex:1}
+.grid{display:flex;flex-wrap:wrap;gap:6px}
+.grid button{width:34px;height:34px;border-radius:9px;font-family:var(--mono);font-size:.75rem;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.grid button.done{background:var(--soft);color:var(--ink)}
+.grid button.cur{border-color:var(--ink);color:var(--ink)}
+
+/* resultados */
+.pill{display:inline-flex;font-size:.75rem;font-weight:500;padding:3px 10px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+.rv{padding:16px;display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.rv+.rv{border-top:1px solid var(--line)}
+.rv .yours{color:var(--bad)} .rv .right{color:var(--ok);font-weight:500}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="app"></div>
+
+<script>
+// ===================== CONFIGURACIÓN DEL CARGO =====================
+// Junto con el banco de preguntas (const Q), es lo único que cambia de un cargo a otro.
+const CONFIG={
+  clave:"[OPEC]",              // usa la OPEC: separa el PIN y el progreso de otros simuladores
+  marca:"26",                 // 2 o 3 caracteres para el logo
+  titulo:"Simulacro 2676",    // nombre corto que aparece arriba
+  proceso:"DIAN 2676",        // proceso de selección
+  entidad:"la DIAN",          // entidad, con artículo
+  cargo:"[Denominación del empleo]",
+  opec:"[OPEC]",
+  examen:"2026-11-08",        // fecha de la prueba escrita (AAAA-MM-DD)
+  examenTexto:"Domingo 8 de noviembre · inicia 8:00 a. m. · puertas cierran 8:30 a. m.",
+  minimo:70,                  // puntaje mínimo aprobatorio de la prueba funcional
+  // Ejes o indicadores oficiales del empleo, escritos igual que en el campo "t" de las preguntas
+  ejes:["[Eje oficial 1]","[Eje oficial 2]"],
+  guiaFuente:"Guía de Orientación al Aspirante (CNSC, octubre de 2026)",
+  // Resumen de la guía: cada bloque es una sección desplegable; los items admiten <b> e <i>
+  guia:[
+    {titulo:"Cómo se califica",items:[
+      "Competencias funcionales: <b>eliminatoria</b>. Necesitas <b>70,00 de 100</b> para seguir en el concurso.",
+      "Pesos (funcionales · comportamentales · integridad · antecedentes):",
+      "<b>Ingreso</b>, empleos que piden experiencia o reservados para personas con discapacidad: <b>65% · 15% · 10% · 10%</b>.",
+      "<b>Ingreso</b>, empleos que no piden experiencia: <b>70% · 20% · 10%</b>, sin valoración de antecedentes.",
+      "<b>Ascenso</b>, empleos que piden experiencia o reservados para personas con discapacidad: <b>60% · 15% · 10% · 15%</b>.",
+      "<b>Ascenso</b>, empleos de nivel técnico o profesional que no piden experiencia: <b>65% · 20% · 10% · 5%</b>.",
+      "El puntaje va de 0 a 100, con dos decimales truncados. Los ítems que no marques cuentan como omisiones.",
+      "Los ítems que no cumplen criterios psicométricos se excluyen de la calificación.",
+      "Solo se evalúan normas vigentes expedidas hasta el 19 de junio de 2026."]},
+    {titulo:"Formato de las preguntas",items:[
+      "<b>Funcionales:</b> juicio situacional. Cada pregunta trae un caso, un enunciado y 3 opciones, y solo una es la solución efectiva.",
+      "<b>Comportamentales e integridad:</b> afirmaciones con 4 niveles, de \"Totalmente en desacuerdo\" a \"Totalmente de acuerdo\". No hay respuestas correctas y hay subescalas de control que detectan respuestas exageradamente favorables, así que lo mejor es responder con honestidad."]},
+    {titulo:"Día del examen",items:[
+      "Abren las puertas a las <b>7:15 a. m.</b>, la prueba empieza a las <b>8:00</b> y termina a la <b>1:00 p. m.</b>: es una sola sesión de 5 horas.",
+      "Las puertas se cierran a las <b>8:30 a. m.</b> Si llegas después, no puedes entrar y quedas excluido del concurso.",
+      "Llega 1 hora antes y visita el sitio al menos 2 días antes. La citación con el lugar aparece en SIMO.",
+      "Debes quedarte mínimo 1 hora en el salón, firmar los formatos y registrar tu huella antes de salir.",
+      "Si una pregunta te parece dudosa, pide al jefe de salón el <i>Formato de ítems dudosos</i>."]},
+    {titulo:"Qué llevar",items:[
+      "<b>Documento:</b> cédula amarilla con hologramas, cédula digital, pasaporte vigente o contraseña de la Registraduría con código de barras y QR (vigente).",
+      "<b>Lleva:</b> lápiz de mina negra N.º 2, sacapuntas y borrador.",
+      "<b>No se permite:</b> calculadora, tabletas, maletines ni hojas, y no se puede comer ni beber durante la sesión. El celular va apagado en la bolsa, debajo del pupitre de enfrente."]},
+    {titulo:"Hoja de respuestas",items:[
+      "Rellena el círculo completo. La lectora no reconoce una X, un visto ni un relleno tenue.",
+      "Marca una sola respuesta por pregunta. Para cambiarla, bórrala por completo.",
+      "Revisa que el número de la respuesta coincida con el de la pregunta. Lo que marques en el cuadernillo no se califica."]},
+    {titulo:"Resultados y reclamaciones",items:[
+      "Los resultados se publican en SIMO, con aviso de al menos 5 días hábiles.",
+      "Puedes reclamar por SIMO dentro de los 5 días hábiles siguientes a la publicación. Si pides acceso a tu prueba, tienes 2 días hábiles después de ese acceso para completar la reclamación."]}
+  ]
+};
+const EXAM=new Date(CONFIG.examen+"T00:00:00");
+const COMP = "Comportamental e integridad";
+// ===================== BANCO DE PREGUNTAS =====================
+// BANCO COMÚN DIAN 2676: preguntas que sirven para cualquier empleo del proceso (Constitución,
+// CPACA, disciplinario, estructura y misionalidad de la DIAN, razonamiento matemático y
+// comportamentales). Se conservan; las preguntas propias del empleo se agregan AL FINAL.
+// Formatos: directa {t,q,o,a,e,r} · caso {t,p:1,cs,q,o,a,j,r} · Likert {t:COMP,lk:1,k,q}.
+// La clave va siempre en la posición 0 (a:0); la app baraja las opciones al mostrarlas.
+const Q = [
+{t:"Constitución y Estado",q:"Según la Constitución, en tiempo de paz ¿quiénes pueden imponer contribuciones fiscales o parafiscales?",o:["Solo el Congreso, las asambleas departamentales y los concejos distritales y municipales","El Presidente mediante decreto ordinario y la DIAN mediante resolución","El Ministerio de Hacienda y las gobernaciones"],a:0,e:"Principio de legalidad tributaria. La DIAN administra los tributos, pero no los crea.",r:"Const. art. 338"},
+{t:"Constitución y Estado",q:"El sistema tributario colombiano se funda en los principios de:",o:["Equidad, eficiencia y progresividad","Legalidad, publicidad y celeridad","Solidaridad, subsidiariedad y concurrencia"],a:0,e:"El mismo artículo agrega que las leyes tributarias no se aplican con retroactividad.",r:"Const. art. 363"},
+{t:"Constitución y Estado",q:"Una ley que modifica un impuesto de período anual se publica en junio. ¿Desde cuándo se aplica?",o:["Desde el período que comience después de iniciar su vigencia","Desde el día siguiente a su publicación","Desde el 1 de enero del mismo año de publicación"],a:0,e:"Para tributos de período, la ley solo aplica desde el período siguiente a su vigencia.",r:"Const. art. 338, inc. final"},
+{t:"Constitución y Estado",q:"El deber de contribuir al financiamiento de los gastos e inversiones del Estado, dentro de conceptos de justicia y equidad, está en:",o:["El artículo 95, numeral 9, de la Constitución","El artículo 23 de la Constitución","El artículo 86 de la Constitución"],a:0,e:"El art. 23 es el derecho de petición y el art. 86 la acción de tutela.",r:"Const. art. 95-9"},
+{t:"Constitución y Estado",q:"¿Cuál es el plazo máximo entre la solicitud de tutela y su resolución?",o:["10 días","15 días hábiles","30 días"],a:0,e:"En ningún caso pueden pasar más de diez días entre la solicitud y la decisión.",r:"Const. art. 86"},
+{t:"Constitución y Estado",q:"Son principios de la función administrativa:",o:["Igualdad, moralidad, eficacia, economía, celeridad, imparcialidad y publicidad","Equidad, eficiencia, progresividad y no retroactividad","Legalidad, tipicidad, culpabilidad y proporcionalidad"],a:0,e:"La segunda opción son los principios del sistema tributario (art. 363); la tercera, principios del derecho sancionatorio.",r:"Const. art. 209"},
+{t:"Constitución y Estado",q:"El sistema específico de carrera de los empleados de la DIAN, que rige este proceso de selección, está regulado principalmente por:",o:["El Decreto Ley 927 de 2023","El Decreto Ley 071 de 2020","La Ley 909 de 2004, sin excepciones"],a:0,e:"La Guía de Orientación cita el Decreto Ley 927 de 2023 como norma del proceso. El Decreto Ley 071 de 2020 era el régimen anterior, y el Decreto 1083 de 2015 se aplica solo en lo que no regule el 927.",r:"D.L. 927/2023 · GOA DIAN 2676"},
+{t:"Peticiones y CPACA",q:"Un ciudadano radica una petición general (no es consulta ni pide documentos). ¿En qué término se responde?",o:["15 días siguientes a su recepción","10 días siguientes a su recepción","30 días siguientes a su recepción"],a:0,e:"Regla general: 15 días. Documentos e información: 10 días. Consultas: 30 días.",r:"Ley 1755/2015 art. 14"},
+{t:"Peticiones y CPACA",q:"Una persona pide copia de documentos que no tienen reserva. ¿En qué término se resuelve?",o:["10 días siguientes a su recepción","15 días siguientes a su recepción","5 días siguientes a su recepción"],a:0,e:"Si no se responde en ese término, se entiende aceptada y la copia debe entregarse dentro de los 3 días siguientes.",r:"Ley 1755/2015 art. 14-1"},
+{t:"Peticiones y CPACA",q:"Una consulta a la autoridad sobre materias a su cargo debe resolverse en:",o:["30 días siguientes a su recepción","15 días siguientes a su recepción","2 meses"],a:0,e:"Las consultas tienen el término más largo de los tres.",r:"Ley 1755/2015 art. 14-2"},
+{t:"Peticiones y CPACA",q:"Si no es posible responder una petición dentro del plazo legal, la autoridad debe:",o:["Informar antes del vencimiento los motivos y el nuevo plazo, que no puede exceder el doble del inicial","Archivar la petición y pedir que se radique de nuevo","Responder cuando sea posible, sin necesidad de avisar"],a:0,e:"Así lo exige el parágrafo del artículo 14.",r:"Ley 1755/2015 art. 14 par."},
+{t:"Peticiones y CPACA",q:"Pasados tres meses desde una petición sin que se notifique decisión, por regla general se entiende que:",o:["La petición fue negada (silencio administrativo negativo)","La petición fue concedida (silencio positivo)","La petición caducó"],a:0,e:"El silencio positivo solo opera cuando la ley lo dice expresamente.",r:"CPACA art. 83"},
+{t:"Peticiones y CPACA",q:"Contra un acto administrativo particular regido por el CPACA, los recursos de reposición y apelación se presentan dentro de:",o:["Los 10 días siguientes a la notificación","Los 2 meses siguientes a la notificación","El año siguiente a la notificación"],a:0,e:"Ojo: en materia tributaria el recurso es el de reconsideración, con 2 meses (art. 720 ET).",r:"CPACA art. 76"},
+{t:"Peticiones y CPACA",q:"La reserva de la información contenida en las declaraciones tributarias está establecida en:",o:["El artículo 583 del Estatuto Tributario","El artículo 23 de la Constitución","La Ley 1712 de 2014, que obliga a publicarla"],a:0,e:"Los funcionarios solo pueden usar esa información para control, recaudo, determinación, discusión y administración de impuestos, y para estadísticas.",r:"ET art. 583"},
+{t:"Peticiones y CPACA",q:"La ley de transparencia y del derecho de acceso a la información pública nacional es:",o:["Ley 1712 de 2014","Ley 1581 de 2012","Ley 87 de 1993"],a:0,e:"La Ley 1581 es protección de datos personales y la Ley 87 es control interno.",r:"Ley 1712/2014"},
+{t:"Peticiones y CPACA",q:"Un ciudadano quiere presentar una petición de forma verbal en un punto de atención. Lo correcto es:",o:["Recibirla, porque las peticiones pueden presentarse verbalmente, y dejar constancia","Exigirle que la presente por escrito","Indicarle que solo se reciben por la página web"],a:0,e:"Las peticiones pueden ser verbales, escritas o por cualquier medio idóneo.",r:"Ley 1755/2015 art. 15"},
+{t:"Disciplinario y ética",q:"El Código General Disciplinario vigente es:",o:["La Ley 1952 de 2019, modificada por la Ley 2094 de 2021","La Ley 734 de 2002","La Ley 1474 de 2011"],a:0,e:"La Ley 734 fue derogada por la Ley 1952.",r:"Ley 1952/2019"},
+{t:"Disciplinario y ética",q:"Según el Código General Disciplinario, las faltas se clasifican en:",o:["Gravísimas, graves y leves","Penales, civiles y fiscales","Dolosas y culposas únicamente"],a:0,e:"Dolo y culpa son formas de culpabilidad, no la clasificación de las faltas.",r:"Ley 1952/2019"},
+{t:"Disciplinario y ética",q:"Los valores del Código de Integridad del Servicio Público son:",o:["Honestidad, respeto, compromiso, diligencia y justicia","Eficiencia, eficacia, efectividad, economía y equidad","Lealtad, obediencia, discreción, puntualidad y orden"],a:0,e:"Los adoptó Función Pública para todas las entidades.",r:"Código de Integridad"},
+{t:"Disciplinario y ética",q:"La Ley 1474 de 2011 se conoce como:",o:["Estatuto Anticorrupción","Código de Procedimiento Administrativo","Ley de Habeas Data"],a:0,e:"El CPACA es la Ley 1437 de 2011 y Habeas Data es la Ley 1581 de 2012.",r:"Ley 1474/2011"},
+{t:"Disciplinario y ética",q:"Le asignan el expediente de una empresa de la que su hermano es socio. Lo correcto es:",o:["Declararse impedido y comunicarlo a su superior antes de actuar","Revisarlo con especial cuidado para evitar sospechas","Pedirle a su hermano que no comente el tema"],a:0,e:"El parentesco es causal de impedimento por conflicto de interés.",r:"CPACA art. 11"},
+{t:"Disciplinario y ética",q:"Durante una revisión, el contribuyente le ofrece un regalo para agilizar su trámite. Usted:",o:["Lo rechaza, sigue el trámite en los términos normales y reporta el ofrecimiento por los canales establecidos","Lo acepta si es de poco valor y no cambia la decisión","Lo rechaza y archiva el trámite como sanción"],a:0,e:"Archivar el trámite como castigo también sería una actuación indebida.",r:"Ley 1952/2019; Ley 1474/2011"},
+{t:"Disciplinario y ética",q:"Un ciudadano le pide los ingresos que declaró su vecino porque sospecha que evade impuestos. Usted:",o:["Le explica que la información es reservada y le indica cómo presentar una denuncia","Le muestra solo el total de ingresos, sin detalles","Se la entrega porque actúa en interés público"],a:0,e:"La reserva tributaria se mantiene; la denuncia permite que la DIAN investigue.",r:"ET art. 583"},
+{t:"Estructura organizacional de la DIAN",q:"Por su naturaleza jurídica, la DIAN es:",o:["Una Unidad Administrativa Especial adscrita al Ministerio de Hacienda y Crédito Público","Un establecimiento público del orden departamental","Una superintendencia adscrita a la Presidencia"],a:0,e:"Tiene personería jurídica y autonomía administrativa y presupuestal.",r:"Dcto. 1742/2020"},
+{t:"Gestión pública y DIAN",q:"El Modelo Integrado de Planeación y Gestión (MIPG) fue adoptado por:",o:["El Decreto 1499 de 2017","La Ley 1712 de 2014","El Decreto 1165 de 2019"],a:0,e:"El Decreto 1499 modificó el Decreto 1083 de 2015.",r:"Dcto. 1499/2017"},
+{t:"Gestión pública y DIAN",q:"¿Cuál de estas es una dimensión del MIPG?",o:["Talento humano","Fiscalización aduanera","Cobro coactivo"],a:0,e:"Las 7 dimensiones: talento humano; direccionamiento estratégico; gestión con valores para resultados; evaluación de resultados; información y comunicación; gestión del conocimiento; control interno.",r:"MIPG"},
+{t:"Gestión pública y DIAN",q:"La ley que establece normas para el control interno en las entidades del Estado es:",o:["Ley 87 de 1993","Ley 909 de 2004","Ley 1581 de 2012"],a:0,e:"La Ley 909 es empleo público y carrera administrativa.",r:"Ley 87/1993"},
+{t:COMP,lk:1,k:"Comportamiento ético",q:"Informo a mi jefe un error que cometí en un acta, aunque nadie más lo haya notado."},
+{t:COMP,lk:1,k:"Comunicación efectiva",q:"Explico los requerimientos a los contribuyentes con palabras sencillas, aunque la atención me tome más tiempo."},
+{t:COMP,lk:1,k:"Adaptabilidad",q:"Aprendo a usar los nuevos aplicativos de la entidad practicando por mi cuenta fuera de las tareas urgentes."},
+{t:COMP,lk:1,k:"Trabajo en equipo",q:"Apoyo las tareas de mis compañeros cuando termino las mías antes del plazo."},
+{t:COMP,lk:1,k:"Orientación al logro",q:"Reviso dos veces un inventario antes de entregarlo, aunque el plazo de entrega esté cerca."},
+{t:"Evasión, elusión y contrabando",q:"La evasión tributaria se caracteriza por:",o:["Incumplir total o parcialmente la obligación tributaria con conductas ilegales, como ocultar ingresos","Usar figuras legales de forma artificiosa para reducir impuestos sin violar la letra de la norma","Acogerse a beneficios tributarios previstos en la ley"],a:0,e:"La segunda opción describe la elusión (abuso tributario). La tercera es planeación tributaria legítima.",r:"Conceptos básicos"},
+{t:"Evasión, elusión y contrabando",q:"Una empresa hace operaciones sin propósito económico real, solo para obtener un beneficio tributario. La DIAN puede recaracterizarlas porque se configura:",o:["Abuso en materia tributaria","Contrabando técnico","Omisión de activos"],a:0,e:"El abuso tributario es la figura legal que combate la elusión.",r:"ET art. 869"},
+{t:"Evasión, elusión y contrabando",q:"Importar mercancía declarando un valor inferior al real para pagar menos tributos aduaneros se conoce como:",o:["Contrabando técnico (fraude aduanero)","Contrabando abierto","Elusión legítima"],a:0,e:"En el contrabando técnico la mercancía sí se presenta a la aduana, pero con información falsa (valor, cantidad, clasificación u origen).",r:"C. Penal art. 321"},
+{t:"Evasión, elusión y contrabando",q:"Introducir mercancías por un lugar no habilitado, sin presentarlas ni declararlas ante la aduana, se conoce como:",o:["Contrabando abierto","Contrabando técnico","Subfacturación"],a:0,e:"Elude por completo el control aduanero.",r:"C. Penal art. 319"},
+{t:"Evasión, elusión y contrabando",q:"Omitir activos o incluir pasivos inexistentes en la declaración de renta, por montos significativos, puede constituir el delito de:",o:["Omisión de activos o inclusión de pasivos inexistentes","Contrabando","Peculado por apropiación"],a:0,e:"Es un delito tributario autónomo. El peculado lo comete un servidor público con bienes del Estado.",r:"C. Penal art. 434A"},
+{t:"PQRSF y servicio al ciudadano",q:"PQRSF significa:",o:["Peticiones, quejas, reclamos, sugerencias y felicitaciones","Procesos, quejas, recursos, sanciones y fallos","Pagos, quejas, retenciones, saldos y facturas"],a:0,e:"Es el sistema de atención de requerimientos ciudadanos.",r:"Sistema PQRSF"},
+{t:"PQRSF y servicio al ciudadano",q:"¿En qué se diferencia una queja de un reclamo?",o:["La queja se refiere a la conducta de un servidor; el reclamo, a un servicio deficiente o una solicitud no atendida","Son lo mismo","La queja solo se presenta por escrito"],a:0,e:"Es la definición usada en la política de servicio al ciudadano.",r:"Sistema PQRSF"},
+{t:"PQRSF y servicio al ciudadano",q:"Recibe por escrito una petición que no es de competencia de la DIAN. Debe:",o:["Informarlo al peticionario y remitirla a la autoridad competente dentro de los 5 días siguientes","Rechazarla y archivarla","Responderla de todas formas"],a:0,e:"Si la petición es verbal, se informa en el mismo momento.",r:"Ley 1755/2015 art. 21"},
+{t:"PQRSF y servicio al ciudadano",q:"Si una petición está incompleta, la autoridad:",o:["Requiere al peticionario dentro de los 10 días siguientes para que la complete en máximo un mes","La rechaza de plano","La archiva de inmediato"],a:0,e:"Si no completa a tiempo, opera el desistimiento tácito.",r:"Ley 1755/2015 art. 17"},
+{t:"CPACA: notificaciones y recursos",q:"Se envió citación para notificar personalmente un acto y el interesado no compareció en 5 días. Se notifica por:",o:["Aviso","Edicto en el Diario Oficial","Llamada telefónica"],a:0,e:"El aviso se envía con copia íntegra del acto.",r:"CPACA art. 68 y 69"},
+{t:"CPACA: notificaciones y recursos",q:"Un acto administrativo queda en firme, entre otros casos:",o:["Cuando contra él no procede ningún recurso, desde el día siguiente a su notificación","Cuando el funcionario lo decide","Solo un año después de expedido"],a:0,e:"También queda en firme al vencer el término sin que se presenten recursos.",r:"CPACA art. 87"},
+{t:"CPACA: notificaciones y recursos",q:"El recurso de apelación busca que:",o:["El inmediato superior administrativo aclare, modifique, adicione o revoque la decisión","El mismo funcionario que decidió revise su decisión","Un juez revise la decisión"],a:0,e:"La segunda opción describe el recurso de reposición.",r:"CPACA art. 74"},
+{t:"CPACA: notificaciones y recursos",q:"La revocación directa de un acto administrativo procede, entre otras causales, cuando:",o:["Es manifiesta su oposición a la Constitución o a la ley","El funcionario cambió de opinión sin razones","El ciudadano no pagó a tiempo"],a:0,e:"Las otras causales: no estar conforme con el interés público o causar agravio injustificado a una persona.",r:"CPACA art. 93"},
+{t:"Buen gobierno y herramientas",q:"El Código de Buen Gobierno de una entidad pública recoge:",o:["Las políticas y compromisos de la dirección para una gestión íntegra, eficiente y transparente","Las tarifas de los impuestos","El régimen de importaciones"],a:0,e:"Complementa el Código de Integridad.",r:"Código de Buen Gobierno"},
+{t:"Buen gobierno y herramientas",q:"En Excel (en español), para sumar los valores de la columna B entre las filas 2 y 20 se escribe:",o:["=SUMA(B2:B20)","=SUMA(B2;B20)","=TOTAL(B2-B20)"],a:0,e:"Con punto y coma solo se suman las celdas B2 y B20; los dos puntos indican el rango.",r:"Herramientas informáticas"},
+{t:"Buen gobierno y herramientas",q:"Para traer a una tabla un dato de otra según un identificador (por ejemplo, el NIT) en Excel se usa:",o:["BUSCARV o BUSCARX","CONCATENAR","REDONDEAR"],a:0,e:"Es muy útil para cruzar información en verificaciones.",r:"Herramientas informáticas"},
+{t:COMP,lk:1,k:"Orientación al usuario y al ciudadano",q:"Atiendo con el mismo trato respetuoso a todos los ciudadanos, sin importar cómo se expresen."},
+{t:COMP,lk:1,k:"Integridad",q:"Rechazo cualquier obsequio de un contribuyente, incluso si es de poco valor."},
+{p:1,t:"Evasión, elusión y contrabando",cs:"Al analizar información de un contribuyente, el técnico ve que redujo su impuesto de renta usando una deducción expresamente prevista en la ley y que tiene todos los soportes.",q:"Al clasificar el caso, el técnico debe entender que se trata de",o:["una conducta permitida, porque usar un beneficio previsto en la ley con soportes no es evasión ni abuso.","evasión, porque el impuesto a cargo del contribuyente disminuyó.","abuso tributario, porque toda reducción del impuesto es artificiosa."],a:0,j:["Correcta. La planeación tributaria lícita es válida. La evasión implica incumplir la ley, y el abuso exige operaciones artificiosas sin propósito económico real.","Incorrecta. Pagar menos impuesto no es evasión cuando la reducción proviene de un beneficio legal bien soportado.","Incorrecta. El abuso requiere operaciones sin propósito económico o comercial real, no simplemente usar un beneficio legal."],r:"ET art. 869"},
+{p:1,t:"PQRSF y servicio al ciudadano",cs:"Un periodista pide a la dependencia el número total de aprehensiones de mercancía que se hicieron el último año en la ciudad.",q:"Frente a la solicitud, al técnico le corresponde apoyar",o:["la entrega de la información estadística agregada, que es pública, sin datos que identifiquen a personas o empresas.","la negativa a la solicitud, porque toda la información de fiscalización es reservada.","la entrega del listado de empresas a las que se aprehendió mercancía, por ser información de interés público."],a:0,j:["Correcta. Las cifras agregadas no revelan información reservada y pueden entregarse, según el principio de máxima publicidad.","Incorrecta. La reserva es la excepción y protege datos concretos. No justifica negar estadísticas generales.","Incorrecta. Identificar a las empresas puede revelar información reservada de actuaciones en curso."],r:"Ley 1712/2014"},
+{p:1,t:"CPACA: notificaciones y recursos",cs:"En un trámite regido por el CPACA debe notificarse personalmente un acto a un ciudadano. La citación se envió hace seis días hábiles y el ciudadano no ha comparecido.",q:"Para continuar con la notificación, al técnico le corresponde apoyar",o:["la notificación por aviso, remitiendo copia íntegra del acto a la dirección del interesado.","el archivo del trámite, porque el ciudadano no mostró interés en notificarse.","el envío de una nueva citación con otros cinco días para comparecer."],a:0,j:["Correcta. Si no es posible la notificación personal en los cinco días siguientes al envío de la citación, se notifica por aviso con copia íntegra del acto.","Incorrecta. Que el ciudadano no comparezca no termina el trámite. La ley prevé otra forma de notificarlo.","Incorrecta. La ley no prevé repetir la citación. Hacerlo dilata el trámite sin fundamento."],r:"CPACA art. 68 y 69"},
+{p:1,t:"PQRSF y servicio al ciudadano",cs:"El representante legal de una empresa investigada pide examinar y obtener copias de los documentos de su propio expediente de fiscalización.",q:"Frente a la solicitud, al técnico le corresponde",o:["tramitarla para que el representante pueda examinar el expediente y obtener las copias, porque la reserva no se le opone al propio investigado.","negarla, porque el expediente tributario tiene reserva frente a todos.","indicarle que solo podrá conocer el expediente cuando se le notifique la liquidación oficial."],a:0,j:["Correcta. Los expedientes de fiscalización pueden ser examinados por el contribuyente o su apoderado. Así se garantizan el derecho de defensa y el debido proceso.","Incorrecta. La reserva protege la información frente a terceros, no frente al propio contribuyente.","Incorrecta. El contribuyente puede conocer su expediente durante la actuación, no solo al final."],r:"ET art. 583 y 729 · Const. art. 29"},
+{lk:1,t:COMP,k:"Adaptabilidad",q:"Cambio mi forma de trabajar cuando se modifica un procedimiento, aunque el anterior me resultara más cómodo."},
+{lk:1,t:COMP,k:"Comunicación efectiva",q:"Pido que me repitan una instrucción cuando no la entiendo, antes de empezar la tarea."},
+{lk:1,t:COMP,k:"Comportamiento ético",q:"Cumplo los procedimientos de custodia de mercancías, aunque retrasen la diligencia."},
+{lk:1,t:COMP,k:"Trabajo en equipo",q:"Comparto con el equipo la información que necesita para avanzar, aunque yo la haya conseguido con esfuerzo."},
+{lk:1,t:COMP,k:"Integridad",q:"Doy la misma prioridad a los casos, sin importar quién es el contribuyente investigado."},
+{lk:1,t:COMP,k:"Orientación al usuario y al ciudadano",q:"Dedico unos minutos extra a orientar a un ciudadano que necesita resolver un trámite urgente."},
+{p:1,t:"Razonamiento matemático",cs:"Un establecimiento vendió en el bimestre $50.000.000 en bienes gravados con la tarifa general del IVA. Los precios de venta no incluían el IVA.",q:"Para revisar la declaración, el IVA generado que el técnico debe calcular es de",o:["$9.500.000.","$7.983.193.","$8.000.000."],a:0,j:["Correcta. Si la base no incluye el IVA, el impuesto es base × 19%: 50.000.000 × 0,19 = 9.500.000.","Incorrecta. Ese valor resulta de extraer el IVA como si los $50.000.000 ya lo incluyeran (50.000.000 ÷ 1,19 × 0,19). El caso dice que los precios no lo incluían.","Incorrecta. Corresponde a una tarifa del 16%, que no es la tarifa general vigente (19%)."],r:"ET art. 468 · cálculo de porcentajes"},
+{p:1,t:"Razonamiento matemático",cs:"En una verificación, el técnico revisa una factura por un total de $1.190.000 que incluye el IVA del 19%.",q:"La base gravable de esa factura es",o:["$1.000.000.","$963.900.","$1.190.000."],a:0,j:["Correcta. Si el total incluye el IVA, la base se obtiene dividiendo: 1.190.000 ÷ 1,19 = 1.000.000.","Incorrecta. Restar el 19% del total (1.190.000 × 0,81) no devuelve la base, porque el 19% se calculó sobre la base y no sobre el total.","Incorrecta. Ese es el valor total de la factura, que ya incluye el impuesto."],r:"Cálculo de porcentajes"},
+{p:1,t:"Razonamiento matemático",cs:"Un contribuyente presentó su declaración 2 meses y 10 días después del vencimiento, sin que la DIAN lo hubiera emplazado. El impuesto a cargo es $4.000.000. No aplique reducciones de sanción.",q:"La sanción por extemporaneidad que debe calcular el técnico es de",o:["$600.000.","$400.000.","$1.200.000."],a:0,j:["Correcta. Es el 5% por cada mes o fracción de mes. 2 meses y 10 días cuentan como 3 meses: 4.000.000 × 5% × 3 = 600.000.","Incorrecta. Cuenta solo 2 meses e ignora que la fracción de mes cuenta como un mes completo.","Incorrecta. Aplica el 10% por mes, que corresponde a la extemporaneidad después del emplazamiento (art. 642)."],r:"ET art. 641"},
+{p:1,t:"Razonamiento matemático",cs:"Se importa una mercancía con valor en aduana de $20.000.000. El arancel es del 10% y el IVA en la importación es del 19%.",q:"El total de tributos aduaneros a liquidar es de",o:["$6.180.000.","$5.800.000.","$4.180.000."],a:0,j:["Correcta. Arancel: 20.000.000 × 10% = 2.000.000. El IVA se calcula sobre el valor en aduana más el arancel: 22.000.000 × 19% = 4.180.000. Total: 6.180.000.","Incorrecta. Calcula el IVA solo sobre el valor en aduana (3.800.000) y olvida que la base del IVA en la importación incluye el arancel.","Incorrecta. Ese es solo el IVA. Falta sumar el arancel."],r:"ET art. 459 · Dcto. 1165/2019"},
+{p:1,t:"Razonamiento matemático",cs:"Una obligación de $10.000.000 lleva 73 días en mora. Para el ejercicio, use una tasa de interés moratorio anual del 24,36% y un año de 365 días.",q:"El interés moratorio aproximado es de",o:["$487.200.","$2.436.000.","$203.000."],a:0,j:["Correcta. El interés moratorio tributario se liquida por días: 10.000.000 × 24,36% × 73 ÷ 365 = 487.200.","Incorrecta. Es el interés de un año completo, no de 73 días.","Incorrecta. Es el interés de un mes (tasa anual ÷ 12). La mora fue de 73 días, no de un mes."],r:"ET art. 634 y 635 · tasa de ejemplo"},
+{p:1,t:"Razonamiento matemático",cs:"Cuatro técnicos inventarían 600 cajas de mercancía aprehendida en 3 horas. Para otra bodega se asignan seis técnicos y hay 1.200 cajas.",q:"Si todos trabajan al mismo ritmo, el inventario de la nueva bodega tardará",o:["4 horas.","6 horas.","3 horas."],a:0,j:["Correcta. Cada técnico inventaría 600 ÷ (4 × 3) = 50 cajas por hora. Seis técnicos hacen 300 cajas por hora: 1.200 ÷ 300 = 4 horas.","Incorrecta. Tiene en cuenta que hay el doble de cajas, pero no que hay más técnicos.","Incorrecta. Supone que el aumento de técnicos compensa por completo el doble de cajas, y no es así: el personal aumenta 1,5 veces y las cajas, 2 veces."],r:"Regla de tres compuesta"},
+{t:"Razonamiento matemático",q:"El recaudo de una seccional pasó de $80 millones a $92 millones. La variación porcentual es:",o:["15%","12%","13,04%"],a:0,e:"Variación = (92 − 80) ÷ 80 = 0,15. Siempre se divide entre el valor inicial. 12 es la diferencia en millones, no el porcentaje, y 13,04% resulta de dividir entre el valor final.",r:"Variación porcentual"},
+{t:"Razonamiento matemático",q:"A un pago por servicios de $3.000.000 se le aplica una retención en la fuente del 4%. El valor retenido es:",o:["$120.000","$1.200.000","$12.000"],a:0,e:"3.000.000 × 4 ÷ 100 = 120.000. Las otras opciones corren mal la coma decimal.",r:"Cálculo de porcentajes"},
+{t:"Razonamiento matemático",q:"En cinco bodegas hay 120, 135, 150, 95 y 100 unidades. El promedio de unidades por bodega es:",o:["120","125","135"],a:0,e:"Suma: 600. Promedio: 600 ÷ 5 = 120.",r:"Promedio aritmético"},
+{t:"Estructura organizacional de la DIAN",q:"La estructura vigente de la DIAN está definida en:",o:["El Decreto 1742 de 2020","El Decreto 1165 de 2019","La Ley 1755 de 2015"],a:0,e:"El Decreto 1165 es el régimen de aduanas y la Ley 1755 regula el derecho de petición.",r:"Dcto. 1742/2020"},
+{t:"Estructura organizacional de la DIAN",q:"En el nivel territorial, la DIAN cumple sus funciones principalmente mediante:",o:["Direcciones seccionales de impuestos, de aduanas, y de impuestos y aduanas","Las secretarías de hacienda de los departamentos","Superintendencias regionales"],a:0,e:"Las seccionales dependen del nivel central. Las secretarías de hacienda son autoridades territoriales distintas.",r:"Dcto. 1742/2020"},
+{t:"Estructura organizacional de la DIAN",q:"La dependencia de la DIAN que ejerce funciones de policía fiscal y aduanera contra el contrabando es:",o:["La Policía Fiscal y Aduanera (POLFA)","La Dirección de Gestión Jurídica","La Defensoría del Contribuyente"],a:0,e:"La POLFA apoya el control aduanero y la lucha contra el contrabando y la evasión.",r:"Dcto. 1742/2020"},
+{t:"Misionalidad de la DIAN",q:"El objeto de la DIAN es:",o:["Coadyuvar a garantizar la seguridad fiscal del Estado y la protección del orden público económico, administrando y controlando el cumplimiento de las obligaciones tributarias, aduaneras y cambiarias","Crear los impuestos nacionales y fijar sus tarifas","Dirigir la política monetaria y fijar la tasa de cambio"],a:0,e:"Crear impuestos le corresponde al Congreso, y la política monetaria y cambiaria a la Junta Directiva del Banco de la República.",r:"Dcto. 1742/2020"},
+{t:"Misionalidad de la DIAN",q:"¿Cuál de estos impuestos NO administra la DIAN?",o:["El impuesto predial","El gravamen a los movimientos financieros","El IVA"],a:0,e:"El predial es un impuesto municipal. La DIAN administra los impuestos nacionales.",r:"Misionalidad DIAN"},
+{t:"Misionalidad de la DIAN",q:"¿Cuál de estas actividades NO hace parte de la administración de los impuestos nacionales a cargo de la DIAN?",o:["Fijar por resolución las tarifas de los impuestos","Fiscalizar y liquidar los impuestos","Cobrar las deudas y tramitar las devoluciones"],a:0,e:"La DIAN recauda, fiscaliza, liquida, discute, cobra, devuelve y sanciona, pero no fija tarifas. Eso es reserva de ley (Const. art. 338).",r:"ET art. 691 · Const. art. 338"},
+{p:1,t:"Misionalidad de la DIAN",cs:"En un punto de atención de la DIAN, un comerciante pregunta cómo pagar el impuesto de industria y comercio (ICA) de su negocio, porque cree que lo administra la DIAN.",q:"Frente a la consulta, al funcionario le corresponde",o:["explicarle que el ICA es un impuesto municipal y orientarlo hacia la secretaría de hacienda de su municipio.","recibir la información del pago y remitirla después al municipio.","indicarle que lo pague junto con su declaración de IVA."],a:0,j:["Correcta. La DIAN administra impuestos nacionales. Orientar bien al ciudadano sobre la entidad competente es parte de la buena atención.","Incorrecta. La DIAN no es competente para recibir ni tramitar pagos de impuestos municipales.","Incorrecta. El ICA no se declara ni se paga en la declaración de IVA, que es un impuesto nacional."],r:"Misionalidad DIAN"},
+{lk:1,t:COMP,k:"Compromiso",q:"Me quedo hasta terminar una tarea urgente del equipo cuando el plazo lo exige."},
+{lk:1,t:COMP,k:"Diligencia",q:"Reviso los términos de cada expediente antes de que se venzan, aunque nadie me lo recuerde."},
+{lk:1,t:COMP,k:"Honestidad",q:"Reconozco cuando no conozco un procedimiento, en lugar de responder sin estar seguro."},
+{lk:1,t:COMP,k:"Respeto",q:"Escucho hasta el final a un compañero que no comparte mi opinión antes de responderle."},
+{t:"Razonamiento matemático",q:"Después de un descuento del 20%, un pago quedó en $400.000. El valor antes del descuento era:",o:["$500.000","$480.000","$420.000"],a:0,e:"Si quedó el 80%, el valor original es 400.000 ÷ 0,8 = 500.000. Sumar el 20% sobre 400.000 da 480.000, que es un error común.",r:"Porcentajes"},
+{t:"Razonamiento matemático",q:"De 240 expedientes, 3/8 están en etapa de fiscalización. ¿Cuántos son?",o:["90","80","120"],a:0,e:"240 ÷ 8 × 3 = 90.",r:"Fracciones"},
+{t:"Razonamiento matemático",q:"Un aspirante obtiene 80 en funcionales (peso 65%), 70 en comportamentales (15%), 60 en integridad (10%) y 50 en antecedentes (10%). Su puntaje ponderado es:",o:["73,50","65,00","76,00"],a:0,e:"80×0,65 + 70×0,15 + 60×0,10 + 50×0,10 = 52 + 10,5 + 6 + 5 = 73,5. Un promedio simple daría 65.",r:"Promedio ponderado"},
+{t:"Razonamiento matemático",q:"Un aplicativo procesa 45 declaraciones cada 15 minutos. Al mismo ritmo, ¿cuántas procesa en 2 horas?",o:["360","90","270"],a:0,e:"2 horas son 8 bloques de 15 minutos: 45 × 8 = 360.",r:"Regla de tres"},
+{t:"Razonamiento matemático",q:"Si la UVT valiera $50.000, 2.000 UVT equivaldrían a:",o:["$100.000.000","$10.000.000","$1.000.000.000"],a:0,e:"2.000 × 50.000 = 100.000.000. El valor de la UVT se fija cada año; aquí se usa uno de ejemplo.",r:"Conversión de UVT"},
+{t:"Razonamiento matemático",q:"¿Qué número sigue en la serie 3, 7, 15, 31, …?",o:["63","47","62"],a:0,e:"Cada término es el anterior × 2 + 1: 31 × 2 + 1 = 63.",r:"Series numéricas"},
+{t:"Razonamiento matemático",q:"Una tasa pasó del 20% al 25%. Es correcto afirmar que:",o:["Subió 5 puntos porcentuales, lo que equivale a un aumento del 25%","Subió 5%","Subió 25 puntos porcentuales"],a:0,e:"La diferencia es de 5 puntos porcentuales. En términos relativos, 5 ÷ 20 = 25% de aumento.",r:"Puntos porcentuales"},
+{t:"Razonamiento matemático",q:"Una diligencia empezó a las 8:45 a. m. y duró 3 horas y 40 minutos. Terminó a las:",o:["12:25 p. m.","11:85 a. m.","12:05 p. m."],a:0,e:"8:45 + 3 h = 11:45; 11:45 + 40 min = 12:25.",r:"Operaciones con tiempo"},
+{t:"Razonamiento matemático",q:"En una muestra, 3 de cada 20 declaraciones revisadas tienen inconsistencias. En 500 declaraciones, ¿cuántas se esperan con inconsistencias?",o:["75","60","150"],a:0,e:"3 ÷ 20 = 15%; 500 × 15% = 75.",r:"Proporciones"},
+{t:"Estructura organizacional de la DIAN",q:"La DIAN está a cargo de un Director General, quien es:",o:["De libre nombramiento y remoción del Presidente de la República","Elegido por el Congreso","Elegido por concurso de la CNSC"],a:0,e:"La dirección de la entidad es un empleo de libre nombramiento y remoción.",r:"Dcto. 1742/2020"},
+{t:"Estructura organizacional de la DIAN",q:"Las acciones de control sobre el cumplimiento de las obligaciones tributarias, aduaneras y cambiarias se lideran desde:",o:["La Dirección de Gestión de Fiscalización","La Dirección de Gestión Corporativa","La Oficina de Comunicaciones"],a:0,e:"Tu cargo pertenece al subproceso de fiscalización y liquidación.",r:"Dcto. 1742/2020"},
+{t:"Misionalidad de la DIAN",q:"Las obligaciones que administra y controla la DIAN son:",o:["Tributarias, aduaneras y cambiarias","Tributarias, laborales y penales","Aduaneras, ambientales y de salud"],a:0,e:"Son los tres frentes de la misión de la DIAN.",r:"Dcto. 1742/2020"},
+{t:"Misionalidad de la DIAN",q:"Además del control, en comercio exterior la DIAN tiene la función de:",o:["Facilitar las operaciones legítimas de comercio exterior","Fijar los aranceles mediante resolución","Otorgar créditos a los exportadores"],a:0,e:"Los aranceles los fija el Gobierno por decreto. La DIAN facilita y controla.",r:"Dcto. 1742/2020"},
+{t:"Misionalidad de la DIAN",q:"Las campañas de cultura de la contribución de la DIAN buscan principalmente:",o:["Promover el cumplimiento voluntario de las obligaciones","Aumentar las tarifas de los impuestos","Reemplazar las acciones de fiscalización"],a:0,e:"El cumplimiento voluntario reduce la evasión y el costo del control.",r:"Misionalidad DIAN"}
+].map((x,i)=>({...x,id:i}));
+
+const TOPICS=[...new Set(Q.map(x=>x.t))];
+const LK=["Totalmente en desacuerdo","En desacuerdo","De acuerdo","Totalmente de acuerdo"];
+const QG=Q.filter(q=>!q.lk);
+const EJES=CONFIG.ejes;
+const OTROS=TOPICS.filter(t=>t!==COMP&&!EJES.includes(t));
+const inEje=q=>!q.lk&&EJES.includes(q.t);
+
+// ---------- almacenamiento local (puede fallar: todo va en try/catch) ----------
+const NS="simulacro"+CONFIG.clave;
+const KEY=NS+":v1", HKEY=NS+":hist", PKEY=NS+":pin", OKEY=NS+":open";
+function get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function put(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function storageOK(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true}catch(e){return false}}
+function isOpen(){try{return sessionStorage.getItem(OKEY)==="1"}catch(e){return false}}
+function setOpen(v){try{v?sessionStorage.setItem(OKEY,"1"):sessionStorage.removeItem(OKEY)}catch(e){}}
+let stats=get(KEY)||{}, hist=get(HKEY)||[];
+let S=null, timerId=null, simSize=30, tab="inicio", lockState=null;
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function record(q,ok){if(q.lk)return;const s=stats[q.id]||{n:0,ok:0,last:null};s.n++;if(ok)s.ok++;s.last=ok;stats[q.id]=s;put(KEY,stats)}
+function wrongIds(){return QG.filter(q=>stats[q.id]&&stats[q.id].last===false).map(q=>q.id)}
+// Escala 0-100 con dos decimales truncados, como califica la CNSC (GOA 4.7)
+function score(ok,n){return n?Math.floor(ok*10000/n)/100:0}
+function fmt(x){return x.toFixed(2).replace(".",",")}
+function topicStats(t){const qs=QG.filter(q=>q.t===t),seen=qs.filter(q=>stats[q.id]);
+  const n=seen.reduce((a,q)=>a+stats[q.id].n,0),ok=seen.reduce((a,q)=>a+stats[q.id].ok,0);
+  return {total:qs.length,seen:seen.length,acc:n?ok/n:null}}
+function daysLeft(){const t=new Date();t.setHours(0,0,0,0);return Math.round((EXAM-t)/864e5)}
+const $=s=>document.querySelector(s);
+const app=$("#app");
+
+const I={
+  home:'<svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  play:'<svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
+  chart:'<svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  book:'<svg class="i" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg>',
+  lock:'<svg class="i" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  x:'<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  arrow:'<svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  chev:'<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m9 6 6 6-6 6"/></svg>',
+  del:'<svg class="i" viewBox="0 0 24 24"><path d="M9 5h11v14H9l-6-7z"/><path d="m12 9 5 6M17 9l-5 6"/></svg>'
+};
+
+// ---------- bloqueo con PIN (privacidad en este dispositivo) ----------
+async function hashPin(p){
+  try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("s"+CONFIG.clave+"|"+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+  catch(e){let h=7;for(const c of "s"+CONFIG.clave+"|"+p)h=(h*31+c.charCodeAt(0))|0;return "f"+h}
+}
+function lockScreen(){
+  clearInterval(timerId);S=null;setOpen(false);
+  const has=!!get(PKEY);
+  lockState={stage:has?"enter":"create",first:"",buf:"",err:"",forgot:false};
+  drawLock();
+}
+function drawLock(){
+  const L=lockState;
+  const title={enter:"Ingresa tu PIN",create:"Crea un PIN de 4 dígitos",confirm:"Confirma tu PIN"}[L.stage];
+  app.innerHTML=`<main class="lock gut"><div class="lockbox">
+    <span class="mark">${esc(CONFIG.marca)}</span>
+    <div class="stack" style="gap:6px"><h1>${title}</h1><p class="muted">${esc(CONFIG.titulo)} · ${esc(CONFIG.cargo)}</p></div>
+    <div class="dots${L.err?" err":""}" aria-label="${L.buf.length} de 4 dígitos">${[0,1,2,3].map(i=>`<i class="${i<L.buf.length?"on":""}"></i>`).join("")}</div>
+    <p class="err-msg" role="alert">${esc(L.err)}</p>
+    <div class="pad">${["1","2","3","4","5","6","7","8","9","","0","del"].map(k=>k===""?"<span></span>":k==="del"?`<button class="ghost" data-k="del" aria-label="Borrar">${I.del}</button>`:`<button data-k="${k}">${k}</button>`).join("")}</div>
+    ${L.stage==="enter"?(L.forgot?`<div class="confirm" style="text-align:left"><p>Restablecer borra el PIN y tu progreso guardado en este dispositivo.</p><div class="acts"><button class="btn" id="nf">Cancelar</button><button class="btn danger" id="yf">Restablecer</button></div></div>`:`<button class="link" id="forgot">¿Olvidaste el PIN?</button>`)
+      :`<p class="note">El PIN solo se guarda cifrado en este dispositivo. La página ya es privada para tu cuenta de Claude; el PIN agrega un bloqueo local.</p>`}
+  </div></main>`;
+  app.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>pinKey(b.dataset.k));
+  const f=$("#forgot");if(f)f.onclick=()=>{L.forgot=true;drawLock()};
+  const nf=$("#nf");if(nf)nf.onclick=()=>{L.forgot=false;drawLock()};
+  const yf=$("#yf");if(yf)yf.onclick=()=>{put(PKEY,null);put(KEY,null);put(HKEY,null);stats={};hist=[];lockScreen()};
+}
+async function pinKey(k){
+  const L=lockState;if(!L)return;
+  if(k==="del"){L.buf=L.buf.slice(0,-1);L.err="";drawLock();return}
+  if(L.buf.length>=4)return;
+  L.buf+=k;L.err="";drawLock();
+  if(L.buf.length<4)return;
+  const pin=L.buf;
+  if(L.stage==="create"){L.first=pin;L.buf="";L.stage="confirm";setTimeout(drawLock,120);return}
+  if(L.stage==="confirm"){
+    if(pin!==L.first){L.stage="create";L.first="";L.buf="";L.err="Los PIN no coinciden. Créalo de nuevo.";drawLock();return}
+    put(PKEY,await hashPin(pin));unlock();return}
+  if(await hashPin(pin)===get(PKEY)){unlock()}else{L.buf="";L.err="PIN incorrecto. Intenta de nuevo.";drawLock()}
+}
+function unlock(){lockState=null;setOpen(true);go("inicio")}
+document.addEventListener("keydown",e=>{if(!lockState)return;if(/^[0-9]$/.test(e.key))pinKey(e.key);else if(e.key==="Backspace")pinKey("del")});
+
+// ---------- estructura de la app ----------
+const TABS=[["inicio","Inicio",I.home],["practicar","Practicar",I.play],["progreso","Progreso",I.chart],["guia","Guía",I.book]];
+function go(t){
+  tab=t;clearInterval(timerId);S=null;
+  const d=daysLeft(), dl=d>1?`${d} días`:d===1?"Mañana":d===0?"Hoy":"Finalizado";
+  const V={inicio:vInicio,practicar:vPracticar,progreso:vProgreso,guia:vGuia}[t]();
+  app.innerHTML=`
+  <header class="top gut"><div class="inner">
+    <div class="brand"><span class="mark">${esc(CONFIG.marca)}</span><span>${esc(CONFIG.titulo)}</span></div>
+    <div class="top-r"><span class="chip">${dl}</span>${get(PKEY)?`<button class="icon-btn" id="lockbtn" aria-label="Bloquear">${I.lock}</button>`:""}</div>
+  </div></header>
+  <main class="view gut"><div class="inner">${V.html}</div></main>
+  <nav class="tabs gut" aria-label="Secciones"><div class="inner">${TABS.map(([id,l,ic])=>`<button class="tab" data-tab="${id}" ${id===t?'aria-current="page"':""}>${ic}<span>${l}</span></button>`).join("")}</div></nav>`;
+  app.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>go(b.dataset.tab));
+  const lb=$("#lockbtn");if(lb)lb.onclick=lockScreen;
+  app.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>mode(b.dataset.mode));
+  app.querySelectorAll("[data-topic]").forEach(b=>b.onclick=()=>{const t=b.dataset.topic;start(shuffle(Q.filter(q=>q.t===t)),"prac",t)});
+  if(V.bind)V.bind();
+  window.scrollTo(0,0);
+}
+function mode(m){
+  const sim=(pool,label)=>start(simSize==="Todas"?pool:pool.slice(0,simSize),"sim",label);
+  if(m==="pjs")sim(shuffle(Q.filter(q=>q.p)),"Casos tipo examen");
+  if(m==="cargo")sim(shuffle(Q.filter(inEje)),"Simulacro de mi cargo");
+  if(m==="general")sim(shuffle(QG),"Simulacro general");
+  if(m==="rapida")start(shuffle(QG).slice(0,10),"prac","Práctica rápida");
+  if(m==="lk")start(shuffle(Q.filter(q=>q.lk)),"prac",COMP);
+  if(m==="errores")start(shuffle(Q.filter(q=>wrongIds().includes(q.id))),"prac","Repaso de errores");
+}
+function meter(acc){return acc==null?`<span class="meter"><i style="width:0"></i></span>`:`<span class="meter"><i class="${acc<CONFIG.minimo/100?"low":""}" style="width:${Math.round(acc*100)}%"></i></span>`}
+function topicRows(names){
+  return names.map(t=>{
+    if(t===COMP)return `<button class="row" data-topic="${esc(t)}"><span class="t">${esc(t)}</span><span class="d">${Q.filter(q=>q.lk).length} afirmaciones · sin calificación</span><span class="r">${I.chev}</span></button>`;
+    const s=topicStats(t);
+    return `<button class="row" data-topic="${esc(t)}"><span class="t">${esc(t)}</span><span class="d">${s.seen}/${s.total} vistas${s.acc!=null?` · ${Math.round(s.acc*100)}% de aciertos`:""}</span><span class="r">${I.chev}</span>${meter(s.acc)}</button>`}).join("");
+}
+function totals(){const seen=QG.filter(q=>stats[q.id]);const n=seen.reduce((a,q)=>a+stats[q.id].n,0),ok=seen.reduce((a,q)=>a+stats[q.id].ok,0);return {seen:seen.length,n,ok,acc:n?ok/n:null}}
+
+function vInicio(){
+  const d=daysLeft(), T=totals(), wrong=wrongIds().length, nC=Q.filter(inEje).length;
+  const weak=EJES.map(t=>[t,topicStats(t)]).filter(([,s])=>s.acc!=null).sort((a,b)=>a[1].acc-b[1].acc).slice(0,3).map(([t])=>t);
+  const h=new Date().getHours(), saludo=h<12?"Buenos días":h<19?"Buenas tardes":"Buenas noches";
+  const last=hist[0];
+  return {html:`
+    <section class="hero">
+      <p class="muted">${saludo}</p>
+      <div class="big">${Math.max(d,0)}<small>${d===1?"día":"días"} para la prueba</small></div>
+      <p class="muted">${esc(CONFIG.examenTexto)}</p>
+    </section>
+    <button class="cta" data-mode="cargo"><span><b>Simulacro de mi cargo</b><span class="s">${EJES.length} ejes oficiales · ${nC} preguntas · cronometrado</span></span>${I.arrow}</button>
+    <div class="kpis">
+      <div class="kpi"><b>${T.acc==null?"—":Math.round(T.acc*100)+"%"}</b><span>Aciertos</span></div>
+      <div class="kpi"><b>${T.seen}<span class="muted" style="font-size:.8rem;font-weight:400">/${QG.length}</span></b><span>Vistas</span></div>
+      <div class="kpi"><b>${wrong}</b><span>Por repasar</span></div>
+    </div>
+    <section class="stack">
+      <div class="label"><h2>Para reforzar</h2></div>
+      ${weak.length?`<div class="list">${topicRows(weak)}</div>`:`<p class="empty">Cuando practiques, aquí aparecerán los ejes con menos aciertos.</p>`}
+    </section>
+    <section class="stack">
+      <h2>Accesos rápidos</h2>
+      <div class="list">
+        <button class="row" data-mode="pjs"><span class="t">Casos tipo examen</span><span class="d">Caso, enunciado y 3 opciones</span><span class="r"><span class="badge">Formato real</span>${I.chev}</span></button>
+        <button class="row" data-mode="errores" ${wrong?"":"disabled"}><span class="t">Repasar mis errores</span><span class="d">${wrong?wrong+" preguntas pendientes":"Sin errores pendientes"}</span><span class="r">${I.chev}</span></button>
+      </div>
+    </section>
+    ${last?`<section class="stack"><h2>Último resultado</h2><div class="list"><div class="row"><span class="t">${esc(last.l)}</span><span class="d">${new Date(last.d).toLocaleDateString("es-CO",{day:"numeric",month:"short"})} · ${last.ok}/${last.n} correctas</span><span class="r"><span class="mono" style="color:var(--ink);font-size:1rem">${fmt(last.s)}</span></span></div></div></section>`:""}
+  `};
+}
+
+function vPracticar(){
+  const wrong=wrongIds().length;
+  const modes=[
+    ["pjs","Casos tipo examen",`${Q.filter(q=>q.p).length} casos de tu cargo · formato de la prueba`,'<span class="badge">Formato real</span>'],
+    ["cargo","Simulacro de mi cargo",`${Q.filter(inEje).length} preguntas de tus ${EJES.length} ejes · cronometrado`,""],
+    ["general","Simulacro general",`${QG.length} preguntas de todos los temas · cronometrado`,""],
+    ["rapida","Práctica rápida","10 preguntas al azar con explicación inmediata",""],
+    ["lk","Comportamental e integridad",`${Q.filter(q=>q.lk).length} afirmaciones en escala de 4 niveles`,""],
+    ["errores","Repasar mis errores",wrong?`${wrong} preguntas pendientes`:"Sin errores pendientes",""]];
+  return {html:`
+    <section class="stack"><h1>Practicar</h1><p class="muted">Los simulacros dan 1,5 minutos por pregunta y muestran las respuestas al final.</p></section>
+    <section class="stack">
+      <div class="label"><h2>Preguntas por simulacro</h2></div>
+      <div class="seg" role="group" aria-label="Preguntas por simulacro">${[15,30,"Todas"].map(n=>`<button id="sz-${n}" data-sz="${n}" aria-pressed="${simSize===n}">${n}</button>`).join("")}</div>
+      <div class="list">${modes.map(([m,t,d,b])=>`<button class="row" data-mode="${m}" ${m==="errores"&&!wrong?"disabled":""}><span class="t">${t}</span><span class="d">${d}</span><span class="r">${b}${I.chev}</span></button>`).join("")}</div>
+    </section>
+    <section class="stack"><div class="label"><h2>Ejes oficiales de tu empleo</h2><span class="mono note">${esc(CONFIG.opec)}</span></div><div class="list">${topicRows(EJES)}</div></section>
+    <section class="stack"><h2>Competencias comportamentales</h2><div class="list">${topicRows([COMP])}</div></section>
+    ${OTROS.length?`<section class="stack"><h2>Otros temas de apoyo</h2><div class="list">${topicRows(OTROS)}</div></section>`:""}
+  `,bind(){app.querySelectorAll("[data-sz]").forEach(b=>b.onclick=()=>{const v=b.dataset.sz;simSize=v==="Todas"?v:+v;go("practicar")})}};
+}
+
+function vProgreso(){
+  const T=totals();
+  return {html:`
+    <section class="stack"><h1>Progreso</h1><p class="muted">Se guarda en este dispositivo.</p></section>
+    <div class="kpis">
+      <div class="kpi"><b>${T.acc==null?"—":Math.round(T.acc*100)+"%"}</b><span>Aciertos</span></div>
+      <div class="kpi"><b>${T.n}</b><span>Respuestas</span></div>
+      <div class="kpi"><b>${hist.length}</b><span>Simulacros</span></div>
+    </div>
+    <section class="stack"><h2>Por eje oficial</h2><div class="list">${topicRows(EJES)}</div><p class="note">La barra se pone roja cuando los aciertos están por debajo del ${CONFIG.minimo}%.</p></section>
+    <section class="stack"><h2>Historial</h2>
+      ${hist.length?`<div class="list">${hist.map(h=>`<div class="row"><span class="t">${esc(h.l)}</span><span class="d">${new Date(h.d).toLocaleString("es-CO",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})} · ${h.ok}/${h.n}</span><span class="r"><span class="pill ${h.s>=CONFIG.minimo?"ok":"bad"}">${fmt(h.s)}</span></span></div>`).join("")}</div>`:`<p class="empty">Aquí verás el puntaje de cada simulacro que termines.</p>`}
+    </section>
+    <section class="stack"><button class="link" id="reset" style="align-self:flex-start">Borrar mi progreso</button><div id="confirm"></div></section>
+  `,bind(){$("#reset").onclick=()=>{$("#confirm").innerHTML=`<div class="confirm"><p>¿Borrar aciertos, errores e historial de este dispositivo? Tu PIN se conserva.</p><div class="acts"><button class="btn" id="no">Cancelar</button><button class="btn danger" id="yes">Borrar</button></div></div>`;
+    $("#no").onclick=()=>$("#confirm").innerHTML="";$("#yes").onclick=()=>{stats={};hist=[];put(KEY,null);put(HKEY,null);go("progreso")}}}};
+}
+
+function vGuia(){
+  return {html:`
+    <section class="stack"><h1>Guía de la prueba</h1><p class="muted">Lo esencial de la ${esc(CONFIG.guiaFuente)}.</p></section>
+    <section class="guide">${CONFIG.guia.map((g,i)=>`<details ${i?"":"open"}><summary>${esc(g.titulo)}</summary><ul>${g.items.map(x=>`<li>${x}</li>`).join("")}</ul></details>`).join("")}</section>
+    <p class="note">Las preguntas de esta página son originales, redactadas a partir de las normas y de los ejes de tu empleo. Las pruebas de la CNSC son reservadas.</p>
+    <p class="note">Herramienta de estudio independiente: no está afiliada a ${esc(CONFIG.entidad)}, la CNSC ni el operador del concurso. Verifica siempre la información oficial en SIMO y en cnsc.gov.co.</p>
+  `};
+}
+
+// ---------- examen ----------
+function start(list,m,label){
+  if(!list.length)return;
+  const timed=list.filter(q=>!q.lk).length;
+  S={list:list.map(q=>({q,order:q.lk?[0,1,2,3]:shuffle([0,1,2]),pick:null})),i:0,mode:m,label,end:m==="sim"?Date.now()+timed*90e3:null,confirm:false};
+  clearInterval(timerId);if(m==="sim")timerId=setInterval(tick,1000);
+  render();
+}
+function tick(){const el=$("#timer");if(!S||!S.end)return;const ms=S.end-Date.now();if(ms<=0){finish();return}
+  if(el){const m=Math.floor(ms/6e4),s=Math.floor(ms/1e3)%60;el.textContent=`${m}:${String(s).padStart(2,"0")}`;el.classList.toggle("low",ms<12e4)}}
+function feedback(it){
+  const q=it.q,L="ABCD";
+  if(q.lk)return `<div class="fb info"><strong>Sin respuesta correcta</strong><span>Competencia: ${esc(q.k)}.</span><span class="muted">Elige lo que de verdad haces normalmente. Si respondes casi todo con "Totalmente de acuerdo", las escalas de control pueden marcarlo como respuesta exageradamente favorable.</span></div>`;
+  const ok=it.pick===q.a,key=`<span>Clave <b>${L[it.order.indexOf(q.a)]}</b> · ${esc(q.o[q.a])}</span>`;
+  const why=q.j?`<span class="muted">${esc(q.j[q.a])}</span>${ok?"":`<span class="muted"><b style="color:var(--ink)">Tu opción ${L[it.order.indexOf(it.pick)]}:</b> ${esc(q.j[it.pick])}</span>`}`:`<span class="muted">${esc(q.e)}</span>`;
+  return `<div class="fb ${ok?"ok":"bad"}"><strong>${ok?"Correcto":"Incorrecto"}</strong>${ok?"":key}${why}<span class="ref">${esc(q.r)}</span></div>`;
+}
+function render(){
+  const it=S.list[S.i],q=it.q,n=S.list.length,sim=S.mode==="sim",answered=it.pick!==null;
+  const L="ABCD",texts=q.lk?LK:q.o,lock=answered&&!sim&&!q.lk;
+  const done=S.list.filter(x=>x.pick!==null).length;
+  const opts=it.order.map((oi,k)=>{let c="opt";
+    if(answered){if(sim||q.lk){if(it.pick===oi)c+=" sel"}else{if(oi===q.a)c+=" ok";else if(it.pick===oi)c+=" bad"}}
+    return `<button class="${c}" data-oi="${oi}" ${lock?"disabled":""}><span class="l">${L[k]}</span><span>${esc(texts[oi])}</span></button>`}).join("");
+  const head=q.cs?`<div class="caso"><span class="kicker">Caso</span><p>${esc(q.cs)}</p></div><span class="kicker">Enunciado</span>`:q.lk?`<span class="kicker">Afirmación · ${esc(q.k)}</span>`:"";
+  const last=S.i===n-1;
+  app.innerHTML=`
+  <header class="qbar gut"><div class="inner">
+    <button class="icon-btn" id="exit" aria-label="Salir">${I.x}</button>
+    <div class="qmeta"><b>${esc(S.label)}</b><span class="mono">${S.i+1} de ${n}</span></div>
+    ${sim?`<span class="timer" id="timer">--:--</span>`:"<span></span>"}
+  </div></header>
+  <div class="prog"><i style="width:${(sim?done:S.i+(answered?1:0))/n*100}%"></i></div>
+  <main class="quiz gut"><div class="inner">
+    <span class="kicker">${esc(q.t)}</span>
+    ${head}
+    <p class="qtext">${esc(q.q)}</p>
+    <div class="opts">${opts}</div>
+    ${answered&&!sim?feedback(it):""}
+    ${sim?`<div class="stack" style="gap:10px"><span class="kicker">${done} de ${n} respondidas</span><div class="grid">${S.list.map((x,k)=>`<button data-go="${k}" class="${x.pick!==null?"done":""} ${k===S.i?"cur":""}" aria-label="Pregunta ${k+1}">${k+1}</button>`).join("")}</div></div>`:""}
+    <div id="confirm"></div>
+  </div></main>
+  <footer class="qnav gut"><div class="inner">
+    ${sim?`<button class="btn" id="prev" ${S.i?"":"disabled"}>Anterior</button>`:""}
+    ${!last?`<button class="btn primary" id="next" ${!sim&&!answered?"disabled":""}>Siguiente</button>`:`<button class="btn primary" id="fin" ${!sim&&!answered?"disabled":""}>${sim?"Terminar y calificar":"Ver resultado"}</button>`}
+  </div></footer>`;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(lock)return;const first=it.pick===null;it.pick=+b.dataset.oi;if(!sim&&first)record(q,it.pick===q.a);render()});
+  $("#exit").onclick=()=>{$("#confirm").innerHTML=`<div class="confirm"><p>${sim?"¿Salir del simulacro? No se calificará.":"¿Salir? Tus respuestas ya quedaron guardadas."}</p><div class="acts"><button class="btn" id="no">Seguir</button><button class="btn danger" id="yes">Salir</button></div></div>`;
+    $("#no").onclick=()=>$("#confirm").innerHTML="";$("#yes").onclick=()=>go(tab);$("#confirm").scrollIntoView({behavior:"smooth",block:"center"})};
+  const nx=$("#next");if(nx)nx.onclick=()=>{S.i++;render();window.scrollTo(0,0)};
+  const pv=$("#prev");if(pv)pv.onclick=()=>{S.i--;render();window.scrollTo(0,0)};
+  const f=$("#fin");if(f)f.onclick=finish;
+  app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{S.i=+b.dataset.go;render();window.scrollTo(0,0)});
+  if(sim)tick();
+}
+function finish(){
+  clearInterval(timerId);
+  const sim=S.mode==="sim";
+  if(sim)S.list.forEach(x=>{if(x.pick!==null)record(x.q,x.pick===x.q.a)});
+  const graded=S.list.filter(x=>!x.q.lk),likert=S.list.filter(x=>x.q.lk&&x.pick!==null);
+  const ok=graded.filter(x=>x.pick===x.q.a).length,n=graded.length,sc=score(ok,n);
+  if(sim&&n){hist.unshift({d:Date.now(),l:S.label,s:sc,ok,n});hist=hist.slice(0,20);put(HKEY,hist)}
+  const by=TOPICS.map(t=>{const xs=graded.filter(x=>x.q.t===t);return {t,n:xs.length,ok:xs.filter(x=>x.pick===x.q.a).length}}).filter(x=>x.n);
+  const wrong=graded.filter(x=>x.pick!==x.q.a),top=likert.filter(x=>x.pick===3).length,label=S.label;
+  const back=tab;
+  app.innerHTML=`
+  <header class="qbar gut"><div class="inner"><button class="icon-btn" id="close" aria-label="Cerrar">${I.x}</button><div class="qmeta"><b>Resultado</b><span>${esc(label)}</span></div><span></span></div></header>
+  <div class="prog"><i style="width:100%"></i></div>
+  <main class="quiz gut"><div class="inner" style="gap:28px">
+    ${n?`<section class="hero"><div class="big">${fmt(sc)}<small>de 100</small></div><p>${ok} de ${n} correctas ${sc>=CONFIG.minimo?`<span class="pill ok">Supera el mínimo de ${fmt(CONFIG.minimo)}</span>`:`<span class="pill bad">Por debajo de ${fmt(CONFIG.minimo)}</span>`}</p></section>`
+      :`<section class="hero"><h1>Listo</h1><p class="muted">Respondiste ${likert.length} ${likert.length===1?"afirmación":"afirmaciones"} y marcaste "Totalmente de acuerdo" en ${top}.${likert.length&&top/likert.length>0.8?" Es una proporción muy alta: en la prueba real, las escalas de control pueden leerla como respuesta exageradamente favorable.":""}</p></section>`}
+    ${by.length>1?`<section class="stack"><h2>Por tema</h2><div class="list">${by.map(b=>`<div class="row"><span class="t">${esc(b.t)}</span><span class="d">${b.ok} de ${b.n}</span><span class="r mono">${Math.round(b.ok/b.n*100)}%</span>${meter(b.ok/b.n)}</div>`).join("")}</div></section>`:""}
+    ${wrong.length?`<section class="stack"><h2>Para repasar · ${wrong.length}</h2><div class="list">${wrong.map(x=>`<div class="rv"><span class="kicker">${esc(x.q.t)}</span>${x.q.cs?`<span class="muted">${esc(x.q.cs)}</span>`:""}<b style="font-weight:500">${esc(x.q.q)}</b>${x.pick!==null?`<span class="yours">Tu respuesta: ${esc(x.q.o[x.pick])}</span>`:`<span class="yours">Sin responder · cuenta como omisión</span>`}<span class="right">Correcta: ${esc(x.q.o[x.q.a])}</span><span class="muted">${esc(x.q.j?x.q.j[x.q.a]:x.q.e)}</span><span class="ref">${esc(x.q.r)}</span></div>`).join("")}</div></section>`:""}
+  </div></main>
+  <footer class="qnav gut"><div class="inner">
+    <button class="btn" id="back">Volver</button>
+    ${wrong.length?`<button class="btn primary" id="again">Practicar las ${wrong.length} falladas</button>`:""}
+  </div></footer>`;
+  const a=$("#again");if(a)a.onclick=()=>start(shuffle(wrong.map(x=>x.q)),"prac","Repaso de errores");
+  $("#back").onclick=()=>go(back);$("#close").onclick=()=>go(back);
+  S=null;window.scrollTo(0,0);
+}
+
+// ---------- arranque ----------
+if(!storageOK()){go("inicio")}
+else if(isOpen()&&get(PKEY)){go("inicio")}
+else{lockScreen()}
+</script>

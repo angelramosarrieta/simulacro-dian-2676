@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens en tripletas RGB (para usar alfa de Tailwind: bg-brand/10).
+   Contraste: ink/muted sobre surface y bg ≥ 4.5:1; brand-ink es la
+   variante del verde apta para texto pequeño. */
+:root {
+  --bg: 246 246 243;
+  --surface: 255 255 255;
+  --soft: 239 239 234;
+  --line: 227 227 221;
+  --ink: 21 23 27;
+  --muted: 92 98 106;
+  --faint: 150 155 162;
+  --brand: 14 107 88;
+  --brand-ink: 11 92 75;
+  --brand-soft: 226 239 234;
+  --on-brand: 255 255 255;
+  --ok: 21 122 67;
+  --ok-soft: 229 243 234;
+  --bad: 180 35 24;
+  --bad-soft: 251 234 232;
+  --warn: 160 98 10;
+  --warn-soft: 252 242 222;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: 13 15 18;
+    --surface: 21 24 28;
+    --soft: 27 31 36;
+    --line: 39 44 51;
+    --ink: 236 237 239;
+    --muted: 150 156 165;
+    --faint: 105 111 120;
+    --brand: 79 194 164;
+    --brand-ink: 110 212 184;
+    --brand-soft: 17 48 42;
+    --on-brand: 6 35 28;
+    --ok: 74 222 128;
+    --ok-soft: 15 42 27;
+    --bad: 246 139 128;
+    --bad-soft: 51 23 21;
+    --warn: 240 180 90;
+    --warn-soft: 48 36 14;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: 13 15 18;
+  --surface: 21 24 28;
+  --soft: 27 31 36;
+  --line: 39 44 51;
+  --ink: 236 237 239;
+  --muted: 150 156 165;
+  --faint: 105 111 120;
+  --brand: 79 194 164;
+  --brand-ink: 110 212 184;
+  --brand-soft: 17 48 42;
+  --on-brand: 6 35 28;
+  --ok: 74 222 128;
+  --ok-soft: 15 42 27;
+  --bad: 246 139 128;
+  --bad-soft: 51 23 21;
+  --warn: 240 180 90;
+  --warn-soft: 48 36 14;
+  color-scheme: dark;
+}
+
+html, body { background: rgb(var(--bg)); color: rgb(var(--ink)); }
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+::selection { background: rgb(var(--brand) / 0.18); }
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 h-11 text-[15px] font-medium transition
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-bg
+      disabled:opacity-50 disabled:cursor-not-allowed select-none whitespace-nowrap;
+  }
+  .btn-primary { @apply btn bg-brand text-onBrand hover:bg-brand/90 active:bg-brand/85; }
+  .btn-secondary { @apply btn bg-surface text-ink border border-line hover:bg-soft; }
+  .btn-ghost { @apply btn text-ink hover:bg-soft; }
+  .btn-danger { @apply btn bg-bad text-white hover:bg-bad/90; }
+  .btn-sm { @apply h-9 px-3 text-sm rounded-lg; }
+  .btn-lg { @apply h-12 px-6 text-base; }
+
+  .card { @apply bg-surface border border-line rounded-2xl shadow-card; }
+  .input {
+    @apply w-full h-11 rounded-xl border border-line bg-surface px-3.5 text-[15px] text-ink placeholder:text-faint
+      transition focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:opacity-60;
+  }
+  .label { @apply block text-sm font-medium text-ink mb-1.5; }
+  .hint { @apply text-[13px] text-muted mt-1.5; }
+  .eyebrow { @apply text-[12px] font-medium uppercase tracking-[0.08em] text-muted; }
+  .link { @apply text-brandInk font-medium underline-offset-4 hover:underline; }
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-medium; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
