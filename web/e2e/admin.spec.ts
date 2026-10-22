@@ -153,3 +153,18 @@ test("el administrador guarda llaves cifradas desde configuración; nadie más p
   await expect(page.getByText("Quitado.")).toBeVisible();
   expect((await db.from("app_secrets").select("key").eq("key", "RESEND_API_KEY")).data).toHaveLength(0);
 });
+
+test("/ejemplo es una demo sin PIN y separada; /mi-simulador conserva el simulador personal", async ({ page }) => {
+  // Simula a alguien que ya usaba el simulador personal con PIN en este dominio.
+  await page.goto("/mi-simulador");
+  await page.evaluate(() => localStorage.setItem("simulacro2676:pin", JSON.stringify("hash-del-pin")));
+  await page.reload();
+  await expect(page.getByText("Ingresa tu PIN")).toBeVisible();
+
+  await page.goto("/ejemplo");
+  await expect(page.getByRole("link", { name: "Crear el mío" })).toBeVisible();
+  await expect(page.getByText("Ingresa tu PIN")).toHaveCount(0);
+  await expect(page.locator("#app")).not.toBeEmpty();
+  await page.getByRole("link", { name: "Crear el mío" }).click();
+  await expect(page).toHaveURL(/\/registro$/);
+});

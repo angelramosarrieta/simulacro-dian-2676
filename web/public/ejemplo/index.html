@@ -175,15 +175,20 @@ button.row:hover{background:var(--soft)}
 .rv .yours{color:var(--bad)} .rv .right{color:var(--ok);font-weight:500}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
+<style>
+.s2676-demo{position:sticky;top:0;z-index:60;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 12px;padding:9px 16px;background:#0E6B58;color:#fff;font:500 13px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center}
+.s2676-demo a{color:#0E6B58;background:#fff;border-radius:999px;padding:5px 12px;font-weight:600;text-decoration:none;white-space:nowrap}
+</style>
 </head>
 <body>
+<div class="s2676-demo" role="note">Ejemplo de un simulador (Analista II). El tuyo se crea con tu manual y tus indicadores. <a href="/registro">Crear el mío</a></div>
 <div id="app"></div>
 
 <script>
 // ===================== CONFIGURACIÓN DEL CARGO =====================
 // Junto con el banco de preguntas (const Q), es lo único que cambia de un cargo a otro.
 const CONFIG={
-  clave:"2676",               // identificador corto y único: separa el PIN y el progreso de otros simuladores
+  clave:"demo-ejemplo",               // identificador corto y único: separa el PIN y el progreso de otros simuladores
   marca:"26",                 // 2 o 3 caracteres para el logo
   titulo:"Simulacro 2676",    // nombre corto que aparece arriba
   proceso:"DIAN 2676",        // proceso de selección
@@ -785,9 +790,7 @@ function finish(){
 }
 
 // ---------- arranque ----------
-if(!storageOK()){go("inicio")}
-else if(isOpen()&&get(PKEY)){go("inicio")}
-else{lockScreen()}
+go("inicio")
 </script>
 </body>
 </html>

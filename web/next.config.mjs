@@ -15,13 +15,23 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "/api/**/*": ["./lib/simulator/plantilla.html"],
   },
-  // El simulador de ejemplo (Analista II) vive en public/ejemplo/index.html,
-  // copia del index.html de la raíz del repo (antes publicado en la raíz del dominio).
+  // /ejemplo: demostración pública generada desde el index.html de la raíz
+  // (Analista II) con su propio espacio de guardado y sin PIN.
+  // /mi-simulador: el index.html original (antes en la raíz del dominio), para
+  // que quien ya lo usaba conserve su PIN y su progreso en el navegador.
+  // Ambos se generan con `npm run sync:plantilla`.
   async rewrites() {
-    return [{ source: "/ejemplo", destination: "/ejemplo/index.html" }];
+    return [
+      { source: "/ejemplo", destination: "/ejemplo/index.html" },
+      { source: "/mi-simulador", destination: "/mi-simulador/index.html" },
+    ];
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/mi-simulador/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      { source: "/mi-simulador", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+    ];
   },
 };
 
