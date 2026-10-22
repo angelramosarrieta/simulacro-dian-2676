@@ -5,10 +5,12 @@
 ```
 Landing (/) → /registro → correo de confirmación → /panel/bienvenida (perfil)
   → /panel/nueva: 1) datos del empleo  2) manual + indicadores (o la biblioteca, si su OPEC ya existe)  3) pagar (Wompi) o generar con un crédito
-  → /panel/simuladores/:id (progreso en vivo) → /s/:id (simulador, solo el dueño)
+  → /panel/simuladores/:id (progreso en vivo; al terminar, el simulador se abre ahí mismo, dentro del panel)
 ```
 
 **Biblioteca de empleos.** Cada generación con IA que termina bien queda guardada en `job_banks` con su OPEC (`save_job_bank`). Cuando otro aspirante escribe la misma OPEC, el paso 2 le ofrece el simulador de la biblioteca: no sube documentos, no se llama a la IA (`source = 'biblioteca'`, `steps_run = 0`) y lo recibe al instante. Se cobra igual. La llave es la OPEC y no cargo + nivel, porque una misma denominación puede tener ejes distintos según la dependencia. Un banco solo se reemplaza por otro con más preguntas, y el administrador puede retirarlo en `/admin/biblioteca`.
+
+**Simulador integrado.** El simulador es un componente de React (`components/simulator/`) con la lógica de `plantilla.html` portada a `lib/simulator/engine.ts`: mismos modos, misma calificación (0-100 truncada) y mismos ids de pregunta (banco común primero, luego las del empleo). El banco común, la guía y el ejemplo se extraen de `plantilla.html` e `index.html` con `npm run sync:plantilla` (`lib/simulator/data/*.json`), así esos archivos siguen siendo la fuente de verdad. El HTML armado se sigue generando para la descarga sin conexión.
 
 Registrarse no cobra nada. La compra se hace cuando el usuario ya subió sus documentos, en el paso 3; al volver de Wompi continúa donde quedó.
 
@@ -19,7 +21,8 @@ Registrarse no cobra nada. La compra se hace cuando el usuario ya subió sus doc
 | `/`, `/terminos`, `/privacidad` | Públicas |
 | `/registro`, `/ingresar`, `/recuperar`, `/restablecer`, `/verifica-tu-correo`, `/auth/*` | Autenticación (Supabase Auth, PKCE) |
 | `/panel/*` | Privadas: resumen, nuevo, simuladores, compras, consumo, cuenta, comprar, resultado del pago |
-| `/s/:id` | Sirve el HTML del simulador solo al dueño (`?descargar=1` lo descarga) |
+| `/s/:id` | `?descargar=1`: archivo HTML del simulador para usarlo sin conexión (solo el dueño). Sin el parámetro redirige al panel |
+| `/ejemplo` | Simulador de ejemplo público (mismo componente que el del panel; progreso solo en el navegador) |
 | `POST /api/checkout` | Crea o reutiliza una orden y devuelve la URL de Wompi |
 | `POST /api/webhooks/wompi` | Eventos de Wompi (firma + re-consulta) |
 | `POST /api/generations` | Crea el borrador (valida los datos del empleo) |
@@ -43,7 +46,7 @@ Registrarse no cobra nada. La compra se hace cuando el usuario ya subió sus doc
 - `app_settings`: precios (públicos) y límites (privados).
 - `admins` y `admin_audit_log`: quién administra y qué hizo (solo servidor).
 - `job_banks`: banco de preguntas reutilizable por OPEC (solo servidor). `generations.source` dice si salió de la IA o de la biblioteca.
-- `simulator_progress`: aciertos e historial del simulador por generación.
+- `simulator_progress`: aciertos e historial del simulador por generación (mismo formato que la plantilla).
 
 ## Seguridad (resumen de la revisión)
 

@@ -24,6 +24,10 @@
 - Biblioteca de empleos por OPEC (`/admin/biblioteca` para revisar, ver usos y retirar bancos).
 - Ayuda “¿Dónde consigo…?” en cada documento con enlaces a SIMO, la Guía de la CNSC y la página del concurso; los enlaces se editan desde `/admin/configuracion`.
 
+## Hecho en la cuarta tanda
+
+- El simulador ahora vive dentro del panel con los mismos estilos de la página (antes se abría como una página aparte). El ejemplo público usa el mismo componente.
+
 ## Ideas para después
 
 - **Ampliar un simulador** (por ejemplo +40 preguntas de un eje) como producto de menor precio. Requiere definir el precio.

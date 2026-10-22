@@ -76,7 +76,7 @@ test("empleo en la biblioteca: el simulador sale al instante, sin documentos ni 
   const { data: gen } = await adminDb().from("generations").select("source, steps_run, questions").eq("id", genId).single();
   expect(gen).toMatchObject({ source: "biblioteca", steps_run: 0 });
   expect(gen!.questions).toHaveLength(12);
-  const html = await (await page.request.get(`/s/${genId}`)).text();
+  const html = await (await page.request.get(`/s/${genId}?descargar=1`)).text();
   expect(html).toContain(`clave:"${opec}"`);
   expect(html).toContain("Caso de biblioteca 1:");
   expect((await adminDb().rpc("credit_balance", { p_user_id: U.id })).data).toBe(0);

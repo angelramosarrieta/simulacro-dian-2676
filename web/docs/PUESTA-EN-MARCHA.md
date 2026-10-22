@@ -46,7 +46,7 @@ Falta configurar en el panel de Supabase de **centra-log**:
 3. Variables (ver `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API de centra-log), `NEXT_PUBLIC_SITE_URL`, `INTERNAL_JOB_SECRET`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_ALERT_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `NEXT_PUBLIC_SUPPORT_EMAIL` y `NEXT_PUBLIC_LEGAL_NAME`.
 4. **Settings → Functions**: Fluid Compute activo (la generación usa funciones de hasta 300 s).
 5. **Domains**: agrega `simulacro.centrahoy.online` (o el que elijas). En el DNS de `centrahoy.online`, crea el CNAME que indique Vercel.
-   > El simulador de ejemplo que estaba en la raíz del dominio ahora vive en `/ejemplo` (mismo dominio, así que quien lo usaba conserva su progreso).
+   > El simulador que estaba en la raíz del dominio vive en `/mi-simulador` (conserva PIN y progreso). `/ejemplo` es la demostración pública integrada al sitio.
 6. El cron diario (`vercel.json`, 7:00 a. m. de Colombia) se activa solo al desplegar.
 
 ✅ Verificación: en `/admin`, todos los indicadores de integración salen en verde salvo IA y Wompi, que se configuran en los pasos siguientes.

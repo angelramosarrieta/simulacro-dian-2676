@@ -1,27 +1,33 @@
 import { readFileSync } from "fs";
 import path from "path";
-import vm from "vm";
 import { describe, expect, it } from "vitest";
-// @ts-expect-error módulo .mjs sin tipos (script de build)
-import { toDemo, toPersonal } from "../scripts/demo-transform.mjs";
+// @ts-expect-error módulos .mjs sin tipos (scripts de build)
+import { toPersonal } from "../scripts/demo-transform.mjs";
+// @ts-expect-error módulos .mjs sin tipos (scripts de build)
+import { extract } from "../scripts/extract-banks.mjs";
+import base from "@/lib/simulator/data/base.json";
+import demo from "@/lib/simulator/data/demo.json";
 
 const original = readFileSync(path.join(__dirname, "../../index.html"), "utf8");
 
-describe("simulador de ejemplo (/ejemplo) y personal (/mi-simulador)", () => {
-  const demo: string = toDemo(original);
-
-  it("la demo usa su propio espacio de guardado y entra sin PIN", () => {
-    expect(demo).toContain('clave:"demo-ejemplo",');
-    expect(demo).not.toContain('clave:"2676",');
-    expect(demo).not.toContain("else{lockScreen()}");
-    expect(demo).toContain('Crear el mío</a>');
-    const script = demo.slice(demo.indexOf("<script>") + 8, demo.lastIndexOf("</script>"));
-    expect(() => new vm.Script(script)).not.toThrow();
+describe("datos del simulador integrado y simulador personal (/mi-simulador)", () => {
+  it("los bancos publicados están sincronizados con plantilla.html e index.html", () => {
+    const fresh = extract(path.join(__dirname, "../.."));
+    expect(base).toEqual(fresh.base);
+    expect(demo).toEqual(fresh.demo);
   });
 
-  it("los archivos publicados están sincronizados con el index.html de la raíz", () => {
-    expect(readFileSync(path.join(__dirname, "../public/ejemplo/index.html"), "utf8")).toBe(demo);
-    expect(readFileSync(path.join(__dirname, "../public/mi-simulador/index.html"), "utf8")).toBe(toPersonal(original));
+  it("el banco común trae preguntas directas, casos y afirmaciones comportamentales", () => {
+    expect(base.common.length).toBeGreaterThan(50);
+    expect(base.common.some((q: { lk?: number }) => q.lk === 1)).toBe(true);
+    expect(base.config.minimo).toBe(70);
+    expect(base.config.guia.length).toBeGreaterThan(3);
+  });
+
+  it("el ejemplo es un simulador completo con sus ejes", () => {
+    expect(demo.cargo).toBe("Analista II");
+    expect(demo.ejes.length).toBeGreaterThan(3);
+    for (const e of demo.ejes) expect(demo.questions.some((q: { t: string }) => q.t === e)).toBe(true);
   });
 
   it("el personal conserva la clave original (PIN y progreso existentes) y no se indexa", () => {
@@ -29,5 +35,6 @@ describe("simulador de ejemplo (/ejemplo) y personal (/mi-simulador)", () => {
     expect(personal).toContain('clave:"2676",');
     expect(personal).toContain("else{lockScreen()}");
     expect(personal).toContain('<meta name="robots" content="noindex, nofollow">');
+    expect(readFileSync(path.join(__dirname, "../public/mi-simulador/index.html"), "utf8")).toBe(personal);
   });
 });

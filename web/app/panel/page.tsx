@@ -20,7 +20,7 @@ export default async function Resumen() {
     { done: profile.onboarding_completed, label: "Completar tu perfil", href: "/panel/bienvenida" },
     { done: quote.hasPaid || balance > 0, label: "Comprar tu simulador", href: "/panel/comprar" },
     { done: generations.some((g) => g.status !== "draft"), label: "Subir tus documentos y generar", href: "/panel/nueva" },
-    { done: completed.length > 0, label: "Empezar a practicar", href: completed[0] ? `/s/${completed[0].id}` : undefined },
+    { done: completed.length > 0, label: "Empezar a practicar", href: completed[0] ? `/panel/simuladores/${completed[0].id}` : undefined },
   ];
   const pending = steps.filter((s) => !s.done).length;
 

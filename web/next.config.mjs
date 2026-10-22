@@ -15,14 +15,11 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "/api/**/*": ["./lib/simulator/plantilla.html"],
   },
-  // /ejemplo: demostración pública generada desde el index.html de la raíz
-  // (Analista II) con su propio espacio de guardado y sin PIN.
   // /mi-simulador: el index.html original (antes en la raíz del dominio), para
-  // que quien ya lo usaba conserve su PIN y su progreso en el navegador.
-  // Ambos se generan con `npm run sync:plantilla`.
+  // que quien ya lo usaba conserve su PIN y su progreso en el navegador. Se
+  // genera con `npm run sync:plantilla`. (/ejemplo es una página de la app.)
   async rewrites() {
     return [
-      { source: "/ejemplo", destination: "/ejemplo/index.html" },
       { source: "/mi-simulador", destination: "/mi-simulador/index.html" },
     ];
   },

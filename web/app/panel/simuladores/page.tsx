@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ExternalLink, FilePlus2, Library } from "lucide-react";
+import { ArrowRight, FilePlus2, Library } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GenerationBadge } from "@/components/ui/StatusBadge";
@@ -41,11 +41,11 @@ export default async function Page() {
               </p>
               <div className="mt-4 flex gap-2 border-t border-line pt-4">
                 {g.status === "completed" && (
-                  <a href={`/s/${g.id}`} target="_blank" rel="noopener" className="btn-primary btn-sm">
-                    Abrir <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                  </a>
+                  <Link href={`/panel/simuladores/${g.id}`} className="btn-primary btn-sm">
+                    Estudiar <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Link>
                 )}
-                <Link href={`/panel/simuladores/${g.id}`} className="btn-secondary btn-sm">Ver detalle</Link>
+                {g.status !== "completed" && <Link href={`/panel/simuladores/${g.id}`} className="btn-secondary btn-sm">Ver detalle</Link>}
               </div>
             </li>
           ))}

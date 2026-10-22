@@ -137,16 +137,22 @@ test("otro usuario no puede abrir mi simulador ni mis generaciones", async ({ pa
   await db.storage.from("simulators").upload(`${user!.id}/e2e.html`, new Blob(["<!doctype html><title>Simulador</title><p>Simulador de prueba</p>"], { type: "text/html" }), { upsert: true });
 
   await login(page);
-  await page.goto(`/s/${gen!.id}`);
-  await expect(page.getByText("Simulador de prueba")).toBeVisible();
+  await page.goto(`/panel/simuladores/${gen!.id}`);
+  await expect(page.getByRole("tab", { name: "Practicar" })).toBeVisible();
+  const file = await page.request.get(`/s/${gen!.id}?descargar=1`);
+  expect(file.status()).toBe(200);
+  expect(await file.text()).toContain("Simulador de prueba");
 
   const other = uniqueEmail("otro");
   await db.auth.admin.createUser({ email: other, password: PASSWORD, email_confirm: true });
   const ctx = await browser.newContext();
   const p2 = await ctx.newPage();
   await login(p2, other);
-  const r = await p2.goto(`/s/${gen!.id}`);
-  expect(r?.status()).toBe(404);
+  // Página de "no encontrada" (el panel transmite el layout primero, así que el estado HTTP puede ser 200).
+  await p2.goto(`/panel/simuladores/${gen!.id}`);
+  await expect(p2.getByRole("heading", { name: "No encontramos esta página" })).toBeVisible();
+  await expect(p2.getByText("Gestor I 301-01")).toHaveCount(0);
+  expect((await p2.request.get(`/s/${gen!.id}?descargar=1`)).status()).toBe(404);
   const api = await p2.request.get(`/api/generations/${gen!.id}`);
   expect(api.status()).toBe(404);
   await ctx.close();

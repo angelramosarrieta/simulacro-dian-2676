@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, ExternalLink, RotateCcw, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, RotateCcw, XCircle } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 
 type Status = {
@@ -53,8 +53,8 @@ export function GenerationProgress({ id, initial, showPlan = false }: { id: stri
         <p className="flex items-center gap-2 font-medium text-ok">
           <CheckCircle2 className="h-5 w-5" aria-hidden /> Tu simulador está listo
         </p>
-        <a href={`/s/${id}`} target="_blank" rel="noopener" className="btn-primary">
-          Abrir simulador <ExternalLink className="h-4 w-4" aria-hidden />
+        <a href={`/panel/simuladores/${id}`} className="btn-primary">
+          Empezar a estudiar <ArrowRight className="h-4 w-4" aria-hidden />
         </a>
       </div>
     );

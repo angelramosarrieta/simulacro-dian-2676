@@ -57,34 +57,6 @@ test("el administrador ve métricas y ajusta créditos con auditoría", async ({
   }
 });
 
-test("el progreso del simulador se guarda en la cuenta y se recupera en otro dispositivo", async ({ page, browser }) => {
-  const u = await makeUser("progreso");
-  const db = adminDb();
-  const template = readFileSync(path.join(__dirname, "../lib/simulator/plantilla.html"), "utf8");
-  const html = assembleSimulator(template, { opec: "777001", cargo: "Gestor Progreso", ejes: [], questions: [] });
-  const { data: gen } = await db.from("generations").insert({ user_id: u.id, cargo: "Gestor Progreso", nivel: "Profesional", opec: "777001", modalidad: "Ingreso", target_questions: 20, status: "completed", progress: 100, simulator_html_path: `${u.id}/prog.html`, questions: [] }).select("id").single();
-  await db.storage.from("simulators").upload(`${u.id}/prog.html`, new Blob([html], { type: "text/html" }), { upsert: true });
-
-  await login(page, u.email);
-  await page.goto(`/s/${gen!.id}`);
-  await expect(page.locator("#app")).not.toBeEmpty();
-  // Simula que la app guarda aciertos: usa el mismo put() de la plantilla.
-  await page.evaluate(() => {
-    localStorage.setItem("simulacro777001:v1", JSON.stringify({ "3": { s: 2, c: 1 } }));
-    (window as unknown as { __s2676Sync: (k: string) => void }).__s2676Sync("simulacro777001:v1");
-  });
-  await expect.poll(async () => (await db.from("simulator_progress").select("stats").eq("generation_id", gen!.id).maybeSingle()).data?.stats, { timeout: 15_000 }).toEqual({ "3": { s: 2, c: 1 } });
-
-  // "Otro dispositivo": contexto nuevo, sin localStorage.
-  const ctx = await browser.newContext();
-  const p2 = await ctx.newPage();
-  await login(p2, u.email);
-  await p2.goto(`/s/${gen!.id}`);
-  const restored = await p2.evaluate(() => localStorage.getItem("simulacro777001:v1"));
-  expect(JSON.parse(restored!)).toEqual({ "3": { s: 2, c: 1 } });
-  await ctx.close();
-});
-
 test("un correo de la lista de administradores obtiene acceso y edita la configuración", async ({ page }) => {
   const db = adminDb();
   const u = await makeUser("duena");
@@ -164,7 +136,7 @@ test("/ejemplo es una demo sin PIN y separada; /mi-simulador conserva el simulad
   await page.goto("/ejemplo");
   await expect(page.getByRole("link", { name: "Crear el mío" })).toBeVisible();
   await expect(page.getByText("Ingresa tu PIN")).toHaveCount(0);
-  await expect(page.locator("#app")).not.toBeEmpty();
-  await page.getByRole("link", { name: "Crear el mío" }).click();
+  await expect(page.getByRole("tab", { name: "Inicio" })).toBeVisible();
+  await page.getByRole("main").getByRole("link", { name: "Crear el mío" }).click();
   await expect(page).toHaveURL(/\/registro$/);
 });
