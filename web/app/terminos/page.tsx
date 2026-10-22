@@ -29,7 +29,7 @@ export default async function Page() {
       <h2>2. Contenido generado con inteligencia artificial</h2>
       <ul>
         <li>El contenido puede contener errores u omisiones, en especial en plazos, cifras, porcentajes y artículos citados. Es material de práctica y debe contrastarse con la norma vigente y con la información oficial publicada en SIMO y por la CNSC.</li>
-        <li>Si encuentras un error puedes reportarlo a {BRAND.supportEmail}. Corregirlo no da derecho a una nueva generación, salvo lo previsto en el numeral 7.</li>
+        <li>Si encuentras un error puedes reportarlo a {BRAND.supportEmail}. Reportarlo no da derecho a una nueva generación ni a devolución de dinero, salvo lo previsto en el numeral 7.</li>
       </ul>
 
       <h2>3. Cuenta</h2>
@@ -54,18 +54,17 @@ export default async function Page() {
         <li>El simulador estará disponible en tu cuenta al menos hasta la fecha de la prueba escrita y en todo caso mientras el Servicio esté en operación.</li>
       </ul>
 
-      <h2>6. Derecho de retracto</h2>
+      <h2>6. No hay devoluciones de dinero</h2>
       <ul>
-        <li>De acuerdo con el artículo 47 de la Ley 1480 de 2011 (Estatuto del Consumidor), puedes retractarte de una compra dentro de los <b>5 días hábiles</b> siguientes al pago, siempre que no hayas iniciado la generación con esa compra.</li>
-        <li>El derecho de retracto no aplica una vez iniciada la generación, porque se trata de un servicio cuya prestación comienza con tu acuerdo y de un contenido digital que se entrega de inmediato.</li>
-        <li>Para ejercerlo escribe a {BRAND.supportEmail} con la referencia de tu compra. El dinero se devuelve por el mismo medio de pago dentro de los 30 días calendario siguientes.</li>
+        <li>Las compras <b>no son reembolsables</b>. El dinero pagado no se devuelve, salvo en los casos que la ley colombiana obliga y que no pueden excluirse por contrato, descritos a continuación.</li>
+        <li><b>Derecho de retracto</b> (Ley 1480 de 2011, art. 47): solo procede dentro de los 5 días hábiles siguientes al pago y siempre que no hayas iniciado la generación con esa compra. No procede una vez iniciada la generación, porque es un servicio cuya prestación comienza con tu acuerdo y un contenido digital que se entrega de inmediato.</li>
+        <li><b>Reversión del pago</b>: procede únicamente en los casos y con el procedimiento del artículo 51 de la Ley 1480 de 2011 y del Decreto 587 de 2016 (por ejemplo, fraude u operación no solicitada).</li>
       </ul>
 
-      <h2>7. Fallas y devoluciones</h2>
+      <h2>7. Fallas en la generación</h2>
       <ul>
-        <li>Si una generación no se completa por una falla del Servicio o porque los documentos no se pudieron procesar, la generación se devuelve automáticamente a tu cuenta para que la uses de nuevo.</li>
-        <li>Si el simulador presenta un defecto grave que impide usarlo, escríbenos y lo revisaremos para corregirlo, regenerarlo o devolver el pago, según corresponda.</li>
-        <li>La reversión del pago procede en los casos y con el procedimiento del artículo 51 de la Ley 1480 de 2011 y del Decreto 587 de 2016.</li>
+        <li>Si una generación no se completa por una falla del Servicio o porque los documentos no se pudieron procesar, la generación (no el dinero) se devuelve automáticamente a tu cuenta para que la uses de nuevo.</li>
+        <li>Si el simulador presenta un defecto que impide usarlo, escríbenos y lo corregiremos o lo generaremos de nuevo.</li>
       </ul>
 
       <h2>8. Uso permitido</h2>

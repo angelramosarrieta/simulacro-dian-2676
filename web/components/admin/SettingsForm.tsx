@@ -33,7 +33,7 @@ const LINKS: [keyof Settings["help_links"], string, string][] = [
 ];
 
 const LIMIT_FIELDS: [keyof Limits, string, string, number?][] = [
-  ["max_cost_usd", "Costo máximo por generación (USD)", "Si se alcanza, se entrega lo generado (si hay al menos el 60 %) o se reembolsa.", 0.1],
+  ["max_cost_usd", "Costo máximo por generación (USD)", "Si se alcanza, se entrega lo generado (si hay al menos el 60 %) o se devuelve la generación al usuario.", 0.1],
   ["max_input_tokens", "Tokens de entrada por generación", "Lectura de documentos y contexto."],
   ["max_output_tokens", "Tokens de salida por generación", "Texto generado, incluido el razonamiento."],
   ["max_tokens_per_call", "Tokens de salida por llamada", "Tope de cada bloque de preguntas."],

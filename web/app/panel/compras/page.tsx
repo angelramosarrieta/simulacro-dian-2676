@@ -10,7 +10,7 @@ import { reconcilePendingOrders } from "@/lib/payments/reconcile";
 
 export const metadata: Metadata = { title: "Compras y créditos" };
 
-const REASON: Record<string, string> = { purchase: "Compra", generation: "Generación", refund: "Reembolso", admin_adjustment: "Ajuste" };
+const REASON: Record<string, string> = { purchase: "Compra", generation: "Generación", refund: "Generación devuelta", admin_adjustment: "Ajuste" };
 const METHOD: Record<string, string> = { CARD: "Tarjeta", PSE: "PSE", NEQUI: "Nequi", BANCOLOMBIA_TRANSFER: "Bancolombia", BANCOLOMBIA_QR: "QR Bancolombia", DAVIPLATA: "Daviplata" };
 
 export default async function Page() {
