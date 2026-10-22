@@ -35,11 +35,7 @@ Falta configurar en el panel de Supabase de **centra-log**:
 
 **e) Authentication → Attack Protection → Bot protection (captcha)**: activa Cloudflare Turnstile y pega la **secret key**. Puede ser el mismo widget de CENTRA si agregas el dominio nuevo en Cloudflare → Turnstile → tu widget → Hostnames.
 
-**f) Hazte administrador** (después de registrarte en el sitio), en el SQL Editor:
-
-```sql
-insert into public.admins (user_id) select id from auth.users where email = 'angelramosarrieta@gmail.com';
-```
+**f) Tu cuenta de administrador** ya está configurada: `angelramosarrieta@gmail.com` está en la lista `admin_emails`. Regístrate en el sitio con ese correo y, en cuanto lo verifiques, verás "Administración" en tu panel. Desde **/admin/configuracion** cambias precios, límites, preguntas por simulador y otros administradores, sin SQL.
 
 ✅ Verificación: al registrarte llega el correo en español desde `no-reply@centrahoy.online` y, tras confirmar, entras a `/panel/bienvenida`. Con la fila de admin, en el panel aparece el enlace "Administración".
 
@@ -50,7 +46,7 @@ insert into public.admins (user_id) select id from auth.users where email = 'ang
 3. Variables (ver `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API de centra-log), `NEXT_PUBLIC_SITE_URL`, `INTERNAL_JOB_SECRET`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_ALERT_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `NEXT_PUBLIC_SUPPORT_EMAIL` y `NEXT_PUBLIC_LEGAL_NAME`.
 4. **Settings → Functions**: Fluid Compute activo (la generación usa funciones de hasta 300 s).
 5. **Domains**: agrega `simulacro.centrahoy.online` (o el que elijas). En el DNS de `centrahoy.online`, crea el CNAME que indique Vercel.
-   > Hoy `simulacro.centrahoy.online` muestra el simulador de ejemplo. Si quieres conservarlo, usa otro subdominio (por ejemplo `app.` o `prueba2676.`) o mueve el ejemplo a `/ejemplo`.
+   > El simulador de ejemplo que estaba en la raíz del dominio ahora vive en `/ejemplo` (mismo dominio, así que quien lo usaba conserva su progreso).
 6. El cron diario (`vercel.json`, 7:00 a. m. de Colombia) se activa solo al desplegar.
 
 ✅ Verificación: en `/admin`, todos los indicadores de integración salen en verde salvo IA y Wompi, que se configuran en los pasos siguientes.

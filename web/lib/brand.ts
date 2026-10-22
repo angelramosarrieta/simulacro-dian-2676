@@ -9,5 +9,5 @@ export const BRAND = {
   legalName: process.env.NEXT_PUBLIC_LEGAL_NAME || "Simulacro 2676",
   examDate: "2026-11-08",
   examDateText: "domingo 8 de noviembre de 2026",
-  exampleUrl: "https://simulacro.centrahoy.online",
+  exampleUrl: "/ejemplo",
 } as const;

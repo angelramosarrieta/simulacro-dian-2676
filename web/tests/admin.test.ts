@@ -78,3 +78,42 @@ d("mantenimiento diario", () => {
     expect(bal).toBe(1);
   });
 });
+
+d("administradores por correo y configuración", () => {
+  it("promueve solo correos verificados de la lista", async () => {
+    const a = admin();
+    const email = `jefa-${Date.now()}@test.local`;
+    const { data: cur } = await a.from("app_settings").select("value").eq("key", "admin_emails").single();
+    await a.from("app_settings").update({ value: [...(cur!.value as string[]), email.toUpperCase()] }).eq("key", "admin_emails");
+
+    const { data: unverified } = await a.auth.admin.createUser({ email: `x${email}`, password: "Prueba12345", email_confirm: false });
+    expect((await a.rpc("ensure_admin", { p_user_id: unverified.user!.id })).data).toBe(false);
+
+    const { data: pending } = await a.auth.admin.createUser({ email, password: "Prueba12345", email_confirm: false });
+    expect((await a.rpc("ensure_admin", { p_user_id: pending.user!.id })).data).toBe(false); // en la lista pero sin verificar
+    await a.auth.admin.updateUserById(pending.user!.id, { email_confirm: true });
+    expect((await a.rpc("ensure_admin", { p_user_id: pending.user!.id })).data).toBe(true);
+    expect((await a.from("admins").select("user_id").eq("user_id", pending.user!.id)).data).toHaveLength(1);
+
+    const other = await newUser("noadmin");
+    expect((await a.rpc("ensure_admin", { p_user_id: other.id })).data).toBe(false);
+    expect((await other.client.rpc("ensure_admin", { p_user_id: other.id })).error).not.toBeNull();
+  });
+
+  it("solo un administrador cambia la configuración, con auditoría y llaves permitidas", async () => {
+    const a = admin();
+    const A = await newUser("cfg");
+    await a.from("admins").insert({ user_id: A.id });
+    const U = await newUser("cfgno");
+    expect((await a.rpc("admin_update_setting", { p_admin_id: U.id, p_key: "price_next_cop", p_value: 1 })).error?.message).toContain("no_autorizado");
+    expect((await a.rpc("admin_update_setting", { p_admin_id: A.id, p_key: "otra_cosa", p_value: 1 })).error?.message).toContain("llave_invalida");
+
+    const { data: before } = await a.from("app_settings").select("value").eq("key", "price_next_cop").single();
+    expect((await a.rpc("admin_update_setting", { p_admin_id: A.id, p_key: "price_next_cop", p_value: 21000 })).error).toBeNull();
+    const { data: quote } = await a.rpc("quote_for_user", { p_user_id: (await grantCredit(U.id)).order.user_id });
+    expect(quote[0]).toMatchObject({ product: "additional_generation", amount_cop: 21000 });
+    const { data: log } = await a.from("admin_audit_log").select("details").eq("admin_id", A.id).eq("action", "configuracion").single();
+    expect(log!.details).toEqual({ antes: before!.value, despues: 21000 });
+    await a.from("app_settings").update({ value: before!.value }).eq("key", "price_next_cop");
+  });
+});

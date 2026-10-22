@@ -10,7 +10,11 @@ export const getAdmin = cache(async () => {
   if (!user) return null;
   const admin = createAdminClient();
   const { data } = await admin.from("admins").select("user_id").eq("user_id", user.id).maybeSingle();
-  return data ? { user, admin } : null;
+  if (data) return { user, admin };
+  // Correos de administrador configurados (app_settings.admin_emails), solo con correo verificado.
+  if (!user.email_confirmed_at) return null;
+  const { data: promoted } = await admin.rpc("ensure_admin", { p_user_id: user.id });
+  return promoted ? { user, admin } : null;
 });
 
 /** Para páginas: quien no es administrador ve un 404 (no se revela que la ruta existe). */

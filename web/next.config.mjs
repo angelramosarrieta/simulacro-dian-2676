@@ -15,6 +15,11 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "/api/**/*": ["./lib/simulator/plantilla.html"],
   },
+  // El simulador de ejemplo (Analista II) vive en public/ejemplo/index.html,
+  // copia del index.html de la raíz del repo (antes publicado en la raíz del dominio).
+  async rewrites() {
+    return [{ source: "/ejemplo", destination: "/ejemplo/index.html" }];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

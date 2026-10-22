@@ -84,3 +84,32 @@ test("el progreso del simulador se guarda en la cuenta y se recupera en otro dis
   expect(JSON.parse(restored!)).toEqual({ "3": { s: 2, c: 1 } });
   await ctx.close();
 });
+
+test("un correo de la lista de administradores obtiene acceso y edita la configuración", async ({ page }) => {
+  const db = adminDb();
+  const u = await makeUser("duena");
+  const { data: cur } = await db.from("app_settings").select("value").eq("key", "admin_emails").single();
+  await db.from("app_settings").update({ value: [...(cur!.value as string[]), u.email] }).eq("key", "admin_emails");
+  const { data: price } = await db.from("app_settings").select("value").eq("key", "price_next_cop").single();
+
+  await login(page, u.email);
+  await page.goto("/admin/configuracion");
+  await expect(page.getByRole("heading", { name: "Configuración" })).toBeVisible();
+  await expect(page.getByText("Base de datos (Supabase)")).toBeVisible();
+  await page.getByLabel("Generación adicional").fill("22000");
+  page.once("dialog", (d) => d.accept());
+  await page.getByRole("button", { name: "Guardar configuración" }).click();
+  await expect(page.getByText("Configuración guardada")).toBeVisible();
+  const { data: after } = await db.from("app_settings").select("value").eq("key", "price_next_cop").single();
+  expect(after!.value).toBe(22000);
+
+  await page.goto("/");
+  await expect(page.locator("#precios")).toContainText("$ 22.000");
+  await db.from("app_settings").update({ value: price!.value }).eq("key", "price_next_cop");
+});
+
+test("el simulador de ejemplo sigue disponible en /ejemplo", async ({ page }) => {
+  const res = await page.goto("/ejemplo");
+  expect(res?.status()).toBe(200);
+  await expect(page).toHaveTitle(/Simulacro/);
+});

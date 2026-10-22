@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { jsonError, readJson, requireUser } from "@/lib/api";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getAdmin } from "@/lib/admin/auth";
 import { UUID_RE } from "@/lib/security";
 
 const schema = z.object({
@@ -21,9 +21,9 @@ const ERRORS: Record<string, string> = {
 export async function POST(request: Request) {
   const auth = await requireUser(request);
   if ("error" in auth) return auth.error;
-  const admin = createAdminClient();
-  const { data: isAdmin } = await admin.from("admins").select("user_id").eq("user_id", auth.user.id).maybeSingle();
-  if (!isAdmin) return jsonError(404, "no_encontrado", "No encontrado.");
+  const ctx = await getAdmin();
+  if (!ctx || ctx.user.id !== auth.user.id) return jsonError(404, "no_encontrado", "No encontrado.");
+  const admin = ctx.admin;
 
   let parsed;
   try {
