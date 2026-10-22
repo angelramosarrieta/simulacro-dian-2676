@@ -70,43 +70,43 @@ async function open(path) {
   await page.addStyleTag({ content: CLEAN });
 }
 
-// ---- Escena 2a (4.3–6.4 s): landing de centrahoy.online, arriba del todo.
+// ---- Escena 2a (4.0–6.3 s): landing de centrahoy.online, arriba del todo.
 await open("/");
-await hold(4.3, 6.4, "landing");
+await hold(4.0, 6.3, "landing");
 
-// ---- Escena 2b (6.4–9.0 s): simulador de ejemplo → Practicar → Práctica rápida.
+// ---- Escena 2b (6.3–8.55 s): simulador de ejemplo → Practicar → Práctica rápida.
 await open("/ejemplo");
 const tabs = page.getByRole("tab", { name: /Practicar/ });
 const s0 = (await docTop(tabs)) - 240;
 await scrollTo(s0);
-await hold(6.4, 7.0, "ejemplo");
-await tap(tabs, 7.0);
-await hold(7.0, 7.3, "ejemplo");
+await hold(6.3, 6.85, "ejemplo");
+await tap(tabs, 6.85);
+await hold(6.85, 7.15, "ejemplo");
 const rapida = page.getByRole("button", { name: /Práctica rápida/ });
 const s1 = (await docTop(rapida)) - 300;
-await scroll(s0, s1, 7.3, 8.2, "ejemplo");
-await hold(8.2, 8.4, "ejemplo");
-await tap(rapida, 8.4);
+await scroll(s0, s1, 7.15, 8.0, "ejemplo");
+await hold(8.0, 8.55, "ejemplo");
+await tap(rapida, 8.55);
 
-// ---- Escena 3 (8.4–16.0 s): caso, opciones, respuesta y explicación.
+// ---- Escena 3 (8.55–15.5 s): caso, opciones, respuesta y explicación.
 const caso = page.getByText("Caso", { exact: true });
 const s2 = (await docTop(caso)) - 150;
 await scrollTo(s2);
-await hold(8.4, 10.3, "pregunta");
+await hold(8.55, 9.45, "pregunta");
 const opts = page.locator("[role=radio]");
 const s3 = (await docTop(opts.nth(0))) - 170;
-await scroll(s2, s3, 10.3, 11.0, "pregunta");
-await hold(11.0, 11.2, "pregunta");
-await tap(opts.nth(1), 11.2);
-await hold(11.2, 11.7, "pregunta");
+await scroll(s2, s3, 9.45, 10.05, "pregunta");
+await hold(10.05, 10.3, "pregunta");
+await tap(opts.nth(1), 10.3);
+await hold(10.3, 10.75, "pregunta");
 const fb = page.getByText("Incorrecto", { exact: true });
 const s4 = (await docTop(fb)) - 110;
-await scroll(s3, s4, 11.7, 12.6, "explicacion");
-await hold(12.6, 16.0, "explicacion");
+await scroll(s3, s4, 10.75, 11.6, "explicacion");
+await hold(11.6, 15.5, "explicacion");
 
-// ---- Escena 5 (20.6–23.0 s): de vuelta a la landing.
+// ---- Escena 5 (19.85–22.4 s): de vuelta a la landing.
 await open("/");
-await hold(20.6, 23.0, "landing");
+await hold(19.85, 22.4, "landing");
 
 writeFileSync(join(OUT, "manifest.json"), JSON.stringify(manifest, null, 1));
 await browser.close();

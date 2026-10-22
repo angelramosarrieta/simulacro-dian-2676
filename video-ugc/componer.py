@@ -1,4 +1,4 @@
-"""Compone el video UGC de 24,8 s a partir de los cuadros reales de la app
+"""Compone el video UGC de 24,75 s a partir de los cuadros reales de la app
 (capturar.mjs) más subtítulos, texto gancho, toques y cierre.
 
 Uso:
@@ -23,7 +23,9 @@ FONTS = HERE.parent / "web" / "node_modules" / "geist" / "dist" / "fonts"
 EMOJI = "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf"
 
 W, H, FPS = 1080, 1920, 30
-DUR = 24.8
+# Tiempos ajustados a la voz real del clip de avatar (ver preparar_avatar.sh):
+# cada subtítulo arranca y termina con la frase dicha.
+DUR = 24.75
 
 # Identidad real de la app (web/app/globals.css).
 BG = (246, 246, 243)
@@ -33,42 +35,42 @@ FAINT = (150, 155, 162)
 BRAND = (14, 107, 88)
 MINT = (79, 194, 164)  # brand en modo oscuro: resalta sobre fondo oscuro
 
-# Escenas de persona: se graban con el celular (ver README).
-PERSONA = [(0.0, 4.3, 1), (16.0, 20.6, 4)]
-CIERRE = 23.0
+# Escenas del avatar (1 y 4): ahí se ve el clip de la persona.
+PERSONA = [(0.0, 4.0, 1), (15.5, 19.85, 4)]
+CIERRE = 22.4
 
-# Subtítulos sincronizados con el guion exacto. [x] = palabra resaltada.
+# Subtítulos con el guion original. [x] = palabra resaltada.
 CUES = [
-    (0.15, 1.55, "Parce, si te estás preparando"),
-    (1.55, 3.15, "para el concurso [DIAN 2676],"),
-    (3.15, 4.25, "mira esto"),
-    (4.40, 5.60, "Encontré esta plataforma"),
-    (5.60, 6.85, "donde puedes practicar"),
-    (6.85, 8.95, "preguntas tipo [juicio situacional]"),
-    (9.10, 9.90, "Respondes,"),
-    (9.90, 11.30, "revisas la [explicación]"),
-    (11.30, 12.80, "y puedes entender mejor"),
-    (12.80, 14.10, "por qué una opción"),
-    (14.10, 15.90, "es más adecuada que otra"),
-    (16.10, 17.40, "La verdad, me parece"),
-    (17.40, 18.90, "una herramienta interesante"),
-    (18.90, 20.50, "para complementar el estudio"),
-    (20.70, 21.80, "Te dejo el enlace"),
-    (21.80, 22.95, "para que le eches un vistazo"),
+    (0.17, 1.55, "Parce, si te estás preparando"),
+    (1.55, 4.00, "para el concurso [DIAN 2676],"),
+    (4.12, 4.85, "mira esto"),
+    (4.90, 6.25, "Encontré esta plataforma"),
+    (6.30, 7.00, "donde puedes practicar"),
+    (7.05, 9.50, "preguntas tipo [juicio situacional]"),
+    (10.00, 10.62, "Respondes,"),
+    (10.66, 11.90, "revisas la [explicación]"),
+    (12.15, 13.35, "y puedes entender mejor"),
+    (13.55, 14.40, "por qué una opción"),
+    (14.40, 15.50, "es más adecuada que otra"),
+    (15.74, 16.80, "La verdad, me parece"),
+    (16.80, 17.95, "una herramienta interesante"),
+    (17.98, 19.65, "para complementar el estudio"),
+    (20.11, 20.95, "Te dejo el enlace"),
+    (20.95, 22.30, "para que le eches un vistazo"),
 ]
-GANCHO = (0.0, 4.3, "¿Te preparas para la [DIAN 2676]?")
+GANCHO = (0.0, 4.0, "¿Te preparas para la [DIAN 2676]?")
 # Centro vertical de los subtítulos: sobre la persona, a la altura del pecho;
 # sobre la app, arriba (encabezado), para no tapar el caso ni la explicación.
-SUB_Y_PERSONA, SUB_Y_APP = 1330, 172
+SUB_Y_PERSONA, SUB_Y_APP = 1600, 172
 
 # Zoom suave por tramo: (t0, t1, zoom0, zoom1, centro_y)
 ZOOM = [
-    (4.3, 6.4, 1.00, 1.06, 760),
-    (6.4, 8.4, 1.00, 1.00, 960),
-    (8.4, 11.7, 1.00, 1.05, 900),
-    (11.7, 12.6, 1.05, 1.00, 900),
-    (12.6, 16.0, 1.00, 1.08, 880),
-    (20.6, 23.0, 1.04, 1.00, 760),
+    (4.0, 6.3, 1.00, 1.06, 760),
+    (6.3, 8.55, 1.00, 1.00, 960),
+    (8.55, 10.5, 1.00, 1.04, 900),
+    (10.5, 11.6, 1.04, 1.00, 900),
+    (11.6, 15.5, 1.00, 1.08, 880),
+    (19.85, 22.4, 1.04, 1.00, 760),
 ]
 
 
@@ -202,7 +204,7 @@ PANT_W, PANT_H = APP_W, APP_H + BARRA
 BISEL = 20
 TEL_W, TEL_H = PANT_W + 2 * BISEL, PANT_H + 2 * BISEL
 TEL_X, TEL_Y = (W - TEL_W) // 2, 318
-ENTRADAS = [4.3, 20.6]
+ENTRADAS = [4.0, 19.85]
 
 
 @lru_cache(None)

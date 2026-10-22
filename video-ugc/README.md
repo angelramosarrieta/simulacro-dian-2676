@@ -1,10 +1,11 @@
 # Video UGC · DIAN 2676 (centrahoy.online)
 
-Video vertical 1080 × 1920, 30 fps, **24,8 s**. Alterna un avatar de IA fotorrealista que habla a cámara con la **interfaz real** de la app mostrada dentro de un celular: la landing de centrahoy.online y el simulador de ejemplo (`/ejemplo`), en *Practicar → Práctica rápida*.
+Video vertical 1080 × 1920, 30 fps, **24,75 s**. **Video final: `entregables/dian2676_ugc_final_1080x1920.mp4`** (avatar generado con Gemini + app real). Alterna un avatar de IA fotorrealista que habla a cámara con la **interfaz real** de la app mostrada dentro de un celular: la landing de centrahoy.online y el simulador de ejemplo (`/ejemplo`), en *Practicar → Práctica rápida*.
 
 | Archivo | Qué es |
 |---|---|
-| `entregables/previsualizacion_avatar_pendiente.mp4` | Corte completo con tiempos, subtítulos, mockup del celular y cierre. Las escenas 1 y 4 tienen un plano guía en el lugar del avatar. Sin audio. |
+| `entregables/dian2676_ugc_final_1080x1920.mp4` | Video final con voz (-14 LUFS), listo para TikTok, Reels y Facebook. |
+| `preparar_avatar.sh` | Adapta el clip de Gemini: recorte 9:16, quita la frase repetida (19,85–25,0 s del original) y difumina sus subtítulos quemados. |
 | `capturar.mjs` | Graba la app real cuadro por cuadro (Playwright, 360 × 640 @3x). |
 | `componer.py` | Mockup del celular, zoom, toques, subtítulos, texto gancho y cierre. `previa` → MP4 · `capa` → ProRes 4444 con alfa. |
 | `montar.sh` | Pone la capa sobre el clip del avatar y mezcla la voz con la música. |
@@ -14,12 +15,12 @@ Video vertical 1080 × 1920, 30 fps, **24,8 s**. Alterna un avatar de IA fotorre
 
 | Tiempo | Imagen | Diálogo (exacto) | Texto en pantalla |
 |---|---|---|---|
-| 0,0–4,3 | **Avatar**, plano medio, mirando a cámara | “Parce, si te estás preparando para el concurso DIAN 2676, mira esto.” | Gancho: “¿Te preparas para la **DIAN 2676**? 👀” |
-| 4,3–9,0 | Entra el celular: landing de centrahoy.online → simulador de ejemplo → toque en *Practicar* → toque en *Práctica rápida* | “Encontré esta plataforma donde puedes practicar preguntas tipo juicio situacional.” | **juicio situacional** resaltado |
-| 9,0–16,0 | Celular: caso real → opciones → toque en B → *Incorrecto*, clave C y la explicación de cada opción, con zoom suave | “Respondes, revisas la explicación y puedes entender mejor por qué una opción es más adecuada que otra.” | **explicación** resaltado |
-| 16,0–20,6 | **Avatar** | “La verdad, me parece una herramienta interesante para complementar el estudio.” | — |
-| 20,6–23,0 | Celular: landing de centrahoy.online | “Te dejo el enlace para que le eches un vistazo.” | — |
-| 23,0–24,8 | Cierre con la identidad real (logo “26”, verde #0E6B58, Geist) | — | **centrahoy.online** / Preparación para la DIAN 2676 / nota: herramienta independiente, no afiliada a la DIAN ni a la CNSC |
+| 0,0–4,0 | **Avatar** (“mira esto” ya cae sobre el celular), plano medio, mirando a cámara | “Parce, si te estás preparando para el concurso DIAN 2676, mira esto.” | Gancho: “¿Te preparas para la **DIAN 2676**? 👀” |
+| 4,0–9,5 | Entra el celular: landing de centrahoy.online → simulador de ejemplo → toque en *Practicar* → toque en *Práctica rápida* | “Encontré esta plataforma donde puedes practicar preguntas tipo juicio situacional.” | **juicio situacional** resaltado |
+| 10,0–15,5 | Celular: caso real → opciones → toque en B → *Incorrecto*, clave C y la explicación de cada opción, con zoom suave | “Respondes, revisas la explicación y puedes entender mejor por qué una opción es más adecuada que otra.” | **explicación** resaltado |
+| 15,5–19,85 | **Avatar** | “La verdad, me parece una herramienta interesante para complementar el estudio.” | — |
+| 19,85–22,4 | Celular: landing de centrahoy.online | “Te dejo el enlace para que le eches un vistazo.” | — |
+| 22,4–24,75 | Cierre con la identidad real (logo “26”, verde #0E6B58, Geist) | — | **centrahoy.online** / Preparación para la DIAN 2676 / nota: herramienta independiente, no afiliada a la DIAN ni a la CNSC |
 
 La pregunta, las opciones y la explicación que se ven son las del simulador de ejemplo (caso de *Fiscalización y liquidación tributaria y aduanera*). En las capturas no aparecen precios, pagos ni botones de compra: se evita la parte de la landing que menciona Wompi y el pie con “Precios”.
 
@@ -59,8 +60,9 @@ node video-ugc/capturar.mjs
 python3 video-ugc/componer.py previa   # previsualización
 python3 video-ugc/componer.py capa     # capa con alfa para el montaje
 
-# 3. Montar sobre el clip del avatar
-video-ugc/montar.sh avatar.mp4 musica.mp3 [inicio_seg]
+# 3. Preparar el clip de Gemini y montar
+video-ugc/preparar_avatar.sh gemini_generated_video.mp4
+video-ugc/montar.sh build/avatar.mp4
 # → video-ugc/build/dian2676_ugc_1080x1920.mp4
 ```
 
@@ -68,7 +70,7 @@ Si prefieres CapCut: importa `build/capa.mov` (ProRes con alfa) en una pista por
 
 ## Verificación antes de publicar
 
-- [ ] La duración es de 24,8 s, en 1080 × 1920.
+- [ ] La duración es de 24,75 s, en 1080 × 1920.
 - [ ] Todo lo que se ve de la app es una captura real de la landing y de `/ejemplo`.
 - [ ] Los subtítulos coinciden palabra por palabra con el guion; los resaltados son DIAN 2676, juicio situacional y explicación.
 - [ ] El dominio final es exactamente **centrahoy.online**.
