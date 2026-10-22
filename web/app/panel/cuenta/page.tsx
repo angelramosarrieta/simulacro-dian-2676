@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LogOut, ShieldCheck } from "lucide-react";
+import { getAdmin } from "@/lib/admin/auth";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ProfileForm } from "@/components/panel/ProfileForm";
 import { EmailForm } from "@/components/panel/EmailForm";
@@ -11,12 +13,21 @@ import { dateOnly } from "@/lib/format";
 export const metadata: Metadata = { title: "Mi cuenta" };
 
 export default async function Page() {
-  const [{ user }, profile, balance, quote] = await Promise.all([requireSession(), getProfile(), getBalance(), getQuote()]);
+  const [{ user }, profile, balance, quote, isAdmin] = await Promise.all([requireSession(), getProfile(), getBalance(), getQuote(), getAdmin()]);
   return (
     <>
       <PageHeader eyebrow="Configuración" title="Mi cuenta" description="Tus datos, tu seguridad y el estado de tu cuenta." />
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-6">
+          {isAdmin && (
+            <Link href="/admin" className="card flex items-center gap-3 border-warn/40 p-5 hover:bg-warnSoft sm:p-6">
+              <ShieldCheck className="h-5 w-5 text-warn" aria-hidden />
+              <span>
+                <span className="block font-medium">Panel de administración</span>
+                <span className="text-[13px] text-muted">Métricas, órdenes, biblioteca, llaves y configuración.</span>
+              </span>
+            </Link>
+          )}
           <section className="card p-5 sm:p-6">
             <h2 className="mb-5 font-medium">Perfil y preferencias</h2>
             <ProfileForm

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LogOut } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { BottomNav, SideNav } from "@/components/panel/Nav";
 import { getBalance, getProfile } from "@/lib/data/account";
@@ -22,7 +22,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <SideNav />
           {isAdmin && (
             <Link href="/admin" className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] text-warn hover:bg-warnSoft">
-              Administración
+              <ShieldCheck className="h-[18px] w-[18px]" aria-hidden /> Administración
             </Link>
           )}
         </div>
@@ -45,9 +45,16 @@ export default async function PanelLayout({ children }: { children: React.ReactN
       <div className="min-w-0">
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line bg-bg/90 px-4 backdrop-blur lg:hidden">
           <Logo href="/panel" />
-          <span className="badge bg-brandSoft text-brandInk" title="Generaciones disponibles">
-            {balance} {balance === 1 ? "generación" : "generaciones"}
-          </span>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Link href="/admin" className="badge bg-warnSoft text-warn">
+                <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Admin
+              </Link>
+            )}
+            <span className="badge bg-brandSoft text-brandInk" title="Generaciones disponibles">
+              {balance} {balance === 1 ? "generación" : "generaciones"}
+            </span>
+          </div>
         </header>
         <main id="contenido" className="mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-10">
           {children}
