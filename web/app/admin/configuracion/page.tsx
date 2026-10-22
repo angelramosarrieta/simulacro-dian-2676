@@ -7,6 +7,7 @@ import { SecretsForm, type SecretRow } from "@/components/admin/SecretsForm";
 import { CONFIG_FIELDS } from "@/lib/config/catalog";
 import { encryptionAvailable } from "@/lib/config/crypto";
 import { cfg, loadRuntimeConfig, sourceOf } from "@/lib/config/runtime";
+import { knownModel, parseOverride } from "@/lib/ai/pricing";
 
 export default async function Page() {
   const { admin } = await requireAdminPage();
@@ -71,6 +72,16 @@ export default async function Page() {
         </ul>
       </section>
       <h2 className="mb-3 mt-8 text-[18px] font-semibold">Llaves de integración</h2>
+      {(() => {
+        const model = cfg("OPENAI_MODEL");
+        const override = parseOverride(cfg("OPENAI_PRICE_INPUT"), cfg("OPENAI_PRICE_OUTPUT"), cfg("OPENAI_PRICE_CACHED"));
+        if (s.aiProvider !== "openai" || !model || override || knownModel(model)) return null;
+        return (
+          <p role="alert" className="mb-4 rounded-xl border border-warn/30 bg-warnSoft px-4 py-3 text-[14px]">
+            El modelo <code>{model}</code> no tiene precio en la tabla interna: el costo se estima con precios altos y el límite por generación se alcanzará antes de lo real. Escribe sus precios en <b>Precio de entrada / salida de OpenAI</b> (abajo).
+          </p>
+        );
+      })()}
       <SecretsForm rows={secretRows} encryption={encryptionAvailable()} />
       <h2 className="mb-3 mt-10 text-[18px] font-semibold">Negocio</h2>
       <SettingsForm initial={settings} />

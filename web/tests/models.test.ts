@@ -35,3 +35,10 @@ describe("precios de OpenAI", () => {
     expect(parseOverride("abc", "4")).toBeNull();
   });
 });
+
+describe("gpt-5.4-mini", () => {
+  it("tiene precio y no se confunde con gpt-5", () => {
+    expect(priceFor("gpt-5.4-mini-2026-03-17")).toMatchObject({ input: 0.75, output: 4.5 });
+    expect(knownModel("gpt-5.4-mini")).toBe(true);
+  });
+});
