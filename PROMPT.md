@@ -1,178 +1,174 @@
-# Prompt para crear tu propio simulador de concurso CNSC
+# Prompt: crea tu simulador de concurso CNSC dentro de Claude
 
-Copia todo lo que está dentro del bloque de abajo y pégalo en Claude (claude.ai), en una conversación nueva. En el mismo mensaje **adjunta tus documentos**:
+Con este prompt, Claude te arma **tu propio simulador** de la prueba escrita, adaptado a tu cargo, como una app que abres desde el celular. No necesitas saber programar ni tener hosting: todo pasa dentro de Claude.
 
-1. **Manual de funciones de tu cargo**: la ficha del MERF o del manual específico, en PDF o en pantallazo.
-2. **Tus indicadores o ejes temáticos**: la lista que te muestra el operador del concurso con tu número de inscripción. Puedes pegar el texto o enviar un pantallazo.
-3. **Guía de Orientación al Aspirante** de tu proceso (PDF), si ya está publicada.
+## Antes de empezar: reúne 4 archivos
 
-Antes de enviar, reemplaza lo que está entre `[CORCHETES]`.
+| # | Archivo | Dónde lo consigues |
+|---|---|---|
+| 1 | **`plantilla.html`** | En este repositorio: abre [plantilla.html](plantilla.html) y toca **Download raw file** (ícono de descarga, arriba a la derecha). |
+| 2 | **Manual de funciones de tu cargo** | La ficha del MERF o del manual específico de tu entidad, en PDF o en pantallazo. Suele estar en SIMO, en el detalle de tu empleo. |
+| 3 | **Indicadores o ejes de tu empleo** | En la página del operador del concurso, con tu número de inscripción (la Guía de Orientación trae el enlace). Pantallazo o texto copiado. |
+| 4 | **Guía de Orientación al Aspirante** | PDF publicado en SIMO o en cnsc.gov.co, en la convocatoria de tu proceso. Si aún no existe, sigue sin ella. |
+
+## Pasos
+
+1. Entra a [claude.ai](https://claude.ai) y abre una **conversación nueva**.
+2. **Adjunta los 4 archivos** con el clip.
+3. Copia el prompt del bloque de abajo, **llena tus datos** donde dice `[ ]` y envíalo.
+4. Claude primero te muestra un resumen de tu cargo y un plan de preguntas. **Revísalo y responde "Confirmo"**, o corrige lo que esté mal.
+5. Claude crea la app por bloques. Cuando termine un bloque, escribe **"Continúa"** hasta completar el banco.
+6. Al final, abre la app, toca **Publicar** o **Compartir** para obtener el enlace y ábrelo en el celular. Luego agrégala a la pantalla de inicio:
+   - **iPhone (Safari):** Compartir → *Agregar a pantalla de inicio*. Ábrela desde el ícono y crea ahí tu PIN.
+   - **Android (Chrome):** menú ⋮ → *Agregar a pantalla principal*.
 
 ---
 
 ```text
-Actúa como experto en concursos de mérito de la CNSC (Colombia), en psicometría de pruebas
-de juicio situacional y en desarrollo web. Vas a construir un SIMULADOR DE ESTUDIO para mi
-prueba escrita, en un solo archivo HTML que funcione en el celular.
+Actúa como experto en concursos de mérito de la CNSC (Colombia), en pruebas de juicio
+situacional y en desarrollo web. Vas a crear MI SIMULADOR DE ESTUDIO para la prueba escrita,
+usando la plantilla HTML adjunta, y lo vas a entregar como un Artifact HTML (una app que
+pueda abrir en el celular).
 
-## 1. Mis datos
-- Proceso de selección: [ej.: DIAN 2676 / Distrito Capital 4 / Territorial 2026]
-- Entidad: [ej.: DIAN]
-- Denominación del empleo: [ej.: Analista II]
-- Código y grado: [ej.: 202-02]
+ARCHIVOS ADJUNTOS
+1. plantilla.html: la app ya construida (diseño, PIN, pestañas, simulacros, progreso y
+   guía). Solo le faltan mis datos y mis preguntas.
+2. Manual de funciones de mi cargo.
+3. Indicadores o ejes oficiales de mi empleo.
+4. Guía de Orientación al Aspirante (si no la adjunto, no inventes sus datos).
+
+MIS DATOS
+- Proceso de selección: [ej.: Distrito Capital 6 / DIAN 2676]
+- Entidad: [ej.: Secretaría de Hacienda de Bogotá]
+- Denominación, código y grado del empleo: [ej.: Técnico Operativo 314-05]
 - Nivel jerárquico: [Asistencial / Técnico / Profesional]
-- Número de OPEC o empleo: [ej.: 236762]
+- OPEC o número de empleo: [ej.: 123456]
 - Modalidad: [Ingreso / Ascenso]
 - Fecha y hora de la prueba: [ej.: domingo 8 de noviembre de 2026, 8:00 a. m.]
-- Adjunto: (a) manual de funciones del cargo, (b) lista de indicadores o ejes a evaluar,
-  (c) Guía de Orientación al Aspirante, si existe.
+- Total de preguntas que quiero: [150 a 200] más [15 a 20] afirmaciones comportamentales
 
-## 2. Antes de escribir código, analiza y muéstrame un resumen
-1. Lee los documentos adjuntos y extrae:
-   - el propósito del empleo y cada función esencial, numeradas;
-   - las competencias funcionales y comportamentales del manual, con su nivel;
-   - la lista EXACTA de indicadores o ejes, escrita tal cual aparece en el documento;
-   - de la guía: tipos de prueba, carácter (eliminatoria o clasificatoria), pesos
-     porcentuales para mi nivel y modalidad, puntaje mínimo aprobatorio, formato de los
-     ítems, número de opciones, duración, horario, documentos y elementos permitidos,
-     reglas de la hoja de respuestas y fecha de corte normativo.
-2. Muéstrame una tabla "eje → normas y temas que cubre → número de preguntas planeadas".
-   Reparte las preguntas según el peso real de cada eje para mi cargo: los ejes más ligados
-   a las funciones esenciales llevan más preguntas.
-3. Si falta un dato o hay ambigüedad, pregúntame antes de seguir. No inventes datos de la
-   guía: si algo no está en los documentos, márcalo como "no especificado".
+======================================================================
+FASE 1: ANÁLISIS (no escribas código todavía)
+======================================================================
+Lee los adjuntos y muéstrame:
+1. Propósito del empleo y funciones esenciales, numeradas.
+2. Competencias funcionales y comportamentales del manual, con su nivel.
+3. La lista EXACTA de ejes o indicadores, copiada tal cual del documento.
+4. De la guía: pruebas que se aplican, carácter, pesos para MI nivel y modalidad,
+   puntaje mínimo aprobatorio, formato de los ítems, horario, cierre de puertas,
+   documentos válidos, elementos permitidos, reglas de la hoja de respuestas, plazos de
+   reclamación y fecha de corte normativo.
+5. Una tabla "eje → normas y temas que cubre → número de preguntas", repartiendo más
+   preguntas en los ejes más ligados a las funciones esenciales. Si hay un eje de
+   razonamiento matemático o de cálculo, inclúyelo con casos numéricos del cargo.
+Si falta algún dato o algo es ambiguo, pregúntame. Marca como "no especificado" lo que no
+esté en los documentos. Espera a que yo escriba "Confirmo" antes de pasar a la fase 2.
 
-## 3. Banco de preguntas
-Total: [200] preguntas calificables + [15-20] afirmaciones comportamentales.
+======================================================================
+FASE 2: CONSTRUCCIÓN DE LA APP
+======================================================================
+REGLA DE ORO: no cambies el diseño, el CSS ni la lógica de la plantilla. Solo vas a
+reemplazar dos bloques del <script>: CONFIG y el arreglo Q. Todo lo demás se copia igual,
+para que la app funcione desde el primer intento.
 
-### 3.1 Competencias funcionales (formato de juicio situacional, PJS)
-Al menos el 40% en formato PJS completo, igual al de la CNSC:
-- **Caso**: una situación hipotética realista del día a día del empleo, coherente con mis
-  funciones esenciales y con mi nivel (un técnico apoya, verifica, documenta y reporta; un
-  profesional analiza, proyecta y decide; un asistencial atiende, radica y organiza).
-- **Enunciado**: una tarea en frase incompleta, por ejemplo "Con base en lo anterior, al
-  técnico le corresponde".
-- **3 opciones** (A, B, C) que completan el enunciado, empiezan en minúscula y terminan en
-  punto. Solo una es la solución efectiva. Las otras dos deben ser plausibles: errores
-  típicos de quien conoce el tema a medias, no absurdos evidentes.
-- **Justificación de CADA opción**: por qué es correcta o incorrecta, citando la norma
-  (ley, decreto, artículo) y conectándola con el caso, al estilo de los ejemplos de la guía.
-El resto pueden ser preguntas directas de conocimiento aplicado, también con 3 opciones,
-explicación y referencia normativa.
+A) BLOQUE CONFIG: reemplaza cada valor entre [CORCHETES]:
+   - clave: identificador corto y único, por ejemplo los dígitos de la OPEC. No lo cambies
+     después, porque de él dependen el PIN y el progreso guardados.
+   - marca (2 o 3 caracteres), titulo, proceso, entidad (con artículo), cargo, opec.
+   - examen: "AAAA-MM-DD". examenTexto: "Domingo 8 de noviembre · inicia 8:00 a. m. ·
+     puertas cierran 8:30 a. m.", con los datos de la guía.
+   - minimo: el puntaje mínimo aprobatorio de la guía (por lo general, 70).
+   - ejes: la lista EXACTA de mis ejes oficiales. Si hay ejes comportamentales o de
+     integridad (por ejemplo "Adaptabilidad nivel 2" u "Honestidad"), NO van aquí: se
+     practican con las afirmaciones Likert.
+   - guiaFuente y guia: 6 secciones (Cómo se califica, Formato de las preguntas, Día del
+     examen, Qué llevar, Hoja de respuestas, Resultados y reclamaciones), con viñetas
+     cortas basadas SOLO en la guía adjunta. Puedes usar <b> para resaltar cifras.
 
-Si el eje es "Razonamiento matemático" o incluye cálculos (porcentajes, regla de tres,
-liquidaciones, intereses, promedios ponderados, conversiones), crea casos numéricos del
-contexto del cargo. Los distractores deben ser los errores de cálculo más comunes, y la
-justificación debe mostrar el paso a paso. Recuerda que en la prueba no se permite
-calculadora: usa números que se puedan operar a mano.
+B) ARREGLO Q: el banco de preguntas. Borra las 3 preguntas de ejemplo y usa EXACTAMENTE
+   estos tres formatos (la clave correcta SIEMPRE en la posición 0, a:0; la app baraja
+   las opciones al mostrarlas):
 
-### 3.2 Reglas de exactitud (obligatorias)
-- Usa SOLO normas vigentes y expedidas hasta la fecha de corte de la guía. Si no estás
-  seguro de un artículo, un plazo o una cifra, NO lo uses: cambia la pregunta.
-- No uses valores que cambian cada año (UVT, salario mínimo) como dato fijo. Si los
-  necesitas, di "use un valor de ejemplo de $X".
-- Cada pregunta lleva su referencia corta: "Ley 1437/2011 art. 69", "ET art. 714".
-- No copies preguntas reales de la CNSC; son reservadas. Todo debe ser original.
-- No repitas preguntas ni enunciados idénticos.
-- Al terminar, haz una auditoría: revisa una por una que la clave sea correcta, que
-  exactamente una opción sea defendible y que la cita normativa corresponda. Corrige lo
-  que falle y dime cuántas corregiste.
+   1) Pregunta directa:
+   {t:"<eje exacto>",q:"enunciado",o:["correcta","distractor","distractor"],a:0,
+    e:"explicación breve de por qué",r:"Ley 1437/2011 art. 69"}
 
-### 3.3 Competencias comportamentales e integridad
-Formato autoinforme con escala Likert de 4 niveles: "Totalmente en desacuerdo",
-"En desacuerdo", "De acuerdo", "Totalmente de acuerdo". Sin respuesta correcta.
-- Afirmaciones en primera persona, con un pequeño costo o tensión ("…aunque me tome más
-  tiempo"), como en los ejemplos de la guía.
-- Cubre cada competencia comportamental de mi manual y los valores del Código de
-  Integridad (honestidad, respeto, compromiso, diligencia, justicia).
-- Al responder, la app explica que no hay respuesta correcta y advierte que marcar casi
-  todo "Totalmente de acuerdo" puede ser detectado por las escalas de control.
+   2) Caso tipo examen (juicio situacional, como la CNSC). Al menos el 40% del banco:
+   {t:"<eje exacto>",p:1,cs:"caso: situación hipotética realista del cargo",
+    q:"enunciado en frase incompleta, ej.: Con base en lo anterior, al técnico le corresponde",
+    o:["opción en minúscula terminada en punto.","…","…"],a:0,
+    j:["Correcta. Por qué, con la norma…","Incorrecta. Por qué…","Incorrecta. Por qué…"],
+    r:"referencia normativa"}
 
-### 3.4 Formato de datos (dentro del HTML)
-const Q = [
-  // pregunta directa
-  {t:"<eje exacto>", q:"enunciado", o:["A","B","C"], a:0, e:"explicación", r:"referencia"},
-  // caso PJS
-  {t:"<eje exacto>", p:1, cs:"caso", q:"enunciado incompleto",
-   o:["opción a.","opción b.","opción c."], a:0,
-   j:["justificación A","justificación B","justificación C"], r:"referencia"},
-  // afirmación Likert
-  {t:"Comportamental e integridad", lk:1, k:"<competencia o valor>", q:"afirmación"}
-];
-- "t" debe ser EXACTAMENTE uno de mis ejes oficiales; usa "Otros temas de apoyo" solo
-  para contenido complementario.
-- Escribe siempre la clave en la posición 0 ("a":0). La app baraja las opciones al
-  mostrarlas, así que la respuesta correcta no queda siempre en la misma letra.
-- A cada pregunta asígnale un "id" estable con su índice en el arreglo
-  (Q.map((x,i)=>({...x,id:i}))). Agrega preguntas nuevas SIEMPRE al final, para no
-  dañar el progreso guardado.
+   3) Afirmación comportamental o de integridad (sin respuesta correcta):
+   {t:COMP,lk:1,k:"<competencia o valor>",q:"afirmación en primera persona"}
 
-## 4. La aplicación (un solo archivo index.html)
-Requisitos técnicos:
-- HTML, CSS y JavaScript sin frameworks ni build. Solo se permiten fuentes de Google Fonts.
-- Mobile-first (375 px), sin scroll horizontal, áreas táctiles de al menos 44 px,
-  respetando las zonas seguras del iPhone (env(safe-area-inset-*)).
-- Modo claro y oscuro automático (prefers-color-scheme), con colores en variables CSS.
-- Todo lo que se guarda va en localStorage, envuelto en try/catch. Si el almacenamiento
-  falla, la app debe seguir funcionando.
-- Accesible: foco visible, etiquetas aria y prefers-reduced-motion.
+   Termina el arreglo con: ].map((x,i)=>({...x,id:i}));
 
-Diseño: profesional, minimalista y sobrio. Fondo neutro, tipografía limpia (por ejemplo
-Geist), un solo color de acento, bordes finos, sin emojis ni degradados llamativos.
+CALIDAD DE LAS PREGUNTAS
+- El campo t debe ser IDÉNTICO a uno de CONFIG.ejes. Usa otro texto solo para temas de
+  apoyo (Constitución, CPACA y similares), que la app muestra en "Otros temas de apoyo".
+- Los casos reflejan MIS funciones esenciales y MI nivel: un asistencial atiende, radica y
+  organiza; un técnico apoya, verifica, documenta y reporta; un profesional analiza,
+  proyecta y decide.
+- Las tres opciones deben ser plausibles. Los distractores son errores típicos de alguien
+  que conoce el tema a medias, nunca absurdos evidentes.
+- Cada justificación explica por qué la opción es correcta o incorrecta en ESE caso, con
+  la norma que lo sustenta.
+- En las preguntas de cálculo, usa números que se puedan operar a mano (en la prueba no se
+  permite calculadora). Los distractores deben ser los errores de cálculo más comunes, y la
+  explicación debe mostrar el paso a paso.
+- Las afirmaciones Likert llevan una tensión o costo ("…aunque me tome más tiempo"). Cubre
+  todas las competencias comportamentales del manual y los valores del Código de
+  Integridad: honestidad, respeto, compromiso, diligencia y justicia.
 
-Pantallas:
-1. **Bloqueo con PIN**: la primera vez la persona crea un PIN de 4 dígitos y lo confirma;
-   las siguientes veces lo ingresa, con un teclado numérico tipo app bancaria. Guarda
-   solo el hash SHA-256 del PIN (crypto.subtle), nunca el PIN en texto. Incluye la opción
-   "¿Olvidaste el PIN?", que restablece el PIN borrando el progreso, con confirmación
-   dentro de la página (no uses alert ni confirm). Agrega un botón de candado para
-   bloquear la app. Aclara en la pantalla que es un bloqueo local del dispositivo.
-2. **Navegación con pestañas inferiores**: Inicio, Practicar, Progreso y Guía.
-3. **Inicio**: cuenta regresiva de días hasta la prueba; botón principal "Simulacro de mi
-   cargo"; indicadores de aciertos, preguntas vistas y preguntas por repasar; los 3 ejes
-   con menos aciertos; el último resultado.
-4. **Practicar**:
-   - selector de tamaño del simulacro: 15, 30 o todas;
-   - modos: Casos tipo examen (solo PJS), Simulacro de mi cargo (solo ejes oficiales),
-     Simulacro general, Práctica rápida (10 al azar con retroalimentación inmediata),
-     Comportamental e integridad (Likert) y Repasar mis errores;
-   - lista de ejes oficiales con barra de avance; al tocar uno, se practica ese eje.
-5. **Pantalla de pregunta**: barra superior con botón de salir, nombre del modo,
-   "n de N" y cronómetro (1,5 minutos por pregunta en los simulacros); barra de progreso;
-   bloques "Caso" y "Enunciado"; opciones A, B, C; botones fijos abajo.
-   - En práctica: al responder, muestra si acertó, la clave y la justificación de la
-     correcta y de la opción elegida.
-   - En simulacro: no muestra respuestas hasta el final; permite navegar entre preguntas
-     con una cuadrícula numerada.
-6. **Resultado**: puntaje en escala de 0 a 100 con dos decimales truncados
-   (Math.floor(aciertos*10000/total)/100); comparación con el mínimo aprobatorio de mi
-   guía; desglose por eje; lista de preguntas falladas con su justificación; botón
-   "Practicar las falladas". Guarda el resultado en un historial (máximo 20).
-7. **Progreso**: aciertos por eje (barra roja si van por debajo del mínimo aprobatorio),
-   historial de simulacros y opción de borrar el progreso, con confirmación.
-8. **Guía**: resumen en secciones desplegables con cómo se califica (pesos de MI nivel y
-   modalidad), formato de las preguntas, día del examen (horarios, cierre de puertas,
-   permanencia mínima), qué llevar, hoja de respuestas, y resultados y reclamaciones.
-   Solo con datos de la guía adjunta.
+EXACTITUD (obligatorio)
+- Usa solo normas vigentes y expedidas hasta la fecha de corte de la guía.
+- Si no estás SEGURO de un artículo, un plazo, un porcentaje o una cifra, no lo uses:
+  cambia la pregunta por otra de la que sí estés seguro.
+- No uses la UVT ni el salario mínimo como valores fijos. Si los necesitas, escribe "use
+  un valor de ejemplo de $X".
+- No copies preguntas reales de la CNSC, que son reservadas. Todo debe ser original.
+- No repitas enunciados.
 
-Incluye un aviso visible: "Herramienta de estudio independiente; no está afiliada a la
-entidad, la CNSC ni el operador del concurso".
+CÓMO ENTREGAR (es un archivo largo)
+- Bloque 1: crea el Artifact con la plantilla completa, CONFIG lleno y las primeras
+  30 a 40 preguntas.
+- Bloques siguientes: cada vez que escriba "Continúa", ACTUALIZA EL MISMO Artifact
+  agregando 30 a 40 preguntas más AL FINAL del arreglo Q, sin borrar ni reordenar las
+  anteriores. Al terminar cada bloque, dime cuántas llevas por eje.
+- Si el Artifact se corta o deja de funcionar, avísame y repáralo antes de seguir.
 
-## 5. Entrega
-1. Primero, el resumen del punto 2 y espera mi confirmación.
-2. Luego, el archivo index.html completo. Si es muy largo, entrégalo por partes numeradas
-   y dime exactamente cómo unirlas.
-3. Al final, una tabla con el número de preguntas por eje, cuántas son PJS y el resultado
-   de la auditoría.
-4. Instrucciones cortas para publicarlo gratis (Vercel o GitHub Pages) y para instalarlo en
-   el celular con "Agregar a pantalla de inicio".
+======================================================================
+FASE 3: CIERRE
+======================================================================
+1. Audita el banco completo: que cada clave sea correcta, que solo una opción sea
+   defendible, que la cita normativa corresponda y que cada t coincida con un eje. Corrige
+   y dime cuántas preguntas corregiste.
+2. Muéstrame la tabla final: preguntas por eje, cuántas son casos y cuántas afirmaciones.
+3. Recuérdame cómo publicar el Artifact y agregarlo a la pantalla de inicio del celular.
 ```
 
 ---
 
-## Consejos
+## Preguntas frecuentes
 
-- Si Claude se queda corto, pídele: *"Continúa con las preguntas del eje X hasta completar N"*.
-- Para ampliar el banco después, pídele que **agregue las preguntas al final del arreglo** `Q`, así no se pierde tu progreso guardado.
-- Revisa las preguntas de cálculo y de plazos contra la norma. Un error en el banco se aprende como verdad.
-- Este repositorio trae un ejemplo completo para el cargo **Analista II (DIAN 2676)** en `index.html`.
+**¿Claude se detuvo a mitad del banco?**
+Escribe "Continúa". Si dice que llegaste al límite de mensajes, vuelve más tarde y escribe "Continúa agregando preguntas al final del arreglo Q del Artifact".
+
+**¿Quiero más preguntas de un eje?**
+Escribe: *"Agrega 20 casos más del eje [nombre exacto] al final del arreglo Q, en el mismo Artifact."*
+
+**¿Encontré una pregunta con un error?**
+Escribe: *"La pregunta que empieza '[primeras palabras]' tiene un error: [explicación]. Corrígela sin cambiar su posición en el arreglo."*
+
+**¿No me pide PIN o no guarda mi progreso?**
+Algunos visores no permiten guardar datos. La práctica funciona igual, pero sin PIN ni historial. Abre el enlace publicado del Artifact en Safari o Chrome y agrégalo a la pantalla de inicio.
+
+**¿Se borró mi progreso al actualizar la app?**
+No se borra mientras la `clave` de CONFIG sea la misma y las preguntas nuevas se agreguen al final.
+
+**¿Puedo ver un ejemplo terminado?**
+Sí: [index.html](index.html) es el simulador completo de *Analista II · DIAN 2676*, con 200 preguntas en 9 ejes.
+
+> Las preguntas que genere la IA pueden tener errores. Compara siempre con la norma vigente y con la información oficial en SIMO y cnsc.gov.co. Esta herramienta no está afiliada a la CNSC ni a ninguna entidad.

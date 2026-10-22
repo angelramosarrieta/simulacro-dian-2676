@@ -180,7 +180,53 @@ button.row:hover{background:var(--soft)}
 <div id="app"></div>
 
 <script>
-const EXAM = new Date(2026, 10, 8); // domingo 8 de noviembre de 2026
+// ===================== CONFIGURACIÓN DEL CARGO =====================
+// Junto con el banco de preguntas (const Q), es lo único que cambia de un cargo a otro.
+const CONFIG={
+  clave:"2676",               // identificador corto y único: separa el PIN y el progreso de otros simuladores
+  marca:"26",                 // 2 o 3 caracteres para el logo
+  titulo:"Simulacro 2676",    // nombre corto que aparece arriba
+  proceso:"DIAN 2676",        // proceso de selección
+  entidad:"la DIAN",          // entidad, con artículo
+  cargo:"Analista II",        // denominación del empleo
+  opec:"236762",              // número de OPEC o empleo
+  examen:"2026-11-08",        // fecha de la prueba escrita (AAAA-MM-DD)
+  examenTexto:"Domingo 8 de noviembre · inicia 8:00 a. m. · puertas cierran 8:30 a. m.",
+  minimo:70,                  // puntaje mínimo aprobatorio de la prueba funcional
+  // Ejes o indicadores oficiales del empleo, escritos igual que en el campo "t" de las preguntas
+  ejes:["Estructura organizacional de la DIAN", "Gestión documental y trazabilidad", "LA/FT, ROS y denuncias", "Liquidación de impuestos nacionales", "Misionalidad de la DIAN", "Normativa cambiaria", "Obligaciones formales y sustanciales", "Fiscalización y liquidación tributaria y aduanera", "Razonamiento matemático"],
+  guiaFuente:"Guía de Orientación al Aspirante (CNSC, octubre de 2026)",
+  // Resumen de la guía: cada bloque es una sección desplegable; los items admiten <b> e <i>
+  guia:[
+    {titulo:"Cómo se califica",items:[
+      "Competencias funcionales: <b>eliminatoria</b>. Necesitas <b>70,00 de 100</b> para seguir en el concurso.",
+      "En la modalidad de ingreso con experiencia, los pesos son: funcionales <b>65%</b>, comportamentales <b>15%</b>, integridad <b>10%</b> y valoración de antecedentes <b>10%</b>. En la modalidad de ascenso son 60%, 15%, 10% y 15%.",
+      "El puntaje va de 0 a 100, con dos decimales truncados. Los ítems que no marques cuentan como omisiones.",
+      "Los ítems que no cumplen criterios psicométricos se excluyen de la calificación.",
+      "Solo se evalúan normas vigentes expedidas hasta el 19 de junio de 2026."]},
+    {titulo:"Formato de las preguntas",items:[
+      "<b>Funcionales:</b> juicio situacional. Cada pregunta trae un caso, un enunciado y 3 opciones, y solo una es la solución efectiva.",
+      "<b>Comportamentales e integridad:</b> afirmaciones con 4 niveles, de \"Totalmente en desacuerdo\" a \"Totalmente de acuerdo\". No hay respuestas correctas y hay subescalas de control que detectan respuestas exageradamente favorables, así que lo mejor es responder con honestidad."]},
+    {titulo:"Día del examen",items:[
+      "Abren las puertas a las <b>7:15 a. m.</b>, la prueba empieza a las <b>8:00</b> y termina a la <b>1:00 p. m.</b>: es una sola sesión de 5 horas.",
+      "Las puertas se cierran a las <b>8:30 a. m.</b> Si llegas después, no puedes entrar y quedas excluido del concurso.",
+      "Llega 1 hora antes y visita el sitio al menos 2 días antes. La citación con el lugar aparece en SIMO.",
+      "Debes quedarte mínimo 1 hora en el salón, firmar los formatos y registrar tu huella antes de salir.",
+      "Si una pregunta te parece dudosa, pide al jefe de salón el <i>Formato de ítems dudosos</i>."]},
+    {titulo:"Qué llevar",items:[
+      "<b>Documento:</b> cédula amarilla con hologramas, cédula digital, pasaporte vigente o contraseña de la Registraduría con código de barras y QR (vigente).",
+      "<b>Lleva:</b> lápiz de mina negra N.º 2, sacapuntas y borrador.",
+      "<b>No se permite:</b> calculadora, tabletas, maletines ni hojas, y no se puede comer ni beber durante la sesión. El celular va apagado en la bolsa, debajo del pupitre de enfrente."]},
+    {titulo:"Hoja de respuestas",items:[
+      "Rellena el círculo completo. La lectora no reconoce una X, un visto ni un relleno tenue.",
+      "Marca una sola respuesta por pregunta. Para cambiarla, bórrala por completo.",
+      "Revisa que el número de la respuesta coincida con el de la pregunta. Lo que marques en el cuadernillo no se califica."]},
+    {titulo:"Resultados y reclamaciones",items:[
+      "Los resultados se publican en SIMO, con aviso de al menos 5 días hábiles.",
+      "Puedes reclamar por SIMO dentro de los 5 días hábiles siguientes a la publicación. Si pides acceso a tu prueba, tienes 2 días hábiles después de ese acceso para completar la reclamación."]}
+  ]
+};
+const EXAM=new Date(CONFIG.examen+"T00:00:00");
 const COMP = "Comportamental e integridad";
 // Banco original de práctica. a = índice de la opción correcta (antes de barajar).
 const Q = [
@@ -447,13 +493,13 @@ const Q = [
 const TOPICS=[...new Set(Q.map(x=>x.t))];
 const LK=["Totalmente en desacuerdo","En desacuerdo","De acuerdo","Totalmente de acuerdo"];
 const QG=Q.filter(q=>!q.lk);
-// Ejes oficiales del empleo 236762 (Analista II), según la consulta de indicadores del operador
-const EJES=["Estructura organizacional de la DIAN","Gestión documental y trazabilidad","LA/FT, ROS y denuncias","Liquidación de impuestos nacionales","Misionalidad de la DIAN","Normativa cambiaria","Obligaciones formales y sustanciales","Fiscalización y liquidación tributaria y aduanera","Razonamiento matemático"];
+const EJES=CONFIG.ejes;
 const OTROS=TOPICS.filter(t=>t!==COMP&&!EJES.includes(t));
 const inEje=q=>!q.lk&&EJES.includes(q.t);
 
 // ---------- almacenamiento local (puede fallar: todo va en try/catch) ----------
-const KEY="simulacro2676:v1", HKEY="simulacro2676:hist", PKEY="simulacro2676:pin", OKEY="simulacro2676:open";
+const NS="simulacro"+CONFIG.clave;
+const KEY=NS+":v1", HKEY=NS+":hist", PKEY=NS+":pin", OKEY=NS+":open";
 function get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function put(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function storageOK(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true}catch(e){return false}}
@@ -490,8 +536,8 @@ const I={
 
 // ---------- bloqueo con PIN (privacidad en este dispositivo) ----------
 async function hashPin(p){
-  try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("s2676|"+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
-  catch(e){let h=7;for(const c of "s2676|"+p)h=(h*31+c.charCodeAt(0))|0;return "f"+h}
+  try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("s"+CONFIG.clave+"|"+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+  catch(e){let h=7;for(const c of "s"+CONFIG.clave+"|"+p)h=(h*31+c.charCodeAt(0))|0;return "f"+h}
 }
 function lockScreen(){
   clearInterval(timerId);S=null;setOpen(false);
@@ -503,8 +549,8 @@ function drawLock(){
   const L=lockState;
   const title={enter:"Ingresa tu PIN",create:"Crea un PIN de 4 dígitos",confirm:"Confirma tu PIN"}[L.stage];
   app.innerHTML=`<main class="lock gut"><div class="lockbox">
-    <span class="mark">26</span>
-    <div class="stack" style="gap:6px"><h1>${title}</h1><p class="muted">Simulacro DIAN 2676 · Analista II</p></div>
+    <span class="mark">${esc(CONFIG.marca)}</span>
+    <div class="stack" style="gap:6px"><h1>${title}</h1><p class="muted">${esc(CONFIG.titulo)} · ${esc(CONFIG.cargo)}</p></div>
     <div class="dots${L.err?" err":""}" aria-label="${L.buf.length} de 4 dígitos">${[0,1,2,3].map(i=>`<i class="${i<L.buf.length?"on":""}"></i>`).join("")}</div>
     <p class="err-msg" role="alert">${esc(L.err)}</p>
     <div class="pad">${["1","2","3","4","5","6","7","8","9","","0","del"].map(k=>k===""?"<span></span>":k==="del"?`<button class="ghost" data-k="del" aria-label="Borrar">${I.del}</button>`:`<button data-k="${k}">${k}</button>`).join("")}</div>
@@ -540,7 +586,7 @@ function go(t){
   const V={inicio:vInicio,practicar:vPracticar,progreso:vProgreso,guia:vGuia}[t]();
   app.innerHTML=`
   <header class="top gut"><div class="inner">
-    <div class="brand"><span class="mark">26</span><span>Simulacro 2676</span></div>
+    <div class="brand"><span class="mark">${esc(CONFIG.marca)}</span><span>${esc(CONFIG.titulo)}</span></div>
     <div class="top-r"><span class="chip">${dl}</span>${get(PKEY)?`<button class="icon-btn" id="lockbtn" aria-label="Bloquear">${I.lock}</button>`:""}</div>
   </div></header>
   <main class="view gut"><div class="inner">${V.html}</div></main>
@@ -561,7 +607,7 @@ function mode(m){
   if(m==="lk")start(shuffle(Q.filter(q=>q.lk)),"prac",COMP);
   if(m==="errores")start(shuffle(Q.filter(q=>wrongIds().includes(q.id))),"prac","Repaso de errores");
 }
-function meter(acc){return acc==null?`<span class="meter"><i style="width:0"></i></span>`:`<span class="meter"><i class="${acc<.7?"low":""}" style="width:${Math.round(acc*100)}%"></i></span>`}
+function meter(acc){return acc==null?`<span class="meter"><i style="width:0"></i></span>`:`<span class="meter"><i class="${acc<CONFIG.minimo/100?"low":""}" style="width:${Math.round(acc*100)}%"></i></span>`}
 function topicRows(names){
   return names.map(t=>{
     if(t===COMP)return `<button class="row" data-topic="${esc(t)}"><span class="t">${esc(t)}</span><span class="d">${Q.filter(q=>q.lk).length} afirmaciones · sin calificación</span><span class="r">${I.chev}</span></button>`;
@@ -579,9 +625,9 @@ function vInicio(){
     <section class="hero">
       <p class="muted">${saludo}</p>
       <div class="big">${Math.max(d,0)}<small>${d===1?"día":"días"} para la prueba</small></div>
-      <p class="muted">Domingo 8 de noviembre · inicia 8:00 a. m. · puertas cierran 8:30 a. m.</p>
+      <p class="muted">${esc(CONFIG.examenTexto)}</p>
     </section>
-    <button class="cta" data-mode="cargo"><span><b>Simulacro de mi cargo</b><span class="s">9 ejes oficiales · ${nC} preguntas · cronometrado</span></span>${I.arrow}</button>
+    <button class="cta" data-mode="cargo"><span><b>Simulacro de mi cargo</b><span class="s">${EJES.length} ejes oficiales · ${nC} preguntas · cronometrado</span></span>${I.arrow}</button>
     <div class="kpis">
       <div class="kpi"><b>${T.acc==null?"—":Math.round(T.acc*100)+"%"}</b><span>Aciertos</span></div>
       <div class="kpi"><b>${T.seen}<span class="muted" style="font-size:.8rem;font-weight:400">/${QG.length}</span></b><span>Vistas</span></div>
@@ -606,7 +652,7 @@ function vPracticar(){
   const wrong=wrongIds().length;
   const modes=[
     ["pjs","Casos tipo examen",`${Q.filter(q=>q.p).length} casos de tu cargo · formato de la prueba`,'<span class="badge">Formato real</span>'],
-    ["cargo","Simulacro de mi cargo",`${Q.filter(inEje).length} preguntas de tus 9 ejes · cronometrado`,""],
+    ["cargo","Simulacro de mi cargo",`${Q.filter(inEje).length} preguntas de tus ${EJES.length} ejes · cronometrado`,""],
     ["general","Simulacro general",`${QG.length} preguntas de todos los temas · cronometrado`,""],
     ["rapida","Práctica rápida","10 preguntas al azar con explicación inmediata",""],
     ["lk","Comportamental e integridad",`${Q.filter(q=>q.lk).length} afirmaciones en escala de 4 niveles`,""],
@@ -618,9 +664,9 @@ function vPracticar(){
       <div class="seg" role="group" aria-label="Preguntas por simulacro">${[15,30,"Todas"].map(n=>`<button id="sz-${n}" data-sz="${n}" aria-pressed="${simSize===n}">${n}</button>`).join("")}</div>
       <div class="list">${modes.map(([m,t,d,b])=>`<button class="row" data-mode="${m}" ${m==="errores"&&!wrong?"disabled":""}><span class="t">${t}</span><span class="d">${d}</span><span class="r">${b}${I.chev}</span></button>`).join("")}</div>
     </section>
-    <section class="stack"><div class="label"><h2>Ejes oficiales de tu empleo</h2><span class="mono note">236762</span></div><div class="list">${topicRows(EJES)}</div></section>
+    <section class="stack"><div class="label"><h2>Ejes oficiales de tu empleo</h2><span class="mono note">${esc(CONFIG.opec)}</span></div><div class="list">${topicRows(EJES)}</div></section>
     <section class="stack"><h2>Competencias comportamentales</h2><div class="list">${topicRows([COMP])}</div></section>
-    <section class="stack"><h2>Otros temas de apoyo</h2><div class="list">${topicRows(OTROS)}</div></section>
+    ${OTROS.length?`<section class="stack"><h2>Otros temas de apoyo</h2><div class="list">${topicRows(OTROS)}</div></section>`:""}
   `,bind(){app.querySelectorAll("[data-sz]").forEach(b=>b.onclick=()=>{const v=b.dataset.sz;simSize=v==="Todas"?v:+v;go("practicar")})}};
 }
 
@@ -633,9 +679,9 @@ function vProgreso(){
       <div class="kpi"><b>${T.n}</b><span>Respuestas</span></div>
       <div class="kpi"><b>${hist.length}</b><span>Simulacros</span></div>
     </div>
-    <section class="stack"><h2>Por eje oficial</h2><div class="list">${topicRows(EJES)}</div><p class="note">La barra se pone roja cuando los aciertos están por debajo del 70%.</p></section>
+    <section class="stack"><h2>Por eje oficial</h2><div class="list">${topicRows(EJES)}</div><p class="note">La barra se pone roja cuando los aciertos están por debajo del ${CONFIG.minimo}%.</p></section>
     <section class="stack"><h2>Historial</h2>
-      ${hist.length?`<div class="list">${hist.map(h=>`<div class="row"><span class="t">${esc(h.l)}</span><span class="d">${new Date(h.d).toLocaleString("es-CO",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})} · ${h.ok}/${h.n}</span><span class="r"><span class="pill ${h.s>=70?"ok":"bad"}">${fmt(h.s)}</span></span></div>`).join("")}</div>`:`<p class="empty">Aquí verás el puntaje de cada simulacro que termines.</p>`}
+      ${hist.length?`<div class="list">${hist.map(h=>`<div class="row"><span class="t">${esc(h.l)}</span><span class="d">${new Date(h.d).toLocaleString("es-CO",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})} · ${h.ok}/${h.n}</span><span class="r"><span class="pill ${h.s>=CONFIG.minimo?"ok":"bad"}">${fmt(h.s)}</span></span></div>`).join("")}</div>`:`<p class="empty">Aquí verás el puntaje de cada simulacro que termines.</p>`}
     </section>
     <section class="stack"><button class="link" id="reset" style="align-self:flex-start">Borrar mi progreso</button><div id="confirm"></div></section>
   `,bind(){$("#reset").onclick=()=>{$("#confirm").innerHTML=`<div class="confirm"><p>¿Borrar aciertos, errores e historial de este dispositivo? Tu PIN se conserva.</p><div class="acts"><button class="btn" id="no">Cancelar</button><button class="btn danger" id="yes">Borrar</button></div></div>`;
@@ -644,43 +690,10 @@ function vProgreso(){
 
 function vGuia(){
   return {html:`
-    <section class="stack"><h1>Guía de la prueba</h1><p class="muted">Lo esencial de la Guía de Orientación al Aspirante (CNSC, octubre de 2026).</p></section>
-    <section class="guide">
-    <details open><summary>Cómo se califica</summary><ul>
-      <li>Competencias funcionales: <b>eliminatoria</b>. Necesitas <b>70,00 de 100</b> para seguir en el concurso.</li>
-      <li>En la modalidad de ingreso con experiencia, los pesos son: funcionales <b>65%</b>, comportamentales <b>15%</b>, integridad <b>10%</b> y valoración de antecedentes <b>10%</b>. En la modalidad de ascenso son 60%, 15%, 10% y 15%.</li>
-      <li>El puntaje va de 0 a 100, con dos decimales truncados. Los ítems que no marques cuentan como omisiones.</li>
-      <li>Los ítems que no cumplen criterios psicométricos se excluyen de la calificación.</li>
-      <li>Solo se evalúan normas vigentes expedidas hasta el 19 de junio de 2026.</li>
-    </ul></details>
-    <details><summary>Formato de las preguntas</summary><ul>
-      <li><b>Funcionales:</b> juicio situacional. Cada pregunta trae un caso, un enunciado y 3 opciones, y solo una es la solución efectiva.</li>
-      <li><b>Comportamentales e integridad:</b> afirmaciones con 4 niveles, de "Totalmente en desacuerdo" a "Totalmente de acuerdo". No hay respuestas correctas y hay subescalas de control que detectan respuestas exageradamente favorables, así que lo mejor es responder con honestidad.</li>
-    </ul></details>
-    <details><summary>Día del examen</summary><ul>
-      <li>Abren las puertas a las <b>7:15 a. m.</b>, la prueba empieza a las <b>8:00</b> y termina a la <b>1:00 p. m.</b>: es una sola sesión de 5 horas.</li>
-      <li>Las puertas se cierran a las <b>8:30 a. m.</b> Si llegas después, no puedes entrar y quedas excluido del concurso.</li>
-      <li>Llega 1 hora antes y visita el sitio al menos 2 días antes. La citación con el lugar aparece en SIMO.</li>
-      <li>Debes quedarte mínimo 1 hora en el salón, firmar los formatos y registrar tu huella antes de salir.</li>
-      <li>Si una pregunta te parece dudosa, pide al jefe de salón el <i>Formato de ítems dudosos</i>.</li>
-    </ul></details>
-    <details><summary>Qué llevar</summary><ul>
-      <li><b>Documento:</b> cédula amarilla con hologramas, cédula digital, pasaporte vigente o contraseña de la Registraduría con código de barras y QR (vigente).</li>
-      <li><b>Lleva:</b> lápiz de mina negra N.º 2, sacapuntas y borrador.</li>
-      <li><b>No se permite:</b> calculadora, tabletas, maletines ni hojas, y no se puede comer ni beber durante la sesión. El celular va apagado en la bolsa, debajo del pupitre de enfrente.</li>
-    </ul></details>
-    <details><summary>Hoja de respuestas</summary><ul>
-      <li>Rellena el círculo completo. La lectora no reconoce una X, un visto ni un relleno tenue.</li>
-      <li>Marca una sola respuesta por pregunta. Para cambiarla, bórrala por completo.</li>
-      <li>Revisa que el número de la respuesta coincida con el de la pregunta. Lo que marques en el cuadernillo no se califica.</li>
-    </ul></details>
-    <details><summary>Resultados y reclamaciones</summary><ul>
-      <li>Los resultados se publican en SIMO, con aviso de al menos 5 días hábiles.</li>
-      <li>Puedes reclamar por SIMO dentro de los 5 días hábiles siguientes a la publicación. Si pides acceso a tu prueba, tienes 2 días hábiles después de ese acceso para completar la reclamación.</li>
-    </ul></details>
-    </section>
-    <p class="note">Las preguntas de esta página son originales, redactadas a partir de las normas y de los ejes de tu empleo. Las de la CNSC son reservadas.</p>
-    <p class="note">Herramienta de estudio independiente: no está afiliada a la DIAN, la CNSC ni el operador del concurso. Verifica siempre la información oficial en SIMO y en cnsc.gov.co.</p>
+    <section class="stack"><h1>Guía de la prueba</h1><p class="muted">Lo esencial de la ${esc(CONFIG.guiaFuente)}.</p></section>
+    <section class="guide">${CONFIG.guia.map((g,i)=>`<details ${i?"":"open"}><summary>${esc(g.titulo)}</summary><ul>${g.items.map(x=>`<li>${x}</li>`).join("")}</ul></details>`).join("")}</section>
+    <p class="note">Las preguntas de esta página son originales, redactadas a partir de las normas y de los ejes de tu empleo. Las pruebas de la CNSC son reservadas.</p>
+    <p class="note">Herramienta de estudio independiente: no está afiliada a ${esc(CONFIG.entidad)}, la CNSC ni el operador del concurso. Verifica siempre la información oficial en SIMO y en cnsc.gov.co.</p>
   `};
 }
 
@@ -753,7 +766,7 @@ function finish(){
   <header class="qbar gut"><div class="inner"><button class="icon-btn" id="close" aria-label="Cerrar">${I.x}</button><div class="qmeta"><b>Resultado</b><span>${esc(label)}</span></div><span></span></div></header>
   <div class="prog"><i style="width:100%"></i></div>
   <main class="quiz gut"><div class="inner" style="gap:28px">
-    ${n?`<section class="hero"><div class="big">${fmt(sc)}<small>de 100</small></div><p>${ok} de ${n} correctas ${sc>=70?'<span class="pill ok">Supera el mínimo de 70,00</span>':'<span class="pill bad">Por debajo de 70,00</span>'}</p></section>`
+    ${n?`<section class="hero"><div class="big">${fmt(sc)}<small>de 100</small></div><p>${ok} de ${n} correctas ${sc>=CONFIG.minimo?`<span class="pill ok">Supera el mínimo de ${fmt(CONFIG.minimo)}</span>`:`<span class="pill bad">Por debajo de ${fmt(CONFIG.minimo)}</span>`}</p></section>`
       :`<section class="hero"><h1>Listo</h1><p class="muted">Respondiste ${likert.length} ${likert.length===1?"afirmación":"afirmaciones"} y marcaste "Totalmente de acuerdo" en ${top}.${likert.length&&top/likert.length>0.8?" Es una proporción muy alta: en la prueba real, las escalas de control pueden leerla como respuesta exageradamente favorable.":""}</p></section>`}
     ${by.length>1?`<section class="stack"><h2>Por tema</h2><div class="list">${by.map(b=>`<div class="row"><span class="t">${esc(b.t)}</span><span class="d">${b.ok} de ${b.n}</span><span class="r mono">${Math.round(b.ok/b.n*100)}%</span>${meter(b.ok/b.n)}</div>`).join("")}</div></section>`:""}
     ${wrong.length?`<section class="stack"><h2>Para repasar · ${wrong.length}</h2><div class="list">${wrong.map(x=>`<div class="rv"><span class="kicker">${esc(x.q.t)}</span>${x.q.cs?`<span class="muted">${esc(x.q.cs)}</span>`:""}<b style="font-weight:500">${esc(x.q.q)}</b>${x.pick!==null?`<span class="yours">Tu respuesta: ${esc(x.q.o[x.pick])}</span>`:`<span class="yours">Sin responder · cuenta como omisión</span>`}<span class="right">Correcta: ${esc(x.q.o[x.q.a])}</span><span class="muted">${esc(x.q.j?x.q.j[x.q.a]:x.q.e)}</span><span class="ref">${esc(x.q.r)}</span></div>`).join("")}</div></section>`:""}
