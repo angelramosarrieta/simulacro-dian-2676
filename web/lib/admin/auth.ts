@@ -8,6 +8,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const getAdmin = cache(async () => {
   const { user } = await getUser();
   if (!user) return null;
+  // Sin la llave de servicio no hay administración (el resto del panel sigue funcionando).
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
   const admin = createAdminClient();
   const { data } = await admin.from("admins").select("user_id").eq("user_id", user.id).maybeSingle();
   if (data) return { user, admin };
