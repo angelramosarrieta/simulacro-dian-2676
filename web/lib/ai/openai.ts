@@ -1,6 +1,6 @@
 import "server-only";
 import OpenAI from "openai";
-import { costUsd } from "@/lib/ai/pricing";
+import { costUsd, parseOverride } from "@/lib/ai/pricing";
 import { cfg } from "@/lib/config/runtime";
 import { AiError, type AiJsonRequest, type AiJsonResult, type AiProvider } from "@/lib/ai/types";
 
@@ -58,7 +58,7 @@ export function createOpenAiProvider(): AiProvider {
         costUsd: 0,
         durationMs: Date.now() - started,
       };
-      usage.costUsd = costUsd(usage.model, usage);
+      usage.costUsd = costUsd(usage.model, usage, parseOverride(cfg("OPENAI_PRICE_INPUT"), cfg("OPENAI_PRICE_OUTPUT"), cfg("OPENAI_PRICE_CACHED")));
 
       const choice = completion.choices[0];
       if (choice?.message?.refusal) throw new AiError("refusal", "El modelo declinó la solicitud", false, usage);
