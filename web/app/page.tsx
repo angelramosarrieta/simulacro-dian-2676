@@ -291,7 +291,7 @@ function QuestionPreview() {
           dirección… <span className="whitespace-nowrap text-brandInk">ET arts. 565 y 566-1</span>
         </p>
       </div>
-      <div className="card absolute -right-3 -top-7 hidden items-center gap-3 px-4 py-3 shadow-pop sm:flex">
+      <div className="card absolute -top-16 right-4 hidden items-center gap-3 px-4 py-3 shadow-pop sm:flex">
         <span className="grid h-9 w-9 place-items-center rounded-full bg-okSoft font-mono text-[13px] font-semibold text-ok">78</span>
         <div className="text-[12.5px] leading-tight">
           <p className="font-medium">Simulacro aprobado</p>
