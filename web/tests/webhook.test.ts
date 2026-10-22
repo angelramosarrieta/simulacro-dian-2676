@@ -80,3 +80,11 @@ d("webhook de Wompi", () => {
     expect(await res.json()).toMatchObject({ ignored: true });
   });
 });
+
+describe("URL alternativa del webhook", () => {
+  it("/api/payments/wompi/webhook es el mismo manejador que /api/webhooks/wompi", async () => {
+    const alias = await import("@/app/api/payments/wompi/webhook/route");
+    const main = await import("@/app/api/webhooks/wompi/route");
+    expect(alias.POST).toBe(main.POST);
+  });
+});
