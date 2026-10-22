@@ -32,10 +32,18 @@ const nextConfig = {
   // que quien ya lo usaba conserve su PIN y su progreso en el navegador. Se
   // genera con `npm run sync:plantilla`. (/ejemplo es una página de la app.)
   async redirects() {
-    return CENTRA_PATHS.flatMap((p) => [
+    // simulacro.centrahoy.online → centrahoy.online (dominio principal). Las APIs no
+    // se redirigen: Wompi y otros servicios llaman por POST y no siguen redirecciones.
+    const oldHost = {
+      source: "/:path((?!api/).*)",
+      has: [{ type: "host", value: "simulacro.centrahoy.online" }],
+      destination: "https://centrahoy.online/:path",
+      permanent: true,
+    };
+    return [oldHost, ...CENTRA_PATHS.flatMap((p) => [
       { source: `/${p}`, destination: `${CENTRA_URL}/${p}`, permanent: false },
       { source: `/${p}/:path*`, destination: `${CENTRA_URL}/${p}/:path*`, permanent: false },
-    ]);
+    ])];
   },
   async rewrites() {
     const centra = CENTRA_API.flatMap((p) => [

@@ -10,7 +10,7 @@ Ya están aplicadas las 3 migraciones (`supabase/migrations/`) en el proyecto **
 Falta configurar en el panel de Supabase de **centra-log**:
 
 **a) Authentication → URL Configuration**
-- Site URL: `https://<tu-dominio>` (por ejemplo `https://simulacro.centrahoy.online`)
+- Site URL: `https://<tu-dominio>` (`https://centrahoy.online`; agrega también `https://simulacro.centrahoy.online/**` a las Redirect URLs)
 - Redirect URLs: `https://<tu-dominio>/**`
 
 **b) Authentication → Sign In / Providers → Email**
@@ -45,7 +45,7 @@ Falta configurar en el panel de Supabase de **centra-log**:
 2. **Root Directory: `web`**. Framework: Next.js.
 3. Variables (ver `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API de centra-log), `NEXT_PUBLIC_SITE_URL`, `INTERNAL_JOB_SECRET`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_ALERT_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `NEXT_PUBLIC_SUPPORT_EMAIL` y `NEXT_PUBLIC_LEGAL_NAME`.
 4. **Settings → Functions**: Fluid Compute activo (la generación usa funciones de hasta 300 s).
-5. **Domains**: agrega `simulacro.centrahoy.online` (o el que elijas). En el DNS de `centrahoy.online`, crea el CNAME que indique Vercel.
+5. **Domains**: `centrahoy.online` (principal) y `simulacro.centrahoy.online`, que redirige al principal salvo `/api/*`. CENTRA vive en `app.centrahoy.online`; el simulador reenvía como proxy sus APIs y sus eventos de Wompi (ver `next.config.mjs` y `lib/payments/forward.ts`).
    > El simulador que estaba en la raíz del dominio vive en `/mi-simulador` (conserva PIN y progreso). `/ejemplo` es la demostración pública integrada al sitio.
 6. El cron diario (`vercel.json`, 7:00 a. m. de Colombia) se activa solo al desplegar.
 
