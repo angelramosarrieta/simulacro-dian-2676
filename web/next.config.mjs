@@ -8,6 +8,10 @@ const CENTRA_PATHS = [
   "entretenimiento", "finanzas", "gastos-fijos", "ingresos", "metas", "patrimonio", "proyeccion", "tareas", "viajes",
   "auth/recuperar", "auth/nueva-contrasena",
 ];
+// APIs de CENTRA que llaman clientes externos (app de iOS, Atajos de iOS, webhooks
+// de Mercado Pago). Se reenvían como proxy (no redirección) para conservar método,
+// cuerpo y encabezado Authorization.
+const CENTRA_API = ["integrations", "mobile", "capture", "agent", "insights", "analytics", "premium", "subscriptions", "csp-report", "auth", "webhooks/mercadopago"];
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -34,9 +38,13 @@ const nextConfig = {
     ]);
   },
   async rewrites() {
-    return [
+    const centra = CENTRA_API.flatMap((p) => [
+      { source: `/api/${p}`, destination: `${CENTRA_URL}/api/${p}` },
+      { source: `/api/${p}/:path*`, destination: `${CENTRA_URL}/api/${p}/:path*` },
+    ]);
+    return { beforeFiles: centra, afterFiles: [
       { source: "/mi-simulador", destination: "/mi-simulador/index.html" },
-    ];
+    ] };
   },
   async headers() {
     return [
