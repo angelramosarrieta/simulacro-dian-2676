@@ -45,10 +45,10 @@ export default async function Resumen() {
         </Alert>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         <Stat label="Generaciones disponibles" value={String(balance)} hint={balance ? "Listas para usar" : "Compra una para empezar"} icon={Sparkles} highlight={balance > 0} />
         <Stat label="Simuladores listos" value={String(completed.length)} hint={completed.length ? "En Mis simuladores" : "Aún no tienes"} icon={Library} />
-        <Stat label={quote.hasPaid ? "Generación adicional" : "Primer simulador"} value={cop(quote.amount)} hint="Pago único con Wompi" icon={CreditCard} />
+        <Stat wide label={quote.hasPaid ? "Generación adicional" : "Primer simulador"} value={cop(quote.amount)} hint="Pago único con Wompi" icon={CreditCard} />
       </div>
 
       {active ? (
@@ -142,14 +142,14 @@ export default async function Resumen() {
   );
 }
 
-function Stat({ label, value, hint, icon: Icon, highlight = false }: { label: string; value: string; hint: string; icon: typeof Sparkles; highlight?: boolean }) {
+function Stat({ label, value, hint, icon: Icon, highlight = false, wide = false }: { label: string; value: string; hint: string; icon: typeof Sparkles; highlight?: boolean; wide?: boolean }) {
   return (
-    <div className={`card p-5 ${highlight ? "border-brand/30 ring-1 ring-brand/15" : ""}`}>
+    <div className={`card p-4 sm:p-5 ${wide ? "col-span-2 sm:col-span-1" : ""} ${highlight ? "border-brand/30 ring-1 ring-brand/15" : ""}`}>
       <div className="flex items-center justify-between">
         <p className="text-[13px] text-muted">{label}</p>
         <Icon className="h-4 w-4 text-faint" aria-hidden />
       </div>
-      <p className="mt-2 text-[28px] font-semibold tracking-tight">{value}</p>
+      <p className="mt-1 text-[24px] font-semibold tracking-tight sm:mt-2 sm:text-[28px]">{value}</p>
       <p className="text-[13px] text-muted">{hint}</p>
     </div>
   );

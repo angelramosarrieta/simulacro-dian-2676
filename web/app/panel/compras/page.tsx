@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { OrderBadge } from "@/components/ui/StatusBadge";
 import { getBalance, getOrders, PRODUCT_LABEL, requireSession } from "@/lib/data/account";
 import { cop, dateTime } from "@/lib/format";
+import { reconcilePendingOrders } from "@/lib/payments/reconcile";
 
 export const metadata: Metadata = { title: "Compras y créditos" };
 
@@ -13,7 +14,8 @@ const REASON: Record<string, string> = { purchase: "Compra", generation: "Genera
 const METHOD: Record<string, string> = { CARD: "Tarjeta", PSE: "PSE", NEQUI: "Nequi", BANCOLOMBIA_TRANSFER: "Bancolombia", BANCOLOMBIA_QR: "QR Bancolombia", DAVIPLATA: "Daviplata" };
 
 export default async function Page() {
-  const { supabase } = await requireSession();
+  const { supabase, user } = await requireSession();
+  await reconcilePendingOrders(user.id);
   const [orders, balance, { data: ledger }] = await Promise.all([
     getOrders(100),
     getBalance(),

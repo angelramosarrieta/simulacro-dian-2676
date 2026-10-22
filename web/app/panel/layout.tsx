@@ -39,7 +39,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line bg-bg/90 px-4 backdrop-blur lg:hidden">
           <Logo href="/panel" />
           <span className="badge bg-brandSoft text-brandInk" title="Generaciones disponibles">
-            {balance} {balance === 1 ? "crédito" : "créditos"}
+            {balance} {balance === 1 ? "generación" : "generaciones"}
           </span>
         </header>
         <main id="contenido" className="mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-10">

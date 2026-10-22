@@ -408,7 +408,7 @@ begin
 
   if v_new = 'approved' then
     insert into public.credit_ledger (user_id, delta, reason, order_id, note)
-    values (v_order.user_id, v_order.credits, 'purchase', v_order.id, 'Compra ' || v_order.reference)
+    values (v_order.user_id, v_order.credits, 'purchase', v_order.id, 'Ref. ' || v_order.reference)
     on conflict do nothing;
     v_credited := found;
   end if;
@@ -454,7 +454,7 @@ begin
   if v_balance < 1 then raise exception 'sin_creditos'; end if;
 
   insert into public.credit_ledger (user_id, delta, reason, generation_id, note)
-  values (p_user_id, -1, 'generation', p_generation_id, 'Generación ' || v_gen.cargo);
+  values (p_user_id, -1, 'generation', p_generation_id, v_gen.cargo);
 
   update public.generations set
     status = 'queued', credit_consumed = true, started_at = now(), updated_at = now(),

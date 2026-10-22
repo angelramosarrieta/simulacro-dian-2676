@@ -26,7 +26,7 @@ describe("armado del simulador", () => {
     const { CONFIG, Q } = extractQ(html);
     expect(CONFIG).toMatchObject({ clave: "236762", cargo: "Gestor I 301-01", opec: "236762", ejes: ["Fiscalización", "Liquidación"] });
     expect(Q).toHaveLength(94 + 2);
-    expect(Q.at(-2)).toMatchObject({ t: "Fiscalización", cs: questions[0].p === 1 ? (questions[0] as { cs: string }).cs : "" });
+    expect(Q.at(-2)).toMatchObject({ t: "Fiscalización", cs: (questions[0] as { cs: string }).cs });
     expect(Q.at(-1)?.id).toBe(95);
   });
 

@@ -7,6 +7,7 @@ import { fetchTransaction } from "@/lib/payments/wompi";
 import { requireSession } from "@/lib/data/account";
 import { cop } from "@/lib/format";
 import { RefreshButton } from "@/components/panel/RefreshButton";
+import { reconcilePendingOrders } from "@/lib/payments/reconcile";
 
 export const metadata: Metadata = { title: "Resultado del pago" };
 
@@ -22,6 +23,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ i
   let state: "approved" | "pending" | "failed" | "unknown" = "unknown";
   let amount = 0;
 
+  if (!id) await reconcilePendingOrders(user.id);
   if (id) {
     try {
       const tx = await fetchTransaction(id);

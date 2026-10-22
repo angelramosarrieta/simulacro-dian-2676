@@ -5,6 +5,7 @@ import { cop } from "@/lib/format";
 import { getPublicPricing } from "@/lib/pricing";
 
 export const metadata: Metadata = { title: "Términos y condiciones" };
+export const revalidate = 3600;
 
 // Borrador base. Revisar con asesoría legal antes de operar a escala (ver docs/PENDIENTES.md).
 export default async function Page() {

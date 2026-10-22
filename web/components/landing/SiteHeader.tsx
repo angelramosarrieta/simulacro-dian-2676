@@ -7,10 +7,10 @@ export function SiteHeader({ signedIn = false }: { signedIn?: boolean }) {
       <div className="mx-auto flex h-16 max-w-page items-center justify-between gap-4 px-4 sm:px-6">
         <Logo />
         <nav aria-label="Principal" className="hidden items-center gap-1 text-[14px] text-muted md:flex">
-          <a href="/#como-funciona" className="rounded-lg px-3 py-2 hover:text-ink">Cómo funciona</a>
-          <a href="/#que-incluye" className="rounded-lg px-3 py-2 hover:text-ink">Qué incluye</a>
-          <a href="/#precios" className="rounded-lg px-3 py-2 hover:text-ink">Precios</a>
-          <a href="/#preguntas" className="rounded-lg px-3 py-2 hover:text-ink">Preguntas</a>
+          <Link href="/#como-funciona" className="rounded-lg px-3 py-2 hover:text-ink">Cómo funciona</Link>
+          <Link href="/#que-incluye" className="rounded-lg px-3 py-2 hover:text-ink">Qué incluye</Link>
+          <Link href="/#precios" className="rounded-lg px-3 py-2 hover:text-ink">Precios</Link>
+          <Link href="/#preguntas" className="rounded-lg px-3 py-2 hover:text-ink">Preguntas</Link>
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (

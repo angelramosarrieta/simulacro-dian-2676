@@ -116,6 +116,7 @@ d("worker de generación (proveedor falso)", () => {
     const last = await driveGeneration(admin(), id, () => fakeProvider({ invalidDocs: true }), 600_000);
     expect(last).toMatchObject({ state: "failed", detail: "documentos_invalidos" });
     const { data: g } = await U.client.from("generations").select("status, error_message, credit_refunded").eq("id", id).single();
+    if (!g) throw new Error("sin generación");
     expect(g).toMatchObject({ status: "failed", credit_refunded: true });
     expect(g.error_message).toContain("no es un manual");
     const { data: bal } = await U.client.rpc("my_credit_balance");
@@ -127,6 +128,7 @@ d("worker de generación (proveedor falso)", () => {
     const last = await driveGeneration(admin(), id, () => fakeProvider({ costPerCall: 1.6 }), 600_000);
     expect(last.state).toBe("failed");
     const { data: g } = await U.client.from("generations").select("error_code, cost_usd, steps_run").eq("id", id).single();
+    if (!g) throw new Error("sin generación");
     expect(g.error_code).toBe("limite_consumo");
     expect(Number(g.cost_usd)).toBeLessThan(3 + 1.6);
     const { data: bal } = await U.client.rpc("my_credit_balance");

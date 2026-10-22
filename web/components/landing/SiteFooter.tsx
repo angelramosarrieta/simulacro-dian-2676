@@ -15,8 +15,8 @@ export function SiteFooter() {
         <div>
           <p className="eyebrow mb-3">Producto</p>
           <ul className="space-y-2 text-sm">
-            <li><a className="text-muted hover:text-ink" href="/#como-funciona">Cómo funciona</a></li>
-            <li><a className="text-muted hover:text-ink" href="/#precios">Precios</a></li>
+            <li><Link className="text-muted hover:text-ink" href="/#como-funciona">Cómo funciona</Link></li>
+            <li><Link className="text-muted hover:text-ink" href="/#precios">Precios</Link></li>
             <li><a className="text-muted hover:text-ink" href={BRAND.exampleUrl} target="_blank" rel="noreferrer">Ver un ejemplo</a></li>
           </ul>
         </div>

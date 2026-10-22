@@ -60,9 +60,11 @@ export function ProfileForm({ initial, onboarding = false }: { initial: Values; 
         </div>
       </div>
 
-      <fieldset className="space-y-5 border-t border-line pt-5">
-        <legend className="text-[15px] font-medium">Tu empleo en el concurso</legend>
-        <p className="-mt-3 text-[13px] text-muted">Lo usamos para prellenar el asistente de generación.</p>
+      <div className="space-y-5 border-t border-line pt-5">
+        <div>
+          <h3 className="text-[15px] font-medium">Tu empleo en el concurso</h3>
+          <p className="mt-0.5 text-[13px] text-muted">Lo usamos para prellenar el asistente de generación.</p>
+        </div>
         <div>
           <label htmlFor="default_cargo" className="label">Denominación, código y grado</label>
           <input id="default_cargo" className="input" placeholder="Ej.: Gestor I 301-01" value={v.default_cargo} maxLength={120} onChange={(e) => setV({ ...v, default_cargo: e.target.value })} />
@@ -86,7 +88,7 @@ export function ProfileForm({ initial, onboarding = false }: { initial: Values; 
             </select>
           </div>
         </div>
-      </fieldset>
+      </div>
 
       <label className="flex items-start gap-3 border-t border-line pt-5 text-[14px]">
         <input type="checkbox" className="mt-1 h-4 w-4 accent-[rgb(var(--brand))]" checked={v.marketing_opt_in} onChange={(e) => setV({ ...v, marketing_opt_in: e.target.checked })} />

@@ -6,6 +6,8 @@ En este concurso la guía y el marco normativo son iguales para todos, así que 
 
 > Herramienta de estudio independiente. No está afiliada a la DIAN, la CNSC ni el operador del concurso. Verifica siempre la información oficial en SIMO y en cnsc.gov.co.
 
+> **Nuevo: plataforma web.** En la carpeta [`web/`](web/) está la plataforma comercial: landing, cuentas, pagos con Wompi y generación automática del simulador con IA. Empieza por [web/docs/PUESTA-EN-MARCHA.md](web/docs/PUESTA-EN-MARCHA.md).
+
 **Ejemplo terminado:** [simulacro.centrahoy.online](https://simulacro.centrahoy.online), el simulador de *Analista II, Fiscalización y liquidación*.
 
 ---
