@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { applyTransaction } from "@/lib/payments/apply";
 import { fetchTransaction } from "@/lib/payments/wompi";
 import { verifyWebhookSignature, type WompiWebhookPayload } from "@/lib/payments/wompi-core";
+import { alertAdmin } from "@/lib/email/send";
 
 /**
  * Webhook de eventos de Wompi (URL a configurar en el panel de Wompi:
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
   } catch (e) {
     const message = e instanceof Error ? e.message : "error";
     await admin.from("payment_events").update({ error: message.slice(0, 500) }).eq("id", eventId);
+    await alertAdmin("Error procesando un webhook de Wompi", [`Transacción: ${tx.id}`, `Referencia: ${tx.reference}`, `Estado informado: ${tx.status}`, `Error: ${message}`, "Wompi reintentará el envío; la conciliación diaria también lo revisa."]);
     // 500 para que Wompi reintente: un pago aprobado no se puede perder.
     return NextResponse.json({ error: "Reintentar" }, { status: 500 });
   }

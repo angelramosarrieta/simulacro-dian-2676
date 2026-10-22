@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from "@/components/auth/Turnstile";
 import { Alert } from "@/components/ui/Alert";
 import { Field } from "@/components/ui/Field";
 import { Spinner } from "@/components/ui/Spinner";
+import { track } from "@vercel/analytics";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage, passwordProblem } from "@/lib/auth-errors";
 
@@ -17,6 +19,8 @@ export function RegisterForm() {
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const captchaRef = useRef<TurnstileHandle>(null);
 
   const pwError = touched ? passwordProblem(password) : null;
 
@@ -34,10 +38,13 @@ export function RegisterForm() {
       options: {
         data: { full_name: name.trim().slice(0, 120), accepted_terms: true },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/panel/bienvenida`,
+        captchaToken: captcha ?? undefined,
       },
     });
+    captchaRef.current?.reset();
     setLoading(false);
     if (error) return setError(authErrorMessage(error.message, error.code));
+    track("registro");
     // Con confirmación de correo activa no hay sesión hasta verificar.
     if (!data.session) router.push(`/verifica-tu-correo?email=${encodeURIComponent(email.trim())}`);
     else {
@@ -70,7 +77,8 @@ export function RegisterForm() {
           <Link href="/privacidad" className="link" target="_blank">política de privacidad</Link>.
         </span>
       </label>
-      <button type="submit" className="btn-primary w-full" disabled={loading}>
+      <Turnstile ref={captchaRef} onToken={setCaptcha} />
+      <button type="submit" className="btn-primary w-full" disabled={loading || (TURNSTILE_ENABLED && !captcha)}>
         {loading && <Spinner />} {loading ? "Creando tu cuenta…" : "Crear cuenta gratis"}
       </button>
       <p className="text-center text-[13px] text-muted">No cobramos por registrarte. Pagas solo cuando generes tu simulador.</p>

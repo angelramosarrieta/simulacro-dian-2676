@@ -45,6 +45,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Todo menos estáticos, imágenes, webhooks y jobs internos (se autentican solos).
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|robots.txt|sitemap.xml|api/webhooks|api/internal|.*\\.(?:png|jpg|jpeg|svg|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|robots.txt|sitemap.xml|api/webhooks|api/internal|api/cron|.*\\.(?:png|jpg|jpeg|svg|webp|ico)$).*)",
   ],
 };

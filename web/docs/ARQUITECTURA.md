@@ -26,6 +26,9 @@ Registrarse no cobra nada. La compra se hace cuando el usuario ya subió sus doc
 | `GET /api/generations/:id` | Estado para el panel; reanuda la generación si está detenida |
 | `POST /api/internal/generations/:id/run` | Continuación del worker (`INTERNAL_JOB_SECRET`) |
 | `PATCH /api/profile` | Edita el perfil propio |
+| `POST /api/simulators/:id/progress` | Guarda el progreso del simulador en la cuenta |
+| `/admin/*`, `POST /api/admin/credits` | Administración (tabla `admins`; quien no es admin ve 404) |
+| `GET /api/cron/diario` | Mantenimiento diario (Vercel Cron con `CRON_SECRET`) |
 
 ## Modelo de datos
 
@@ -36,6 +39,8 @@ Registrarse no cobra nada. La compra se hace cuando el usuario ya subió sus doc
 - `usage_events`: cada llamada a la IA con tokens, costo y resultado.
 - `payment_events`: eventos de webhook (idempotencia y auditoría). Sin acceso para usuarios.
 - `app_settings`: precios (públicos) y límites (privados).
+- `admins` y `admin_audit_log`: quién administra y qué hizo (solo servidor).
+- `simulator_progress`: aciertos e historial del simulador por generación.
 
 ## Seguridad (resumen de la revisión)
 

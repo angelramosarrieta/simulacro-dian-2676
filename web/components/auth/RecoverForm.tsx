@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from "@/components/auth/Turnstile";
 import { Alert } from "@/components/ui/Alert";
 import { Field } from "@/components/ui/Field";
 import { Spinner } from "@/components/ui/Spinner";
@@ -11,6 +12,8 @@ export function RecoverForm() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const captchaRef = useRef<TurnstileHandle>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -18,7 +21,9 @@ export function RecoverForm() {
     setLoading(true);
     const { error } = await createClient().auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/auth/callback?next=/restablecer`,
+      captchaToken: captcha ?? undefined,
     });
+    captchaRef.current?.reset();
     setLoading(false);
     // Por privacidad, el mensaje es el mismo exista o no la cuenta.
     if (error && error.code !== "user_not_found") return setError(authErrorMessage(error.message, error.code));
@@ -36,7 +41,8 @@ export function RecoverForm() {
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
       {error && <Alert tone="error">{error}</Alert>}
       <Field id="email" label="Correo electrónico" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-      <button type="submit" className="btn-primary w-full" disabled={loading || !email}>
+      <Turnstile ref={captchaRef} onToken={setCaptcha} />
+      <button type="submit" className="btn-primary w-full" disabled={loading || !email || (TURNSTILE_ENABLED && !captcha)}>
         {loading && <Spinner />} {loading ? "Enviando…" : "Enviar enlace"}
       </button>
     </form>

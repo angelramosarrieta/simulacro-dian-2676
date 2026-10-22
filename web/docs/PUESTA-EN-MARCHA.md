@@ -1,79 +1,79 @@
-# Puesta en marcha (checklist para mañana)
+# Puesta en marcha
 
 Tiempo estimado: 1 a 2 horas. Haz los pasos en orden; cada uno dice cómo verificarlo.
 
-## 1. Supabase de producción (15 min)
+## 1. Supabase: proyecto `centra-log` ✅ base de datos lista
 
-La organización de Supabase está en el plan **Free**, que permite **2 proyectos activos** y hoy ya tiene 2 (los de CENTRA). Elige una opción:
+Ya están aplicadas las 3 migraciones (`supabase/migrations/`) en el proyecto **centra-log** (`nnfudjmautufeswvkytd`), que estaba vacío:
+10 tablas con RLS, funciones de negocio, buckets privados `documents` y `simulators`, y la configuración de precios y límites. El asesor de seguridad de Supabase no reporta problemas.
 
-- **A.** Pausar un proyecto que no uses (por ejemplo, uno de pruebas) y crear `simulacro-2676`, gratis.
-- **B.** Pasar la organización a Pro (≈ US$25 al mes, incluye más proyectos y backups).
-- No reutilices la base de CENTRA: las tablas y los datos de los clientes deben quedar separados.
+Falta configurar en el panel de Supabase de **centra-log**:
 
-Luego, desde `web/`:
-
-```bash
-npx supabase login
-npx supabase link --project-ref <ref-del-proyecto-nuevo>
-npx supabase db push          # crea tablas, funciones, políticas y buckets
-npx supabase config push      # plantillas de correo en español y reglas de contraseña
-```
-
-En el panel de Supabase, **Authentication → URL Configuration**:
-- Site URL: `https://<tu-dominio>`
+**a) Authentication → URL Configuration**
+- Site URL: `https://<tu-dominio>` (por ejemplo `https://simulacro.centrahoy.online`)
 - Redirect URLs: `https://<tu-dominio>/**`
 
-En **Authentication → Emails → SMTP**: configura un remitente propio (Resend, Brevo o el de tu dominio). El correo integrado de Supabase solo envía unos pocos mensajes por hora y no sirve para vender.
+**b) Authentication → Sign In / Providers → Email**
+- Confirm email: **activado**
+- Minimum password length: **8**, Password requirements: **letras y números**
 
-✅ Verificación: en **Table Editor** debes ver `profiles`, `orders`, `credit_ledger`, `generations`, `usage_events`, `payment_events` y `app_settings`, y en **Storage** los buckets `documents` y `simulators`, ambos privados.
+**c) Authentication → Emails → SMTP Settings** (los mismos datos de CENTRA, ver su proyecto):
+- Enable custom SMTP: activado
+- Sender email: `no-reply@centrahoy.online` · Sender name: `Simulacro 2676`
+- Host: `smtp.resend.com` · Port: `465`
+- Username: `resend` ← en CENTRA un error aquí causó `535 Invalid username`
+- Password: tu API key de Resend (`re_…`)
+
+**d) Authentication → Emails → Templates**: copia el asunto y el HTML de cada archivo de `supabase/templates/`:
+
+| Plantilla | Archivo | Asunto |
+|---|---|---|
+| Confirm signup | `confirmation.html` | Confirma tu correo · Simulacro 2676 |
+| Reset password | `recovery.html` | Restablece tu contraseña · Simulacro 2676 |
+| Change email address | `email_change.html` | Confirma tu nuevo correo · Simulacro 2676 |
+| Magic link | `magic_link.html` | Tu enlace para ingresar · Simulacro 2676 |
+
+**e) Authentication → Attack Protection → Bot protection (captcha)**: activa Cloudflare Turnstile y pega la **secret key**. Puede ser el mismo widget de CENTRA si agregas el dominio nuevo en Cloudflare → Turnstile → tu widget → Hostnames.
+
+**f) Hazte administrador** (después de registrarte en el sitio), en el SQL Editor:
+
+```sql
+insert into public.admins (user_id) select id from auth.users where email = 'angelramosarrieta@gmail.com';
+```
+
+✅ Verificación: al registrarte llega el correo en español desde `no-reply@centrahoy.online` y, tras confirmar, entras a `/panel/bienvenida`. Con la fila de admin, en el panel aparece el enlace "Administración".
 
 ## 2. Vercel (15 min)
 
-1. Entra a vercel.com → **Add New → Project** → importa `angelramosarrieta/simulacro-dian-2676`.
+1. vercel.com → **Add New → Project** → importa `angelramosarrieta/simulacro-dian-2676`, rama `plataforma-saas` (o fusiónala a `main`).
 2. **Root Directory: `web`**. Framework: Next.js.
-3. Carga las variables de [.env.example](../.env.example): Supabase, `INTERNAL_JOB_SECRET` (genérala con `openssl rand -hex 32`), `NEXT_PUBLIC_SITE_URL` y los datos de contacto.
-4. Verifica que **Fluid Compute** esté activo (Settings → Functions). La generación usa funciones de hasta 300 s.
-5. Despliega. Agrega tu dominio en **Settings → Domains** y actualiza `NEXT_PUBLIC_SITE_URL`.
+3. Variables (ver `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API de centra-log), `NEXT_PUBLIC_SITE_URL`, `INTERNAL_JOB_SECRET`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_ALERT_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `NEXT_PUBLIC_SUPPORT_EMAIL` y `NEXT_PUBLIC_LEGAL_NAME`.
+4. **Settings → Functions**: Fluid Compute activo (la generación usa funciones de hasta 300 s).
+5. **Domains**: agrega `simulacro.centrahoy.online` (o el que elijas). En el DNS de `centrahoy.online`, crea el CNAME que indique Vercel.
+   > Hoy `simulacro.centrahoy.online` muestra el simulador de ejemplo. Si quieres conservarlo, usa otro subdominio (por ejemplo `app.` o `prueba2676.`) o mueve el ejemplo a `/ejemplo`.
+6. El cron diario (`vercel.json`, 7:00 a. m. de Colombia) se activa solo al desplegar.
 
-> La rama con todo esto es `plataforma-saas`. Fusiónala a `main` cuando quieras publicar. El simulador de ejemplo (`index.html` en la raíz) no se toca.
-
-✅ Verificación: abre el dominio, crea una cuenta, confirma el correo y llega a `/panel/bienvenida`.
+✅ Verificación: en `/admin`, todos los indicadores de integración salen en verde salvo IA y Wompi, que se configuran en los pasos siguientes.
 
 ## 3. IA (10 min)
 
-1. En console.anthropic.com crea una API key y carga saldo. Con US$20 alcanza para unas 10 a 15 generaciones con Opus 5.5, o unas 25 con Sonnet 5.5.
-2. En Vercel agrega `ANTHROPIC_API_KEY`. Opcional: `AI_MODEL=claude-sonnet-5-5` para reducir el costo a la mitad.
-   - Si prefieres OpenAI: `AI_PROVIDER=openai`, `OPENAI_API_KEY` y `OPENAI_MODEL`.
-3. Redeploy.
-
-✅ Verificación: el aviso amarillo "Estamos terminando la configuración" ya no dice "El generador se está conectando".
+`ANTHROPIC_API_KEY` en Vercel. Opcional: `AI_MODEL=claude-sonnet-5-5`, que cuesta la mitad. Para OpenAI: `AI_PROVIDER=openai`, `OPENAI_API_KEY` y `OPENAI_MODEL`. Redeploy.
 
 ## 4. Wompi en sandbox (20 min)
 
-1. Dashboard de Wompi → modo **Pruebas** → **Desarrolladores**: copia la llave pública, la llave privada, el secreto de **Integridad** y el secreto de **Eventos**.
+1. Wompi → modo **Pruebas** → Desarrolladores: copia la llave pública, la llave privada, el secreto de Integridad y el secreto de Eventos.
 2. En Vercel: `WOMPI_ENV=sandbox`, `NEXT_PUBLIC_WOMPI_PUBLIC_KEY`, `WOMPI_PRIVATE_KEY`, `WOMPI_INTEGRITY_SECRET` y `WOMPI_EVENTS_SECRET`. Redeploy.
-3. En Wompi → **URL de eventos** (pruebas): `https://<tu-dominio>/api/webhooks/wompi`.
-4. Haz una compra de prueba:
-   - Tarjeta `4242 4242 4242 4242` (fecha futura y cualquier CVC) → **aprobada**.
-   - Tarjeta `4111 1111 1111 1111` → **rechazada**.
-   - Nequi `3991111111` → aprobada; `3992222222` → rechazada.
+3. URL de eventos (pruebas): `https://<tu-dominio>/api/webhooks/wompi`.
+4. Pruebas:
+   - Tarjeta `4242 4242 4242 4242` → aprobada; `4111 1111 1111 1111` → rechazada.
+   - Nequi `3991111111` → aprobado; `3992222222` → rechazado.
 
-✅ Verificación: después de pagar vuelves a `/panel/pagos/resultado` con "¡Pago aprobado!". En **Compras y créditos** aparece la compra y +1 generación. En Supabase, `payment_events` tiene el evento con `processed_at` lleno. Un pago rechazado no suma créditos.
+✅ Verificación: "¡Pago aprobado!" al volver, +1 generación en Compras, el comprobante llega por correo y la venta aparece en `/admin/ordenes`.
 
-## 5. Prueba completa de generación (20 min)
+## 5. Primera generación real (20 min)
 
-Con un crédito de prueba, sube un manual real y tus indicadores y genera. Revisa:
-- que el progreso avance en `/panel/simuladores/<id>`;
-- que el simulador abra en el celular y tenga preguntas de tus ejes;
-- el costo real en `usage_events` (columna `cost_usd`) y en `generations.cost_usd`.
+Genera con tu manual y tus indicadores. Debe llegarte el correo "Tu simulador está listo". Revisa la calidad de las preguntas y el costo en `/admin/generaciones`.
 
-Si el costo por generación es más alto de lo esperado, ajusta `AI_MODEL` o los límites (ver [LIMITES.md](LIMITES.md)).
+## 6. Producción
 
-## 6. Pasar a producción (10 min)
-
-1. En Wompi → modo **Producción**: copia las llaves de producción y la URL de eventos de producción.
-2. En Vercel: `WOMPI_ENV=production` y las llaves `pub_prod_…` y `prv_prod_…`, más los secretos de producción. Redeploy.
-3. Haz una compra real de bajo riesgo, por ejemplo con tu propia tarjeta, y confirma que se acredita.
-4. Completa los textos legales: `NEXT_PUBLIC_LEGAL_NAME` y una revisión de `/terminos` y `/privacidad`.
-
-> Seguridad: con `WOMPI_ENV=production` el checkout se bloquea solo si falta la llave de IA, para no cobrar algo que no se puede entregar.
+Llaves `pub_prod_…` y `prv_prod_…`, `WOMPI_ENV=production` y la URL de eventos de producción en Wompi. Haz una compra real pequeña y revisa los textos de `/terminos` y `/privacidad`.

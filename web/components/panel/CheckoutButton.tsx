@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { CreditCard } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { Spinner } from "@/components/ui/Spinner";
 
 export function CheckoutButton({ label, disabled }: { label: string; disabled?: boolean }) {
@@ -13,6 +14,7 @@ export function CheckoutButton({ label, disabled }: { label: string; disabled?: 
       const res = await fetch("/api/checkout", { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error?.message || "No pudimos abrir el pago.");
+      track("checkout_iniciado", { origen: "comprar" });
       window.location.assign(data.url);
     } catch (e) {
       setError((e as Error).message);

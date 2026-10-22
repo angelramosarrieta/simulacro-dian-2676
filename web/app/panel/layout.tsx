@@ -3,12 +3,14 @@ import { LogOut } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { BottomNav, SideNav } from "@/components/panel/Nav";
 import { getBalance, getProfile } from "@/lib/data/account";
+import { getAdmin } from "@/lib/admin/auth";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Panel", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
-  const [profile, balance] = await Promise.all([getProfile(), getBalance()]);
+  const [profile, balance, isAdmin] = await Promise.all([getProfile(), getBalance(), getAdmin()]);
   const initials = (profile.full_name || profile.email).split(/\s+/).map((s) => s[0]).slice(0, 2).join("").toUpperCase();
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[260px_1fr]">
@@ -18,6 +20,11 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         </div>
         <div className="mt-8 flex-1">
           <SideNav />
+          {isAdmin && (
+            <Link href="/admin" className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] text-warn hover:bg-warnSoft">
+              Administración
+            </Link>
+          )}
         </div>
         <div className="rounded-2xl border border-line p-3">
           <div className="flex items-center gap-3">

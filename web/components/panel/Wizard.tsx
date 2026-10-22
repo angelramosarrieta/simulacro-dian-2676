@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Check, CreditCard, FileText, ImageIcon, Lock, Sparkles, UploadCloud, X } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
 import { Spinner } from "@/components/ui/Spinner";
+import { track } from "@vercel/analytics";
 import { createClient } from "@/lib/supabase/client";
 import { cop } from "@/lib/format";
 
@@ -79,6 +80,7 @@ export function Wizard(props: {
         setGenId(id);
         setSaved(next);
         setDocs({ manual: { status: "empty" }, indicadores: { status: "empty" } });
+        track("borrador_creado");
       }
       setStep(2);
     } catch (err) {
@@ -116,6 +118,7 @@ export function Wizard(props: {
     setBusy(true);
     try {
       await api(`/api/generations/${genId}/start`);
+      track("generacion_iniciada");
       router.push(`/panel/simuladores/${genId}?nuevo=1`);
       router.refresh();
     } catch (err) {
@@ -129,6 +132,7 @@ export function Wizard(props: {
     setBusy(true);
     try {
       const { url } = await api<{ url: string }>("/api/checkout");
+      track("checkout_iniciado", { origen: "asistente", precio: props.price });
       window.location.assign(url);
     } catch (err) {
       setError((err as Error).message);

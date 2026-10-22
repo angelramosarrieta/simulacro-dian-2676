@@ -18,6 +18,7 @@ import {
   type TemplateQuestion,
 } from "@/lib/generation/schemas";
 import { assembleSimulator } from "@/lib/simulator/assemble";
+import { notifyGenerationFinished } from "@/lib/email/notify";
 
 /**
  * Worker de generación por etapas. Cada llamada a runStep avanza UNA etapa
@@ -219,6 +220,7 @@ async function assemble(admin: SupabaseClient, gen: GenerationRow): Promise<Step
     error_message: null,
   });
   await deleteDocuments(admin, gen);
+  await notifyGenerationFinished(admin, gen.id);
   return { state: "completed" };
 }
 
@@ -308,6 +310,7 @@ async function fail(admin: SupabaseClient, gen: GenerationRow, code: string, mes
   // lo garantiza el índice único del libro de créditos).
   await admin.rpc("refund_generation", { p_generation_id: gen.id, p_note: `Reembolso: ${code}` });
   await deleteDocuments(admin, gen);
+  await notifyGenerationFinished(admin, gen.id);
   return { state: "failed", detail: code };
 }
 

@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WompiTransaction } from "@/lib/payments/wompi-core";
+import { notifyPaymentApproved } from "@/lib/email/notify";
 
 /** Aplica una transacción ya verificada contra Wompi (idempotente en la BD). */
 export async function applyTransaction(admin: SupabaseClient, tx: WompiTransaction) {
@@ -13,6 +14,7 @@ export async function applyTransaction(admin: SupabaseClient, tx: WompiTransacti
     p_payment_method_type: tx.payment_method_type ?? null,
   });
   if (error) throw new Error(error.message);
-  const row = Array.isArray(data) ? data[0] : data;
-  return row as { order_id: string; user_id: string; status: string; credited: boolean };
+  const row = (Array.isArray(data) ? data[0] : data) as { order_id: string; user_id: string; status: string; credited: boolean };
+  if (row?.status === "approved") await notifyPaymentApproved(admin, row.order_id);
+  return row;
 }
