@@ -25,8 +25,11 @@ export async function POST(request: Request) {
   const { count } = await admin.from("generations").select("id", { count: "exact", head: true }).eq("user_id", auth.user.id).gte("created_at", since);
   if ((count ?? 0) >= 10) return jsonError(429, "demasiados_borradores", "Creaste muchas generaciones hoy. Intenta mañana o escríbenos.");
 
-  // Reutiliza un borrador abierto del usuario para no acumular basura.
-  await admin.from("generations").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("user_id", auth.user.id).eq("status", "draft");
+  // Descarta los borradores abiertos (y sus documentos) para no acumular datos personales.
+  const { data: drafts } = await admin.from("generations").select("id, manual_path, indicadores_path").eq("user_id", auth.user.id).eq("status", "draft");
+  const orphanFiles = (drafts ?? []).flatMap((g) => [g.manual_path, g.indicadores_path]).filter((p): p is string => Boolean(p));
+  if (orphanFiles.length) await admin.storage.from("documents").remove(orphanFiles);
+  if (drafts?.length) await admin.from("generations").update({ status: "cancelled", updated_at: new Date().toISOString() }).in("id", drafts.map((g) => g.id));
 
   const { data: setting } = await admin.from("app_settings").select("value").eq("key", "questions_per_generation").maybeSingle();
   const target = Math.min(200, Math.max(20, Number(setting?.value ?? 120) || 120));

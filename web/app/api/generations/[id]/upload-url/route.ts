@@ -40,8 +40,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const admin = createAdminClient();
   const limits = await loadLimits(admin);
-  if (parsed.data.size > limits.max_upload_mb * 1024 * 1024) {
-    return jsonError(413, "archivo_grande", `El archivo supera ${limits.max_upload_mb} MB.`);
+  // Las imágenes tienen un tope menor: la API de Claude rechaza imágenes de más de 5 MB.
+  const maxMb = parsed.data.mime.startsWith("image/") ? Math.min(5, limits.max_upload_mb) : limits.max_upload_mb;
+  if (parsed.data.size > maxMb * 1024 * 1024) {
+    return jsonError(413, "archivo_grande", `El archivo supera ${maxMb} MB.`);
   }
 
   const { data: gen } = await admin.from("generations").select("id, status").eq("id", id).eq("user_id", auth.user.id).maybeSingle();

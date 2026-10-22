@@ -24,6 +24,8 @@ const NIVELES = ["Asistencial", "Técnico", "Profesional"];
 const MODALIDADES = ["Ingreso", "Ascenso"];
 const ACCEPT = ["application/pdf", "image/png", "image/jpeg", "image/webp"];
 const MAX_MB = 15;
+// La API de Claude acepta imágenes de hasta 5 MB; los PDF pueden pesar más.
+const MAX_IMAGE_MB = 5;
 
 async function api<T>(url: string, body?: unknown): Promise<T> {
   const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
@@ -57,6 +59,8 @@ export function Wizard(props: {
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Datos con los que se creó el borrador actual (para no crear otro si no cambian).
+  const [saved, setSaved] = useState(d ? { cargo: d.cargo, nivel: d.nivel, opec: d.opec, modalidad: d.modalidad } : null);
 
   const formValid = form.cargo.trim().length >= 2 && form.nivel && /^[0-9]{3,10}$/.test(form.opec.trim()) && form.modalidad;
   const docsReady = docs.manual.status === "done" && docs.indicadores.status === "done";
@@ -68,10 +72,12 @@ export function Wizard(props: {
     setBusy(true);
     try {
       // Si cambian los datos se crea un borrador nuevo (el anterior se descarta).
-      const changed = !d || d.cargo !== form.cargo.trim() || d.nivel !== form.nivel || d.opec !== form.opec.trim() || d.modalidad !== form.modalidad;
+      const next = { ...form, cargo: form.cargo.trim(), opec: form.opec.trim() };
+      const changed = !saved || saved.cargo !== next.cargo || saved.nivel !== next.nivel || saved.opec !== next.opec || saved.modalidad !== next.modalidad;
       if (!genId || changed) {
-        const { id } = await api<{ id: string }>("/api/generations", { ...form, cargo: form.cargo.trim(), opec: form.opec.trim() });
+        const { id } = await api<{ id: string }>("/api/generations", next);
         setGenId(id);
+        setSaved(next);
         setDocs({ manual: { status: "empty" }, indicadores: { status: "empty" } });
       }
       setStep(2);
@@ -88,8 +94,10 @@ export function Wizard(props: {
       setDocs((s) => ({ ...s, [kind]: { status: "error", error: "Formato no admitido. Usa PDF, PNG, JPG o WEBP." } }));
       return;
     }
-    if (file.size > MAX_MB * 1024 * 1024) {
-      setDocs((s) => ({ ...s, [kind]: { status: "error", error: `El archivo pesa más de ${MAX_MB} MB.` } }));
+    const limit = file.type.startsWith("image/") ? MAX_IMAGE_MB : MAX_MB;
+    if (file.size > limit * 1024 * 1024) {
+      const tip = file.type.startsWith("image/") ? " Toma el pantallazo en JPG o recórtalo." : "";
+      setDocs((s) => ({ ...s, [kind]: { status: "error", error: `El archivo pesa más de ${limit} MB.${tip}` } }));
       return;
     }
     setDocs((s) => ({ ...s, [kind]: { status: "uploading", name: file.name, size: file.size, mime: file.type } }));
@@ -210,7 +218,7 @@ export function Wizard(props: {
           <div className="space-y-5">
             <div>
               <h2 className="text-[18px] font-semibold">Sube tus 2 documentos</h2>
-              <p className="mt-1 text-[14px] text-muted">PDF o imagen (PNG, JPG, WEBP), máximo {MAX_MB} MB cada uno. Se eliminan al terminar la generación.</p>
+              <p className="mt-1 text-[14px] text-muted">PDF (máx. {MAX_MB} MB) o imagen PNG, JPG o WEBP (máx. {MAX_IMAGE_MB} MB). Se eliminan al terminar la generación.</p>
             </div>
             <DocUpload
               kind="manual"

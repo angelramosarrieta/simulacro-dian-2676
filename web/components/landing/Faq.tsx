@@ -6,7 +6,7 @@ export function Faq({ pricing }: { pricing: Pricing }) {
   const items = [
     {
       q: "¿Qué documentos necesito?",
-      a: "Dos: el manual de funciones de tu empleo (la ficha del MERF, Resolución DIAN 067 de 2024) y tus indicadores. Puedes subirlos en PDF o como pantallazo (PNG o JPG), de hasta 15 MB cada uno.",
+      a: "Dos: el manual de funciones de tu empleo (la ficha del MERF, Resolución DIAN 067 de 2024) y tus indicadores. Puedes subirlos en PDF (hasta 15 MB) o como pantallazo PNG o JPG (hasta 5 MB).",
     },
     {
       q: "¿Dónde consigo mis indicadores?",

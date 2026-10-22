@@ -87,6 +87,13 @@ test("asistente: datos, subida de documentos y pago (sin pasarela configurada)",
   await expect(page.getByRole("button", { name: "Pagar con Wompi" })).toBeDisabled();
   await expect(page.getByText("Los pagos se habilitan en las próximas horas.")).toBeVisible();
 
+  // Volver al paso 1 sin cambiar datos no pierde los documentos subidos.
+  await page.getByRole("button", { name: "Atrás" }).click();
+  await page.getByRole("button", { name: "Atrás" }).click();
+  await page.getByRole("button", { name: "Continuar" }).click();
+  await expect(page.getByText("manual.pdf")).toBeVisible();
+  await expect(page.getByText("indicadores.png")).toBeVisible();
+
   // El borrador quedó guardado con los documentos en el bucket privado.
   const db = adminDb();
   const { data: user } = await db.from("profiles").select("id").eq("email", email).single();

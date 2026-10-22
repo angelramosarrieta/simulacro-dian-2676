@@ -12,7 +12,7 @@ Se guardan en la tabla `app_settings` (llave `generation_limits`). Solo el servi
 | `max_steps` | 30 | Tope de llamadas al modelo por generación |
 | `max_running_per_user` | 1 | Una generación activa por usuario |
 | `max_generations_per_user_per_day` | 5 | Freno anti-abuso |
-| `max_upload_mb` | 15 | Por archivo (el bucket también lo limita a 15 MB) |
+| `max_upload_mb` | 15 | Por archivo PDF (el bucket también lo limita a 15 MB). Las imágenes se limitan a 5 MB porque la API de Claude no acepta imágenes más pesadas |
 
 Otros valores en `app_settings`: `price_first_cop` (29900), `price_next_cop` (20000), `questions_per_generation` (120) y `order_pending_ttl_minutes` (60).
 

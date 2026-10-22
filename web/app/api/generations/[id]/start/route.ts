@@ -50,7 +50,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (!p) return jsonError(422, "faltan_documentos", `${label} no se ha subido.`);
     const { data: file, error } = await admin.storage.from("documents").download(p);
     if (error || !file) return jsonError(422, "faltan_documentos", `${label} no se ha subido completo. Vuelve a cargarlo.`);
-    if (file.size > limits.max_upload_mb * 1024 * 1024) return jsonError(413, "archivo_grande", `${label} supera ${limits.max_upload_mb} MB.`);
+    const maxMb = mime?.startsWith("image/") ? Math.min(5, limits.max_upload_mb) : limits.max_upload_mb;
+    if (file.size > maxMb * 1024 * 1024) return jsonError(413, "archivo_grande", `${label} supera ${maxMb} MB. Vuelve a cargarlo más liviano.`);
     const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
     if (sniffMime(head) !== mime) return jsonError(422, "archivo_invalido", `${label} no es un PDF o imagen válido.`);
   }
