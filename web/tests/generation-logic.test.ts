@@ -139,3 +139,33 @@ describe("limpieza de la respuesta de la IA", () => {
     expect(JSON.stringify(cleanAiData(dirty))).not.toMatch(/\\u0000/);
   });
 });
+
+import { checkQuestion, qualityOf } from "@/lib/generation/schemas";
+
+describe("revisión automática de calidad", () => {
+  const base = { tipo: "caso", caso: "El contribuyente presenta su declaración con soportes incompletos y pide orientación sobre cómo corregirla.", enunciado: "Con base en lo anterior, al analista le corresponde", justificaciones: ["Correcta. Por la norma.", "Incorrecta. Es prematuro.", "Incorrecta. Excede su función."], explicacion: "", norma: "ET art. 588" };
+
+  it("descarta la pregunta si la correcta es mucho más larga que los distractores", () => {
+    const larga = checkQuestion({ ...base, opciones: ["solicitar los soportes faltantes por escrito, dejar constancia en el expediente y orientar al contribuyente sobre el plazo para corregir.", "remitir el caso a fiscalización.", "orientar verbalmente al contribuyente."] }, "Eje");
+    expect(larga).toEqual({ reject: "largo" });
+    const pareja = checkQuestion({ ...base, opciones: ["solicitar por escrito los soportes faltantes y dejar constancia.", "remitir de inmediato el caso a fiscalización con lo recibido.", "orientar verbalmente sobre la corrección y cerrar la gestión."] }, "Eje");
+    expect("question" in pareja).toBe(true);
+  });
+
+  it("en razonamiento matemático exige un cálculo", () => {
+    const sinNumeros = checkQuestion({ ...base, opciones: ["verificar el inventario.", "informar al supervisor.", "esperar instrucciones."] }, "Razonamiento matemático");
+    expect(sinNumeros).toEqual({ reject: "sin_calculo" });
+    const conNumeros = checkQuestion({ ...base, caso: base.caso + " Hay 60 cajas de 12 unidades y se contaron 684.", opciones: ["$90.000.", "$72.000.", "$108.000."] }, "Razonamiento matemático");
+    expect("question" in conNumeros).toBe(true);
+  });
+
+  it("corrige siglas en minúscula al guardar", () => {
+    const r = checkQuestion({ ...base, opciones: ["radicar el ros ante la uiaf.", "informar a la dian por correo.", "consultar el rut del tercero."] }, "Eje");
+    expect("question" in r && r.question.o).toEqual(["radicar el ROS ante la UIAF.", "informar a la DIAN por correo.", "consultar el RUT del tercero."]);
+  });
+
+  it("calcula el % de preguntas en que la correcta es la más larga", () => {
+    const mk = (a: string, b: string, c: string) => ({ t: "E", q: "¿Qué?", o: [a, b, c] as [string, string, string], a: 0 as const, e: "porque", r: "ET" });
+    expect(qualityOf([mk("larguísima", "corta", "corta"), mk("x", "larga", "media"), mk("igual", "igual", "igua")], 2)).toEqual({ preguntas: 3, correcta_mas_larga_pct: 33, descartadas: 2 });
+  });
+});

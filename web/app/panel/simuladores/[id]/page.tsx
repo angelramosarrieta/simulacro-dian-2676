@@ -11,6 +11,7 @@ import { UUID_RE } from "@/lib/security";
 import { Simulator } from "@/components/simulator/Simulator";
 import { buildSimData, type RawQuestion } from "@/lib/simulator/engine";
 import demo from "@/lib/simulator/data/demo.json";
+import { displayName } from "@/lib/generation/names";
 
 export const metadata: Metadata = { title: "Mi simulador" };
 
@@ -66,7 +67,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
             <ul className="divide-y divide-line text-[14px]">
               {plan.filter((p) => p.generadas > 0).map((p) => (
                 <li key={p.eje} className="flex justify-between gap-4 py-2.5">
-                  <span>{p.eje}</span>
+                  <span>{displayName(p.eje)}</span>
                   <span className="shrink-0 font-mono text-muted">{p.generadas}</span>
                 </li>
               ))}

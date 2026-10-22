@@ -88,3 +88,24 @@ d("biblioteca de empleos", () => {
     expect(error?.message).toContain("sin_biblioteca");
   });
 });
+
+describe("calidad y biblioteca", () => {
+  it("guarda los indicadores de calidad y no lleva a la biblioteca un banco que delata la respuesta", async () => {
+    if (!ok) return;
+    const opec = String(Math.floor(100000 + Math.random() * 899999));
+    const U = await newUser("calidad");
+    await grantCredit(U.id);
+    const a = admin();
+    const { data: gen } = await a.from("generations").insert({ user_id: U.id, cargo: "Gestor I 301-01", nivel: "Profesional", opec, modalidad: "Ingreso", target_questions: 10 }).select("id").single();
+    const id = gen!.id as string;
+    await a.storage.from("documents").upload(`${U.id}/${id}/m.pdf`, new Blob(["%PDF-1.4"], { type: "application/pdf" }));
+    await a.storage.from("documents").upload(`${U.id}/${id}/i.png`, new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47, 13, 10, 26, 10])], { type: "image/png" }));
+    await a.from("generations").update({ manual_path: `${U.id}/${id}/m.pdf`, manual_mime: "application/pdf", indicadores_path: `${U.id}/${id}/i.png`, indicadores_mime: "image/png" }).eq("id", id);
+    await a.rpc("start_generation", { p_user_id: U.id, p_generation_id: id });
+    // La correcta siempre un poco más larga (sin pasar el umbral de descarte): el banco no entra a la biblioteca.
+    expect((await driveGeneration(a, id, once(fakeProvider({ correctLongest: true })), 600_000)).state).toBe("completed");
+    const { data: g } = await a.from("generations").select("quality").eq("id", id).single();
+    expect(g!.quality).toMatchObject({ preguntas: 10, correcta_mas_larga_pct: 100 });
+    expect(await findBank(a, opec)).toBeNull();
+  });
+});

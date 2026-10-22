@@ -2,7 +2,7 @@ import { AiError, type AiJsonRequest, type AiProvider } from "@/lib/ai/types";
 
 const usage = (cost = 0.01) => ({ provider: "fake", model: "fake-model", inputTokens: 1000, outputTokens: 500, cacheReadTokens: 0, cacheWriteTokens: 0, costUsd: cost, durationMs: 5 });
 
-export function fakeProvider(opts: { invalidDocs?: boolean; costPerCall?: number; failFirst?: number } = {}): AiProvider & { calls: AiJsonRequest[] } {
+export function fakeProvider(opts: { invalidDocs?: boolean; costPerCall?: number; failFirst?: number; correctLongest?: boolean } = {}): AiProvider & { calls: AiJsonRequest[] } {
   let failures = opts.failFirst ?? 0;
   const calls: AiJsonRequest[] = [];
   let n = 0;
@@ -41,7 +41,8 @@ export function fakeProvider(opts: { invalidDocs?: boolean; costPerCall?: number
           tipo: "caso",
           caso: `Caso número ${n}: durante una diligencia de verificación el contribuyente presenta documentos incompletos y pide un plazo adicional.`,
           enunciado: `Con base en lo anterior (${n}), al gestor le corresponde`,
-          opciones: [`opción correcta ${n}.`, `distractor uno ${n}.`, `distractor dos ${n}.`],
+          // Por defecto la correcta es la más larga solo en 1 de cada 3 (banco sano).
+          opciones: opts.correctLongest || n % 3 === 0 ? [`opción correcta ${n}.`, `distractor uno ${n}.`, `distractor dos ${n}.`] : [`opción correcta ${n}.`, `distractor uno más largo ${n}.`, `distractor dos ${n}.`],
           justificaciones: ["Correcta. Por la norma citada.", "Incorrecta. No aplica al caso.", "Incorrecta. Desconoce el plazo."],
           explicacion: "",
           norma: "ET art. 684",

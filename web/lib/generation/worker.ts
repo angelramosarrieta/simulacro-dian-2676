@@ -12,7 +12,8 @@ import {
   questionFingerprint,
   questionsBatchSchema,
   questionsJsonSchema,
-  toTemplateQuestion,
+  checkQuestion,
+  qualityOf,
   type Analysis,
   type GenerationInput,
   type TemplateQuestion,
@@ -164,7 +165,8 @@ async function generateBatch(admin: SupabaseClient, gen: GenerationRow, provider
 
   const previous = gen.questions.filter((q) => q.t === item.eje).map((q) => ("cs" in q ? q.cs : q.q).slice(0, 140));
   const result = await callAi(admin, gen, provider, limits, `batch:${item.eje}`, {
-    parts: [{ type: "text", text: batchInstructions({ input: gen, analysis: gen.analysis, eje: item.eje, cantidad: next.size, yaGeneradas: previous }) }],
+    // Se piden ~40 % de más: la revisión automática descarta las que delatan la respuesta.
+    parts: [{ type: "text", text: batchInstructions({ input: gen, analysis: gen.analysis, eje: item.eje, cantidad: Math.min(14, Math.ceil(next.size * 1.4)), yaGeneradas: previous }) }],
     schemaName: "preguntas",
     schema: questionsJsonSchema as unknown as Record<string, unknown>,
   });
@@ -173,9 +175,14 @@ async function generateBatch(admin: SupabaseClient, gen: GenerationRow, provider
   const batch = questionsBatchSchema.safeParse(result.data);
   const seen = new Set(gen.questions.map(questionFingerprint));
   const fresh: TemplateQuestion[] = [];
+  let rejected = 0;
   for (const raw of batch.success ? batch.data.preguntas : []) {
-    const q = toTemplateQuestion(raw, item.eje);
-    if (!q) continue;
+    const checked = checkQuestion(raw, item.eje);
+    if (!("question" in checked)) {
+      rejected++;
+      continue;
+    }
+    const q = checked.question;
     const fp = questionFingerprint(q);
     if (seen.has(fp)) continue;
     seen.add(fp);
@@ -185,6 +192,7 @@ async function generateBatch(admin: SupabaseClient, gen: GenerationRow, provider
 
   item.intentos += 1;
   item.generadas += fresh.length;
+  item.descartadas = (item.descartadas ?? 0) + rejected;
   // Si un eje no logra completarse tras varios intentos, se cierra con lo
   // que tenga para no gastar más tokens en él.
   if (item.generadas < item.cantidad && item.intentos >= Math.ceil(item.cantidad / 10) + limits.max_attempts_per_step) {
@@ -223,6 +231,9 @@ async function fromBank(admin: SupabaseClient, gen: GenerationRow): Promise<Step
   return assemble(admin, gen);
 }
 
+/** Si la correcta es la más larga en más de este % de preguntas, el banco no entra a la biblioteca. */
+export const LIBRARY_MAX_LONGEST_PCT = 60;
+
 async function assemble(admin: SupabaseClient, gen: GenerationRow): Promise<StepResult> {
   const minimum = Math.ceil(gen.target_questions * 0.6);
   if (gen.questions.length < minimum) {
@@ -237,8 +248,11 @@ async function assemble(admin: SupabaseClient, gen: GenerationRow): Promise<Step
     .upload(htmlPath, new Blob([html], { type: "text/html" }), { contentType: "text/html", upsert: true });
   if (error) throw new Error(`No se pudo guardar el simulador: ${error.message}`);
 
+  const fromBank = gen.source === "biblioteca";
+  const quality = qualityOf(gen.questions, fromBank ? null : (gen.plan ?? []).reduce((s, p) => s + (p.descartadas ?? 0), 0));
   await patch(admin, gen.id, {
     status: "completed",
+    quality,
     simulator_html_path: htmlPath,
     progress: 100,
     current_step: "Listo",
@@ -246,8 +260,9 @@ async function assemble(admin: SupabaseClient, gen: GenerationRow): Promise<Step
     error_message: null,
   });
   await deleteDocuments(admin, gen);
-  // Lo generado con IA alimenta la biblioteca para los siguientes aspirantes de la misma OPEC.
-  if (gen.source !== "biblioteca") await admin.rpc("save_job_bank", { p_generation_id: gen.id });
+  // Lo generado con IA alimenta la biblioteca para los siguientes aspirantes de la
+  // misma OPEC, salvo que la correcta delate la respuesta en demasiadas preguntas.
+  if (!fromBank && (quality.correcta_mas_larga_pct ?? 100) <= LIBRARY_MAX_LONGEST_PCT) await admin.rpc("save_job_bank", { p_generation_id: gen.id });
   await notifyGenerationFinished(admin, gen.id);
   return { state: "completed" };
 }

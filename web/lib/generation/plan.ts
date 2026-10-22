@@ -1,7 +1,8 @@
 import { COMMON_TOPICS, BATCH_SIZE } from "@/lib/generation/constants";
 import type { Analysis } from "@/lib/generation/schemas";
+import { displayName } from "@/lib/generation/names";
 
-export type PlanItem = { eje: string; cantidad: number; generadas: number; intentos: number };
+export type PlanItem = { eje: string; cantidad: number; generadas: number; intentos: number; descartadas?: number };
 
 /**
  * Normaliza los ejes del análisis y reparte las preguntas nuevas. Los ejes que
@@ -15,7 +16,7 @@ export function buildPlan(analysis: Analysis, target: number): PlanItem[] {
     const equivalente = COMMON_TOPICS.find(
       (t) => simplify(t) === simplify(e.equivalente_banco_comun) || simplify(t) === simplify(e.nombre)
     );
-    const nombre = (equivalente ?? e.nombre).replace(/\s+/g, " ").trim().slice(0, 160);
+    const nombre = displayName(equivalente ?? e.nombre).slice(0, 160);
     const key = simplify(nombre);
     if (!key || seen.has(key)) continue;
     seen.add(key);
@@ -52,7 +53,7 @@ export function planProgress(plan: PlanItem[]) {
   return total ? done / total : 0;
 }
 
-function simplify(s: string) {
+export function simplify(s: string) {
   return s
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")

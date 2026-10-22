@@ -1,6 +1,8 @@
 import { COMMON_TOPICS } from "@/lib/generation/constants";
 import type { Analysis } from "@/lib/generation/schemas";
 import type { GenerationInput } from "@/lib/generation/schemas";
+import { roleNoun } from "@/lib/generation/names";
+import { simplify } from "@/lib/generation/plan";
 
 /**
  * Prompts del generador. Vienen de PROMPT.md (el flujo manual que ya se
@@ -33,7 +35,7 @@ Corte normativo de la guía: solo normas vigentes y expedidas hasta el 19 de jun
 TEMAS DEL BANCO COMÚN QUE YA TRAE EL SIMULADOR (no los repitas si no son eje del usuario):
 ${COMMON_TOPICS.map((t) => `- ${t}`).join("\n")}
 
-FORMATO DE LA PRUEBA: juicio situacional. Cada pregunta trae un caso, un enunciado en frase incompleta y 3 opciones; solo una es la solución efectiva. Los distractores son errores típicos de quien conoce el tema a medias.`;
+FORMATO DE LA PRUEBA: juicio situacional. Cada pregunta trae un caso, un enunciado en frase incompleta y 3 opciones; solo una es la solución MÁS efectiva. En la prueba real las 3 opciones parecen razonables: los distractores son acciones que un servidor bien intencionado podría tomar, pero que son incompletas, prematuras, fuera de su competencia o menos efectivas.`;
 
 export function analysisInstructions(input: GenerationInput) {
   return `DATOS DEL ASPIRANTE
@@ -58,8 +60,10 @@ export function batchInstructions(p: {
   cantidad: number;
   yaGeneradas: string[];
 }) {
-  const ejeInfo = p.analysis.ejes.find((e) => e.nombre === p.eje || e.equivalente_banco_comun === p.eje);
+  const ejeInfo = p.analysis.ejes.find((e) => simplify(e.nombre) === simplify(p.eje) || simplify(e.equivalente_banco_comun) === simplify(p.eje));
   const casos = Math.max(1, Math.ceil(p.cantidad * 0.7));
+  const rol = roleNoun(p.input.cargo);
+  const matematico = /razonamiento matem/i.test(p.eje);
   return `EMPLEO
 - ${p.input.cargo} · nivel ${p.input.nivel} · OPEC ${p.input.opec} · modalidad ${p.input.modalidad}
 - Propósito: ${p.analysis.proposito}
@@ -71,11 +75,15 @@ ${ejeInfo ? `- Funciones relacionadas: ${ejeInfo.funciones_relacionadas.join("; 
 
 TAREA
 Escribe EXACTAMENTE ${p.cantidad} preguntas nuevas de este eje: al menos ${casos} de tipo "caso" (juicio situacional) y el resto de tipo "directa".
-- La opción correcta va SIEMPRE de primera en "opciones". Las 3 opciones deben ser plausibles, de longitud parecida, en minúscula y terminadas en punto.
-- Casos: situación hipotética realista de ESTE empleo y ESTE nivel (un asistencial atiende, radica y organiza; un técnico apoya, verifica, documenta y reporta; un profesional analiza, proyecta, decide y sustancia). Enunciado en frase incompleta, por ejemplo "Con base en lo anterior, al gestor le corresponde". "justificaciones": 3 textos en el orden de las opciones, que empiecen por "Correcta." o "Incorrecta." y expliquen el porqué con la norma. "explicacion" vacía.
+- La opción correcta va SIEMPRE de primera en "opciones". Opciones en minúscula y terminadas en punto.
+- OPCIONES INCORRECTAS CREÍBLES (lo más importante): cada distractor es una acción profesional y legal en apariencia que un servidor razonable podría elegir: hacer lo correcto pero en el orden equivocado, quedarse corto (solo informar o solo documentar), excederse de su competencia con buena intención, aplicar la norma o el procedimiento de un caso parecido, o priorizar mal. PROHIBIDO usar distractores absurdos, ilegales u obvios ("inventar", "destruir sin autorización", "no hacer nada", "archivar sin registro", "ignorar", "sin dejar constancia").
+- LONGITUD: las 3 opciones deben tener casi el mismo largo (diferencia máxima de unas 15 palabras) y el mismo nivel de detalle. La correcta NO puede ser la más larga ni la más detallada. Si la correcta necesita detalle, dale el mismo detalle a los distractores.
+- Llama al servidor SIEMPRE "${rol}" (por ejemplo "Con base en lo anterior, al ${rol} le corresponde"); no alternes con otros nombres del cargo.
+- Escribe las siglas en mayúscula: DIAN, UIAF, ROS, LA/FT, IVA, RUT, UVT, CPACA, AGN.
+- Casos: situación hipotética realista de ESTE empleo y ESTE nivel (un asistencial atiende, radica y organiza; un técnico apoya, verifica, documenta y reporta; un profesional analiza, proyecta, decide y sustancia). Enunciado en frase incompleta. "justificaciones": 3 textos en el orden de las opciones, que empiecen por "Correcta." o "Incorrecta." y expliquen el porqué con la norma; la de cada distractor debe decir por qué parece razonable y por qué no es la más efectiva. "explicacion" vacía.
 - Directas: "caso" vacío, "justificaciones" vacío y una "explicacion" breve.
 - "norma": cita concreta (ley o decreto y artículo) del marco de referencia, vigente al 19 de junio de 2026.
-- En cálculos usa números operables a mano y muestra el paso a paso en la justificación.
+- En cálculos usa números operables a mano y muestra el paso a paso en la justificación.${matematico ? "\n- EJE DE RAZONAMIENTO MATEMÁTICO: TODAS las preguntas exigen un cálculo con números (porcentajes, proporciones, conteos, diferencias, intereses simples) y las 3 opciones son resultados numéricos distintos y verosímiles (errores de cálculo típicos). No hagas preguntas de procedimiento en este eje." : ""}
 - No repitas situaciones ya usadas en este eje:
 ${p.yaGeneradas.length ? p.yaGeneradas.slice(-40).map((s) => `  · ${s}`).join("\n") : "  (ninguna todavía)"}`;
 }

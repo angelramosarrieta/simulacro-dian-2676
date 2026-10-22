@@ -5,6 +5,7 @@
  * progreso ({ stats, history }), así el avance guardado sigue sirviendo.
  */
 import base from "@/lib/simulator/data/base.json";
+import { displayName } from "@/lib/generation/names";
 
 export type DirectQ = { t: string; q: string; o: string[]; a: number; e: string; r: string };
 export type CaseQ = { t: string; p: 1; cs: string; q: string; o: string[]; a: number; j: string[]; r: string };
@@ -48,7 +49,15 @@ export const isCase = (q: RawQuestion): q is CaseQ => "p" in q && (q as CaseQ).p
 /** Banco completo: el común primero y luego las del empleo (los ids son la posición, como en la plantilla). */
 export function buildSimData(p: { cargo: string; opec: string; ejes: string[]; jobQuestions: RawQuestion[]; includeCommon?: boolean }): SimData {
   const raw = [...(p.includeCommon === false ? [] : (base.common as RawQuestion[])), ...p.jobQuestions];
-  return { cargo: p.cargo, opec: p.opec, ejes: p.ejes, questions: raw.map((q, id) => ({ ...q, id })), config: BASE_CONFIG, comp: COMP };
+  // Los simuladores ya generados pueden traer ejes en MAYÚSCULAS (como vienen del operador).
+  return {
+    cargo: p.cargo,
+    opec: p.opec,
+    ejes: p.ejes.map(displayName),
+    questions: raw.map((q, id) => ({ ...q, t: displayName(q.t), id })),
+    config: BASE_CONFIG,
+    comp: COMP,
+  };
 }
 
 export function shuffle<T>(a: T[], rnd = Math.random): T[] {

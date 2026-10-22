@@ -13,7 +13,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
   const ids = await userIdsByEmail(admin, q);
   let query = admin
     .from("generations")
-    .select("id, user_id, status, cargo, opec, nivel, progress, error_code, error_message, cost_usd, input_tokens, output_tokens, steps_run, ai_model, credit_refunded, created_at, started_at, finished_at, target_questions, plan")
+    .select("id, user_id, status, cargo, opec, nivel, progress, error_code, error_message, cost_usd, input_tokens, output_tokens, steps_run, ai_model, credit_refunded, created_at, started_at, finished_at, target_questions, plan, quality")
     .neq("status", "cancelled")
     .order("created_at", { ascending: false })
     .limit(200);
@@ -27,9 +27,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
       <PageHeader eyebrow="Administración" title="Generaciones" description="Estado, consumo y errores de las últimas 200 generaciones." />
       <StatusFilter base="/admin/generaciones" current={estado} options={STATES} q={q} />
       <div className="card overflow-x-auto">
-        <table className="w-full min-w-[960px] text-left text-[13.5px]">
+        <table className="w-full min-w-[1060px] text-left text-[13.5px]">
           <thead className="text-[12px] text-muted"><tr className="border-b border-line">
-            {["Creada", "Usuario", "Empleo", "Estado", "Preguntas", "Tokens (ent./sal.)", "Costo", "Duración", "Detalle"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}
+            {["Creada", "Usuario", "Empleo", "Estado", "Preguntas", "Calidad", "Tokens (ent./sal.)", "Costo", "Duración", "Detalle"].map((h) => <th key={h} className="px-4 py-2.5 font-medium">{h}</th>)}
           </tr></thead>
           <tbody className="divide-y divide-line">
             {(gens ?? []).map((g) => {
@@ -43,6 +43,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
                   <td className="max-w-[200px] px-4 py-2.5"><span className="line-clamp-2">{g.cargo}</span><span className="text-[12px] text-muted">OPEC {g.opec} · {g.nivel}</span></td>
                   <td className="px-4 py-2.5"><GenerationBadge status={g.status} />{g.credit_refunded && <span className="mt-1 block text-[11.5px] text-muted">Crédito devuelto</span>}</td>
                   <td className="px-4 py-2.5 font-mono">{done}/{g.target_questions}</td>
+                  <td className="px-4 py-2.5"><Quality q={g.quality as Quality | null} /></td>
                   <td className="px-4 py-2.5 font-mono">{compactNumber(Number(g.input_tokens))} / {compactNumber(Number(g.output_tokens))}</td>
                   <td className="px-4 py-2.5 font-mono">US${Number(g.cost_usd).toFixed(3)}</td>
                   <td className="px-4 py-2.5 font-mono">{mins} min</td>
@@ -58,5 +59,20 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
         {!gens?.length && <p className="px-4 py-10 text-center text-muted">Sin generaciones con este filtro.</p>}
       </div>
     </>
+  );
+}
+
+type Quality = { correcta_mas_larga_pct: number | null; descartadas: number | null };
+
+/** % de preguntas en que la correcta es la opción más larga (sano: cerca de 33 %) y descartes de la revisión automática. */
+function Quality({ q }: { q: Quality | null }) {
+  if (!q || q.correcta_mas_larga_pct == null) return <span className="text-muted">—</span>;
+  const pct = q.correcta_mas_larga_pct;
+  const tone = pct <= 45 ? "bg-okSoft text-ok" : pct <= 60 ? "bg-warnSoft text-warn" : "bg-badSoft text-bad";
+  return (
+    <span className="block whitespace-nowrap">
+      <span className={`badge ${tone}`} title="Preguntas en que la correcta es la opción más larga">Más larga {pct}%</span>
+      {q.descartadas != null && <span className="mt-1 block text-[11.5px] text-muted">{q.descartadas} descartadas</span>}
+    </span>
   );
 }

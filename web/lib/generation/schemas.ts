@@ -131,13 +131,48 @@ export type TemplateQuestion =
   | { t: string; p: 1; cs: string; q: string; o: [string, string, string]; a: 0; j: [string, string, string]; r: string }
   | { t: string; q: string; o: [string, string, string]; a: 0; e: string; r: string };
 
-const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+import { fixAcronyms } from "@/lib/generation/names";
+
+const norm = (s: string) => fixAcronyms(s.replace(/\s+/g, " ").trim());
+
+/** La correcta delata la respuesta si es mucho más larga que el distractor más largo. */
+export const LENGTH_RATIO_MAX = 1.3;
+export function correctIsTooLong(o: string[]) {
+  const longest = Math.max(o[1].length, o[2].length);
+  return o[0].length > longest * LENGTH_RATIO_MAX && o[0].length - longest > 15;
+}
+
+export type RejectReason = "formato" | "largo" | "sin_calculo";
+
+/** Indicadores de calidad del banco: en un banco sano la correcta es la más larga ~1/3 de las veces. */
+export function qualityOf(questions: TemplateQuestion[], descartadas: number | null) {
+  const longest = questions.filter((q) => q.o[0].length > Math.max(q.o[1].length, q.o[2].length)).length;
+  return {
+    preguntas: questions.length,
+    correcta_mas_larga_pct: questions.length ? Math.round((100 * longest) / questions.length) : null,
+    descartadas,
+  };
+}
 
 /**
  * Valida y convierte una pregunta del modelo. Devuelve null si no cumple
  * (se descarta en vez de entregarle al usuario algo roto).
  */
 export function toTemplateQuestion(raw: unknown, eje: string): TemplateQuestion | null {
+  const r = checkQuestion(raw, eje);
+  return "question" in r ? r.question : null;
+}
+
+/** Igual que toTemplateQuestion, pero dice por qué se descartó (para medir la calidad). */
+export function checkQuestion(raw: unknown, eje: string): { question: TemplateQuestion } | { reject: RejectReason } {
+  const q0 = buildQuestion(raw, eje);
+  if (!q0) return { reject: "formato" };
+  if (correctIsTooLong(q0.o)) return { reject: "largo" };
+  if (/razonamiento matem/i.test(eje) && !/\d/.test(("cs" in q0 ? q0.cs : "") + q0.q + q0.o.join(" "))) return { reject: "sin_calculo" };
+  return { question: q0 };
+}
+
+function buildQuestion(raw: unknown, eje: string): TemplateQuestion | null {
   const parsed = rawQuestion.safeParse(raw);
   if (!parsed.success) return null;
   const q = parsed.data;
