@@ -19,7 +19,31 @@ Los tiempos de cada versión (escenas, subtítulos, zoom y capturas) están en `
 | `capturar.mjs` | Graba la app real cuadro por cuadro (Playwright, 360 × 640 @3x). |
 | `componer.py` | Mockup del celular, zoom, toques, subtítulos, texto gancho y cierre. `previa` → MP4 · `capa` → ProRes 4444 con alfa. |
 | `montar.sh` | Pone la capa sobre el clip del avatar y mezcla la voz con la música. |
+| `profesional.py`, `voz_pro.py`, `voz_pro/*.flac`, `capturar_extra.mjs` | Video profesional sin persona (ver abajo). |
 | `subtitulos.srt`, `subtitulos_gemini.srt` | Subtítulos de cada versión para cargarlos como captions en TikTok, Reels o CapCut. |
+
+## Video profesional (sin persona)
+
+`entregables/dian2676_profesional_1080x1920.mp4`: 45,5 s, 1080 × 1920. Tiene locución masculina neural (Kokoro `em_alex`, audio 48 kHz a -14 LUFS), música de fondo, transiciones con sonido, motion graphics con la identidad de la app y capturas reales del simulador de ejemplo. Todo el texto sale de la landing y las preguntas frecuentes. No menciona precios ni pagos.
+
+| Tiempo | Escena | Locución |
+|---|---|---|
+| 0–7,25 | Intro en verde de marca: logo, “DIAN 2676”, fecha | ¿Te preparas para la prueba escrita de la DIAN 2676? Es el domingo 8 de noviembre. |
+| 7,25–11,65 | Titular de la landing + celular con la landing real | Aquí practicas con preguntas hechas para tu empleo, no para cualquiera. |
+| 11,65–16,3 | Cómo funciona: manual de funciones → indicadores → simulador | Subes tu manual de funciones y tus indicadores, y en unos 15 minutos recibes tu simulador, |
+| 16,3–20,35 | Celular con la pestaña Progreso (ejes oficiales) | con casos de juicio situacional de tus ejes oficiales. |
+| 20,35–26,9 | Celular: caso real, respuesta y explicación con la norma | Respondes cada caso y revisas por qué cada opción es correcta o incorrecta, con la norma que la sustenta. |
+| 26,9–36,0 | Qué incluye: 77 preguntas, simulacros 0–100 (mínimo 70,00), repaso de errores + Practicar | Además, tienes un banco común de 77 preguntas, simulacros cronometrados… y repaso de tus errores por eje. |
+| 36,0–39,25 | Celulares en modo claro y oscuro | Todo desde tu celular, en modo claro u oscuro. |
+| 39,25–45,5 | Cierre en verde: centrahoy.online, “Prueba el simulador de ejemplo”, nota de independencia | Entra a centrahoy.online y prueba el simulador de ejemplo. |
+
+```bash
+TIEMPOS=pro node video-ugc/capturar.mjs          # flujo real de la pregunta
+node video-ugc/capturar_extra.mjs                # inicio claro/oscuro, Practicar, Progreso
+python3 video-ugc/voz_pro.py --usar-guardadas video-ugc/build/voz_pro
+python3 video-ugc/musica.py video-ugc/build/musica_pro.wav 46.5
+cd video-ugc && python3 profesional.py build/voz_pro/voz_pro.wav build/musica_pro.wav
+```
 
 ## Guion y tiempos
 
