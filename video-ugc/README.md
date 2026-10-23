@@ -55,6 +55,22 @@ python3 musica.py build/musica_lina.wav 44.5
 PRO=pro_lina python3 profesional.py build/voz_lina.wav build/musica_lina.wav
 ```
 
+### Versión con voz colombiana + persona
+
+`entregables/dian2676_profesional_lina_persona_1080x1920.mp4`: 43,5 s. Combina el video de una persona con el mismo audio de Lina, que coincide con la voz al 100 % (desfase 0,0 s), con las escenas de la app:
+
+| Tiempo | Imagen | Transición |
+|---|---|---|
+| 0–6,62 | Persona: gancho, con tarjetas "Prueba escrita · DIAN 2676" y la fecha | Zoom con desenfoque hacia la app |
+| 6,62–33,37 | App real (titular, cómo funciona, ejes, pregunta, qué incluye) | Barrido diagonal verde hacia la persona |
+| 33,37–39,2 | Persona: "Todo desde tu celular…" y la tarjeta centrahoy.online | Círculo verde que se abre hacia el cierre |
+| 39,2–43,5 | Cierre en verde | — |
+
+```bash
+ffmpeg -i VIDEO_PERSONA.mov -vf "fps=30,scale=1080:1920:flags=lanczos,unsharp=5:5:0.6:5:5:0,eq=saturation=1.04" -q:v 2 build/persona/p%04d.jpg
+PRO=pro_lina_persona python3 profesional.py build/voz_lina.wav build/musica_lina.wav
+```
+
 ## Guion y tiempos
 
 Tiempos de la versión Gemini; los de la versión hombre están en `tiempos/hombre.json` (escena 1: 0–5,3 s · app: 5,3–16,45 s · escena 4: 16,45–21,1 s · app: 21,1–23,6 s · cierre: 23,6–24,95 s).

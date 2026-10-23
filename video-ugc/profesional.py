@@ -547,8 +547,8 @@ def a_variante(tb):
     return interp(max(tb, 0.0), [[b, n] for n, b in MAPA])
 
 
-def cuadro(f):
-    tn = f / FPS
+def cuadro_base(tn):
+    """Montaje de la app (escenas del montaje base, reajustadas al tiempo tn)."""
     t = a_base(tn)
     i = next(k for k, (a, b, _) in enumerate(ESCENAS) if a <= t < b or k == len(ESCENAS) - 1)
     a, b, nombre = ESCENAS[i]
@@ -558,6 +558,108 @@ def cuadro(f):
         k = ease_io((t - a) / FUNDIDO)
         prev = escena(pn, t, pa)
         c = Image.blend(prev, c, k)
+    return c
+
+
+# ------------------------------------------------- persona (video con la misma voz)
+PERSONA = V.get("persona")  # {"cuadros", "offset", "tramos": [[desde, hasta, "intro"|"final"], ...]}
+TRANS = 0.5  # duración de las transiciones con la persona
+
+
+@lru_cache(8)
+def cuadro_persona_src(k):
+    d = HERE / PERSONA["cuadros"]
+    n = len(list(d.glob("p*.jpg")))
+    k = min(max(k, 0), n - 1)
+    return Image.open(d / f"p{k + 1:04d}.jpg").convert("RGBA")
+
+
+def persona(tn, desde, hasta):
+    """Cuadro de la persona sincronizado con la voz, con un acercamiento lento."""
+    img = cuadro_persona_src(round((tn - PERSONA["offset"]) * FPS))
+    z = 1.0 + 0.05 * clamp((tn - desde) / (hasta - desde))
+    cw, ch = W / z, H / z
+    return img.resize((W, H), Image.LANCZOS, box=((W - cw) / 2, (H - ch) * 0.3, (W + cw) / 2, (H - ch) * 0.3 + ch))
+
+
+@lru_cache(None)
+def chip_marca(s, size=42):
+    f = font("Geist-SemiBold", size)
+    lg = logo(int(size * 1.6))
+    w = int(f.getlength(s)) + lg.width + int(size * 1.6)
+    h = lg.height + int(size * 0.5)
+    img, pad = tarjeta(w, h, radio=h // 2)
+    img = img.copy()
+    img.alpha_composite(lg, (pad + int(size * 0.25), pad + (h - lg.height) // 2))
+    ImageDraw.Draw(img).text((pad + lg.width + int(size * 0.6), pad + h / 2), s, font=f, fill=INK, anchor="lm")
+    return img
+
+
+@lru_cache(None)
+def tarjeta_dominio():
+    img, pad = tarjeta(820, 250, radio=40)
+    img = img.copy()
+    img.alpha_composite(logo(120), (pad + 40, pad + 65))
+    d = ImageDraw.Draw(img)
+    d.text((pad + 200, pad + 70), "centrahoy.online", font=font("Geist-Bold", 72), fill=BRAND)
+    d.text((pad + 202, pad + 160), "Prueba el simulador de ejemplo", font=font("Geist-Medium", 36), fill=MUTED)
+    return img
+
+
+def sobre_persona(c, tn, desde, tipo):
+    lt = tn - desde
+    if tipo == "intro":
+        ch = chip_marca("Prueba escrita · DIAN 2676")
+        entrar(c, ch, centrar_x(ch), 120, lt, 0.25, dy=-40)
+        fecha = pildora("Domingo 8 de noviembre de 2026", 38, SURFACE, BRAND)
+        entrar(c, fecha, centrar_x(fecha), 300, tn, 2.75, dy=-30)
+    else:
+        ch = chip_marca("Estudia desde tu celular")
+        p = aparece(lt, 0.4) * (1 - aparece(tn, 37.05, 0.3))
+        pegar(c, ch, centrar_x(ch), 120 - (1 - aparece(lt, 0.4)) * 40, p)
+        td = tarjeta_dominio()
+        entrar(c, td, centrar_x(td), 1330, tn, 37.1, dy=60)
+
+
+def cuadro(f):
+    tn = f / FPS
+    c = cuadro_base(tn)
+    for desde, hasta, tipo in (PERSONA or {}).get("tramos", []):
+        if not (desde - TRANS / 2 <= tn < hasta + TRANS / 2):
+            continue
+        per = persona(tn, desde, hasta)
+        sobre_persona(per, tn, desde, tipo)
+        if tn < desde + TRANS / 2 and desde > 0:
+            # Entrada: barrido diagonal verde de marca que destapa a la persona.
+            k = ease_io((tn - desde + TRANS / 2) / TRANS)
+            x = -W * 0.6 + k * W * 2.2
+            mascara = Image.new("L", (W, H), 0)
+            ImageDraw.Draw(mascara).polygon([(-W, 0), (x, 0), (x - 500, H), (-W, H)], fill=255)
+            c = Image.composite(per, c, mascara)
+            banda = Image.new("L", (W, H), 0)
+            ImageDraw.Draw(banda).polygon([(x - 200, 0), (x, 0), (x - 500, H), (x - 700, H)], fill=255)
+            c.paste(Image.new("RGBA", (W, H), BRAND + (255,)), (0, 0), banda.filter(ImageFilter.GaussianBlur(6)))
+        elif tn >= hasta - TRANS / 2:
+            k = ease_io((tn - hasta + TRANS / 2) / TRANS)
+            if tipo == "intro":
+                # Salida hacia la app: zoom con desenfoque, como si la cámara entrara en la pantalla.
+                z = 1 + 0.35 * k
+                cw, ch = W / z, H / z
+                a = per.resize((W, H), Image.BILINEAR, box=((W - cw) / 2, (H - ch) / 2, (W + cw) / 2, (H + ch) / 2))
+                a = a.filter(ImageFilter.GaussianBlur(28 * k))
+                z2 = 0.9 + 0.1 * k
+                b = c.resize((round(W * z2), round(H * z2)), Image.BILINEAR).filter(ImageFilter.GaussianBlur(28 * (1 - k)))
+                fondo = Image.new("RGBA", (W, H), BG + (255,))
+                fondo.alpha_composite(b, ((W - b.width) // 2, (H - b.height) // 2))
+                c = Image.blend(a, fondo, k)
+            else:
+                # Salida al cierre: círculo verde que se abre desde el centro.
+                r = k * math.hypot(W, H) * 0.6
+                mascara = Image.new("L", (W, H), 0)
+                ImageDraw.Draw(mascara).ellipse((W / 2 - r, H * 0.45 - r, W / 2 + r, H * 0.45 + r), fill=255)
+                c = Image.composite(c, per, mascara.filter(ImageFilter.GaussianBlur(4)))
+        else:
+            c = per
     for ca, cb, s in CUES:
         if ca <= tn < cb:
             sub = subtitulo(s)
@@ -595,8 +697,8 @@ def hacer_transiciones(path):
     sr = 48000
     pista = np.zeros(int(DUR * sr))
     rng = np.random.default_rng(3)
-    for a, _, _ in ESCENAS[1:]:
-        a = a_variante(a)
+    cortes = V.get("cortes") or [a_variante(a) for a, _, _ in ESCENAS[1:]]
+    for a in cortes:
         n = int(0.5 * sr)
         ruido = rng.standard_normal(n)
         env = np.sin(np.linspace(0, np.pi, n)) ** 2
