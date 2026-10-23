@@ -45,6 +45,16 @@ python3 video-ugc/musica.py video-ugc/build/musica_pro.wav 46.5
 cd video-ugc && python3 profesional.py build/voz_pro/voz_pro.wav build/musica_pro.wav
 ```
 
+### Versión con voz colombiana (Lina, ElevenLabs)
+
+`entregables/dian2676_profesional_lina_1080x1920.mp4`: 43,5 s. La locución es `voz_pro/lina_elevenlabs.mp3`, generada en ElevenLabs con la voz "Lina – Colombian, Warm & Confident". Los subtítulos siguen lo que ella dice: sin el "2676" en la primera frase y con "para que estés listo para el examen" en la sexta. `tiempos/pro_lina.json` trae los subtítulos y un mapa que ajusta cada escena del montaje base a sus frases.
+
+```bash
+ffmpeg -i voz_pro/lina_elevenlabs.mp3 -af "adelay=300:all=1,apad=whole_dur=43.5,atrim=0:43.5" -ac 2 -ar 48000 build/voz_lina.wav
+python3 musica.py build/musica_lina.wav 44.5
+PRO=pro_lina python3 profesional.py build/voz_lina.wav build/musica_lina.wav
+```
+
 ## Guion y tiempos
 
 Tiempos de la versión Gemini; los de la versión hombre están en `tiempos/hombre.json` (escena 1: 0–5,3 s · app: 5,3–16,45 s · escena 4: 16,45–21,1 s · app: 21,1–23,6 s · cierre: 23,6–24,95 s).

@@ -11,6 +11,7 @@ Todo el texto en pantalla sale de la landing y las preguntas frecuentes de la we
 """
 import json
 import math
+import os
 import subprocess
 import sys
 from functools import lru_cache
@@ -24,7 +25,13 @@ EXTRA = HERE / "build" / "extra"
 FONTS = HERE.parent / "web" / "node_modules" / "geist" / "dist" / "fonts"
 W, H, FPS = 1080, 1920, 30
 T = json.loads((HERE / "tiempos" / "pro.json").read_text())
-DUR = T["dur"]
+# Variante de locución (PRO=pro_lina, ...): trae su duración, sus subtítulos y un
+# "mapa" [[t_nuevo, t_base], ...] que estira o encoge cada escena del montaje
+# base (tiempos de pro.json) para que caiga con las frases de esa voz.
+VARIANTE = os.environ.get("PRO", "pro")
+V = json.loads((HERE / "tiempos" / f"{VARIANTE}.json").read_text()) if VARIANTE != "pro" else {}
+DUR = V.get("dur", T["dur"])
+MAPA = V.get("mapa", [[0.0, 0.0], [DUR, DUR]])
 
 # Identidad de la app (web/app/globals.css).
 BG = (246, 246, 243)
@@ -80,6 +87,7 @@ CUES = [
     (39.42, 41.27, "Entra a [centrahoy.online]"),
     (41.33, 42.85, "y prueba el simulador de ejemplo."),
 ]
+CUES = [tuple(c) for c in V["cues"]] if "cues" in V else CUES
 
 
 # ------------------------------------------------------------------ utilidades
@@ -136,7 +144,8 @@ def texto(s, size, peso="Geist-SemiBold", color=INK, hl=BRAND, maxw=940, interli
     for parte in s.replace("[", "\x00[").replace("]", "]\x00").split("\x00"):
         if parte:
             r = parte.startswith("[")
-            for w in parte.strip("[]").split():
+            # Un resaltado es una sola unidad: no se parte entre líneas.
+            for w in [parte.strip("[]")] if r else parte.split():
                 if w[0] in ",.?!:;" and palabras:  # puntuación pegada a la palabra anterior
                     palabras[-1] = (palabras[-1][0] + w, palabras[-1][1])
                 else:
@@ -521,8 +530,26 @@ def subtitulo(s):
     return img
 
 
+def interp(x, pares):
+    for (x0, y0), (x1, y1) in zip(pares, pares[1:]):
+        if x <= x1:
+            return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+    (x0, y0), (x1, y1) = pares[-2], pares[-1]
+    return y1 + (x - x1) * (y1 - y0) / (x1 - x0)
+
+
+def a_base(tn):
+    """Tiempo del montaje base que corresponde al segundo tn de esta variante."""
+    return interp(max(tn, 0.0), MAPA)
+
+
+def a_variante(tb):
+    return interp(max(tb, 0.0), [[b, n] for n, b in MAPA])
+
+
 def cuadro(f):
-    t = f / FPS
+    tn = f / FPS
+    t = a_base(tn)
     i = next(k for k, (a, b, _) in enumerate(ESCENAS) if a <= t < b or k == len(ESCENAS) - 1)
     a, b, nombre = ESCENAS[i]
     c = escena(nombre, t, a)
@@ -532,15 +559,15 @@ def cuadro(f):
         prev = escena(pn, t, pa)
         c = Image.blend(prev, c, k)
     for ca, cb, s in CUES:
-        if ca <= t < cb:
+        if ca <= tn < cb:
             sub = subtitulo(s)
-            pegar(c, sub, centrar_x(sub), 1690, min(1, (t - ca) * FPS / 3 + 0.3))
+            pegar(c, sub, centrar_x(sub), 1690, min(1, (tn - ca) * FPS / 3 + 0.3))
     return c
 
 
 def main():
     voz, musica = sys.argv[1], sys.argv[2]
-    out = HERE / "build" / "dian2676_profesional_1080x1920.mp4"
+    out = HERE / "build" / ("dian2676_profesional_1080x1920.mp4" if VARIANTE == "pro" else f"dian2676_{VARIANTE}_1080x1920.mp4")
     sfx = HERE / "build" / "transiciones.wav"
     hacer_transiciones(sfx)
     voz_fx = ("[1:a]aresample=48000:resampler=soxr,highpass=f=70,equalizer=f=180:t=q:w=1:g=1.5,"
@@ -569,6 +596,7 @@ def hacer_transiciones(path):
     pista = np.zeros(int(DUR * sr))
     rng = np.random.default_rng(3)
     for a, _, _ in ESCENAS[1:]:
+        a = a_variante(a)
         n = int(0.5 * sr)
         ruido = rng.standard_normal(n)
         env = np.sin(np.linspace(0, np.pi, n)) ** 2
