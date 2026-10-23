@@ -46,6 +46,7 @@ Registrarse no cobra nada. La compra se hace cuando el usuario ya subió sus doc
 - `app_settings`: precios (públicos) y límites (privados).
 - `admins` y `admin_audit_log`: quién administra y qué hizo (solo servidor).
 - `job_banks`: banco de preguntas reutilizable por OPEC (solo servidor). `generations.source` dice si salió de la IA o de la biblioteca.
+- `page_views`: visitas anónimas (identificador aleatorio del navegador, página, origen, ciudad, dispositivo; sin IP). Se borran a los 6 meses. Resumen en `/admin/visitas` con `admin_traffic()`.
 - `simulator_progress`: aciertos e historial del simulador por generación (mismo formato que la plantilla).
 
 ## Seguridad (resumen de la revisión)

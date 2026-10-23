@@ -12,7 +12,11 @@ const ACTIVE = ["queued", "analyzing", "generating", "assembling"];
  * 2. Reanuda generaciones detenidas (sin lease y sin cambios hace 5+ min).
  * 3. Da por fallidas (y reembolsa) las que llevan 3+ horas sin terminar.
  * 4. Borra los documentos de borradores abandonados hace 24+ horas.
+ * 5. Borra las visitas registradas hace más de 6 meses.
  */
+/** Días que se conservan las visitas anónimas (ver /privacidad). */
+export const VISITS_RETENTION_DAYS = 183;
+
 export async function runDailyMaintenance(admin: SupabaseClient, now = Date.now()) {
   const report = { reconciled: 0, resumed: 0, expired: 0, purgedDrafts: 0 };
   report.reconciled = await reconcilePendingOrders(undefined, 50);
@@ -44,5 +48,6 @@ export async function runDailyMaintenance(admin: SupabaseClient, now = Date.now(
     await admin.from("generations").update({ status: "cancelled", updated_at: new Date(now).toISOString() }).in("id", drafts.map((d) => d.id));
     report.purgedDrafts = drafts.length;
   }
+  await admin.from("page_views").delete().lt("created_at", new Date(now - VISITS_RETENTION_DAYS * 86_400_000).toISOString());
   return report;
 }

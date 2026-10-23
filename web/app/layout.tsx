@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
+import { PageTracker } from "@/components/analytics/PageTracker";
 import { BRAND } from "@/lib/brand";
 import "./globals.css";
 
@@ -37,6 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh font-sans text-[15px] leading-relaxed">
         {children}
         <Analytics />
+        <Suspense fallback={null}>
+          <PageTracker />
+        </Suspense>
       </body>
     </html>
   );

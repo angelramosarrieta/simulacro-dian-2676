@@ -26,7 +26,8 @@ export default function Page() {
         <li><b>Documentos:</b> el manual de funciones y los indicadores que subes, que pueden incluir tu número de inscripción.</li>
         <li><b>Estudio:</b> respuestas, aciertos e historial de simulacros, para mostrarte tu progreso.</li>
         <li><b>Compras:</b> referencia, valor, estado y medio de pago informado por Wompi. No recibimos ni guardamos números de tarjeta ni claves bancarias.</li>
-        <li><b>Uso técnico:</b> datos necesarios para la seguridad y el funcionamiento (por ejemplo, registros de acceso y errores) y estadísticas de visitas sin cookies publicitarias.</li>
+        <li><b>Uso técnico:</b> datos necesarios para la seguridad y el funcionamiento (por ejemplo, registros de acceso y errores).</li>
+        <li><b>Visitas al sitio:</b> páginas vistas, sitio o campaña desde donde llegaste, tipo de dispositivo y navegador, y ciudad aproximada. Se asocian a un identificador aleatorio guardado en tu navegador, no a tu nombre; si inicias sesión, se relacionan con tu cuenta. No guardamos tu dirección IP. Puedes evitarlo activando &quot;No rastrear&quot; en tu navegador o borrando los datos del sitio.</li>
       </ul>
       <p>No tratamos datos sensibles ni datos de menores de edad.</p>
 
@@ -36,7 +37,7 @@ export default function Page() {
         <li>Analizar tus documentos y generar tu simulador.</li>
         <li>Procesar pagos, emitir comprobantes, prevenir fraudes y cumplir obligaciones contables y legales.</li>
         <li>Enviarte mensajes del servicio (verificación de correo, comprobantes, aviso de simulador listo, recuperación de contraseña).</li>
-        <li>Atender peticiones, quejas y reclamos, y mejorar el Servicio.</li>
+        <li>Atender peticiones, quejas y reclamos, y mejorar el Servicio, incluido medir cuántas personas lo visitan y de dónde llegan.</li>
         <li>Enviarte recordatorios de estudio y novedades del concurso, <b>solo si lo autorizas</b>. Puedes retirar esa autorización en cualquier momento desde tu cuenta.</li>
       </ul>
 
@@ -83,6 +84,7 @@ export default function Page() {
       <ul>
         <li>Los datos de tu cuenta, tus simuladores y tu progreso se conservan mientras tengas la cuenta activa. Si pides eliminarla, se suprimen, salvo los registros que la ley obliga a conservar.</li>
         <li>Los registros de compras se conservan durante el tiempo que exigen las normas contables y comerciales (hasta 10 años).</li>
+        <li>Las estadísticas de visitas se borran automáticamente a los 6 meses.</li>
       </ul>
 
       <h2>10. Seguridad</h2>
@@ -93,8 +95,8 @@ export default function Page() {
 
       <h2>11. Cookies</h2>
       <p>
-        Usamos cookies técnicas necesarias para mantener tu sesión iniciada y proteger la cuenta. No usamos cookies publicitarias ni vendemos información a
-        terceros.
+        Usamos cookies técnicas necesarias para mantener tu sesión iniciada y proteger la cuenta, y el almacenamiento local del navegador para el
+        identificador anónimo de visitas descrito arriba. No usamos cookies publicitarias ni vendemos información a terceros.
       </p>
 
       <h2>12. Vigencia y cambios</h2>

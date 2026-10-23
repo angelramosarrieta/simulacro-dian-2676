@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 const ITEMS = [
   { href: "/admin", label: "Métricas", exact: true },
+  { href: "/admin/visitas", label: "Visitas" },
   { href: "/admin/ordenes", label: "Órdenes" },
   { href: "/admin/generaciones", label: "Generaciones" },
   { href: "/admin/usuarios", label: "Usuarios" },
