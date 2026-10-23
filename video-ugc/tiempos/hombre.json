@@ -91,11 +91,11 @@
  "cues": [
   [
    0.15,
-   1.6,
+   1.71,
    "Parce, si te estás preparando"
   ],
   [
-   1.6,
+   1.71,
    4.59,
    "para el concurso [DIAN 2676],"
   ],
@@ -151,11 +151,11 @@
   ],
   [
    17.9,
-   19.53,
+   19.54,
    "una herramienta interesante"
   ],
   [
-   19.53,
+   19.54,
    21.0,
    "para complementar el estudio"
   ],
@@ -195,5 +195,42 @@
    21.1,
    23.6
   ]
- }
+ },
+ "tomas": [
+  {
+   "desde": 0.0,
+   "hasta": 1.71,
+   "clip": "esc1",
+   "inicio_clip": 0.15,
+   "zoom": 1.0
+  },
+  {
+   "desde": 1.71,
+   "hasta": 4.62,
+   "clip": "esc1b",
+   "inicio_clip": 1.71,
+   "zoom": 1.0
+  },
+  {
+   "desde": 4.62,
+   "hasta": 5.3,
+   "clip": "esc1",
+   "inicio_clip": 0.15,
+   "zoom": 1.14
+  },
+  {
+   "desde": 16.45,
+   "hasta": 19.54,
+   "clip": "esc4",
+   "inicio_clip": 16.6,
+   "zoom": 1.0
+  },
+  {
+   "desde": 19.54,
+   "hasta": 21.1,
+   "clip": "esc4b",
+   "inicio_clip": 19.54,
+   "zoom": 1.08
+  }
+ ]
 }

@@ -4,7 +4,7 @@ Video vertical 1080 × 1920, 30 fps. Alterna un avatar de IA que habla a cámara
 
 | Versión | Archivo | Avatar y voz | Duración |
 |---|---|---|---|
-| **Hombre** | `entregables/dian2676_ugc_hombre_1080x1920.mp4` | Fotos de referencia (`referencias/`) animadas con SadTalker + GFPGAN; voz sintética masculina en español latino (Piper es_MX-ald) | 24,95 s |
+| **Hombre** | `entregables/dian2676_ugc_hombre_1080x1920.mp4` | 4 fotos de referencia (`referencias/`) animadas con SadTalker + GFPGAN, con cortes entre tomas y movimiento de celular en mano; voz sintética masculina en español latino (Piper es_MX-ald) con ambiente de habitación; música lo-fi propia | 24,95 s |
 | Gemini | `entregables/dian2676_ugc_final_1080x1920.mp4` | Clip de Gemini (mujer), con su propia voz | 24,75 s |
 
 Los tiempos de cada versión (escenas, subtítulos, zoom y capturas) están en `tiempos/hombre.json` y `tiempos/gemini.json`; todos los scripts los leen según `TIEMPOS=hombre|gemini` (por defecto `hombre`).
@@ -12,7 +12,9 @@ Los tiempos de cada versión (escenas, subtítulos, zoom y capturas) están en `
 | Archivo | Qué es |
 |---|---|
 | `voz_hombre.py`, `voz/*.flac` | Voz masculina: síntesis de las 5 frases y armado de la pista según `tiempos/hombre.json`. Las frases exactas del video final están en `voz/`. |
-| `preparar_avatar_hombre.sh` | Ubica los clips animados de las escenas 1 y 4 donde empieza su frase y arma `build/avatar.mp4`. |
+| `avatar_hombre.py` | Arma `build/avatar.mp4` con las tomas de `tiempos/hombre.json` ("tomas"): cortes entre fotos, zoom por toma y movimiento de celular en mano. |
+| `musica.py` | Música de fondo lo-fi sintetizada aquí (sin derechos de terceros). |
+| `fal_run.py`, `fal_hombre.sh` | Generación con fal.ai (voz natural y avatar con movimiento de cuerpo) cuando el entorno tenga `FAL_KEY` y acceso a fal.ai. |
 | `preparar_avatar.sh` | Adapta el clip de Gemini: recorte 9:16, quita la frase repetida (19,85–25,0 s del original) y difumina sus subtítulos quemados. |
 | `capturar.mjs` | Graba la app real cuadro por cuadro (Playwright, 360 × 640 @3x). |
 | `componer.py` | Mockup del celular, zoom, toques, subtítulos, texto gancho y cierre. `previa` → MP4 · `capa` → ProRes 4444 con alfa. |
@@ -63,9 +65,10 @@ Pronunciación: escribe “DIAN dos mil seiscientos setenta y seis” en el camp
 1. **Voz:** `python3 video-ugc/voz_hombre.py --usar-guardadas build/voz` arma la pista con las frases de `voz/` (o las sintetiza de nuevo; ver el docstring).
 2. **Animación con sincronía de labios** ([SadTalker](https://github.com/OpenTalker/SadTalker), checkpoints de sus releases en GitHub, CPU):
    `python inference.py --driven_audio voz/l1.wav --source_image referencias/avatar_escena1.png --still --preprocess full --size 256 --cpu`
-   (y lo mismo con `l4` y `avatar_escena4.png`). Con Python 3.13 y numpy 2 hacen falta parches menores: alias `np.float`/`np.int`, `float()` sobre arrays de un elemento en `src/face3d/util/preprocess.py` y `src/utils/preprocess.py`, `audioop-lts` para pydub, `basicsr` 1.4.2 compilado a mano. Además, en `src/utils/paste_pic.py` se cambió `seamlessClone` por un pegado con borde difuminado, porque el recorte de la cara se sale del cuadro.
+   (y lo mismo con cada parte de frase y su foto). Con Python 3.13 y numpy 2 hacen falta parches menores: alias `np.float`/`np.int`, `float()` sobre arrays de un elemento en `src/face3d/util/preprocess.py` y `src/utils/preprocess.py`, `audioop-lts` para pydub, `basicsr` 1.4.2 compilado a mano. Además, en `src/utils/paste_pic.py` se cambió `seamlessClone` por un pegado con borde difuminado, porque el recorte de la cara se sale del cuadro.
 3. **Nitidez de la cara:** GFPGAN v1.4 (peso 0,5) sobre cada cuadro.
-4. `video-ugc/preparar_avatar_hombre.sh esc1.mp4 esc4.mp4 build/voz/voz_hombre.wav`, y luego el montaje de abajo con `TIEMPOS=hombre`.
+4. **Tomas:** la escena 1 se corta en 3 tomas ("Parce, si te estás preparando" señalando → "para el concurso DIAN 2676" con las manos abiertas → "mira esto" señalando de cerca) y la escena 4 en 2. Las frases se parten en sus silencios naturales y cada parte se anima con su foto (`esc1`, `esc1b`, `esc4`, `esc4b`).
+5. `python3 video-ugc/avatar_hombre.py DIR_CLIPS build/voz/voz_hombre.wav`, y luego el montaje de abajo con `TIEMPOS=hombre` y `build/musica.wav` (`python3 video-ugc/musica.py build/musica.wav`).
 
 ## Montaje
 
@@ -81,9 +84,10 @@ python3 video-ugc/componer.py previa   # previsualización
 python3 video-ugc/componer.py capa     # capa con alfa para el montaje
 
 # 3. Pista del avatar y montaje
-video-ugc/preparar_avatar_hombre.sh esc1.mp4 esc4.mp4 build/voz/voz_hombre.wav   # versión hombre
+python3 video-ugc/avatar_hombre.py DIR_CLIPS build/voz/voz_hombre.wav             # versión hombre
+python3 video-ugc/musica.py build/musica.wav
 # TIEMPOS=gemini video-ugc/preparar_avatar.sh gemini_generated_video.mp4         # versión Gemini
-video-ugc/montar.sh build/avatar.mp4
+video-ugc/montar.sh build/avatar.mp4 build/musica.wav
 # → video-ugc/build/dian2676_ugc_1080x1920.mp4
 ```
 

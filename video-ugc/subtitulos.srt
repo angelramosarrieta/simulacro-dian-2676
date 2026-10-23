@@ -1,9 +1,9 @@
 1
-00:00:00,150 --> 00:00:01,600
+00:00:00,150 --> 00:00:01,710
 Parce, si te estás preparando
 
 2
-00:00:01,600 --> 00:00:04,590
+00:00:01,710 --> 00:00:04,590
 para el concurso DIAN 2676,
 
 3
@@ -47,11 +47,11 @@ es más adecuada que otra
 La verdad, me parece
 
 13
-00:00:17,900 --> 00:00:19,530
+00:00:17,900 --> 00:00:19,540
 una herramienta interesante
 
 14
-00:00:19,530 --> 00:00:21,000
+00:00:19,540 --> 00:00:21,000
 para complementar el estudio
 
 15

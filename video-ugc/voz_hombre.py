@@ -64,7 +64,9 @@ def armar_pista(out):
         entradas += ["-i", out / f"{nombre}.wav"]
         filtros.append(f"[{k}]adelay={round(inicio * 1000)}:all=1[a{k}]")
     n = len(t["voz"])
-    mezcla = "".join(f"[a{k}]" for k in range(n)) + f"amix=inputs={n}:normalize=0,apad=whole_dur={t['dur']},atrim=0:{t['dur']},aformat=channel_layouts=stereo"
+    # Ambiente de habitación y presencia leves: la voz sintética suena menos "seca".
+    sala = "highpass=f=95,equalizer=f=220:t=q:w=1:g=2,equalizer=f=3200:t=q:w=1.2:g=2.5,aecho=0.85:0.6:23|41:0.10|0.06"
+    mezcla = "".join(f"[a{k}]" for k in range(n)) + f"amix=inputs={n}:normalize=0,{sala},apad=whole_dur={t['dur']},atrim=0:{t['dur']},aformat=channel_layouts=stereo"
     subprocess.run(["ffmpeg", "-v", "error", "-y", *entradas, "-filter_complex", ";".join(filtros) + ";" + mezcla, "-ar", "48000", out / "voz_hombre.wav"], check=True)
     print(out / "voz_hombre.wav")
 
